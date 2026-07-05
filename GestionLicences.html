@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AS Joliot Curie">
+<title>AS Joliot Curie - Gestion des élèves licenciés pour l'année 2026-2027</title>
+<style>
+:root {
+  --primary:#2563eb; --primary-dark:#1d4ed8;
+  --danger:#dc2626; --warning:#d97706;
+  --bg:#f1f5f9; --surface:#fff;
+  --border:#e2e8f0; --text:#1e293b; --muted:#64748b;
+  --radius:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.1);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;
+  padding:.875rem 1.5rem;display:flex;align-items:center;gap:1rem;
+  flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header-logo img{height:56px;border-radius:8px;object-fit:contain;display:block}
+.header-title h1{font-size:1.05rem;font-weight:700;line-height:1.3}
+.header-title p{font-size:.78rem;opacity:.85;margin-top:.1rem}
+.header-actions{margin-left:auto;display:flex;gap:.5rem;flex-wrap:wrap}
+
+/* TABS */
+.tabs-nav{background:var(--surface);border-bottom:2px solid var(--border);display:flex;
+  overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:20;box-shadow:var(--shadow)}
+.tabs-nav::-webkit-scrollbar{display:none}
+.tab-btn{padding:.75rem 1.125rem;border:none;background:none;font-size:.85rem;font-weight:600;
+  color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;
+  margin-bottom:-2px;transition:all .15s}
+.tab-btn:hover{color:var(--primary);background:#eff6ff}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* PANELS */
+.tab-panel{display:none;padding:1.5rem}
+.tab-panel.active{display:block}
+
+/* CARDS */
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-md);
+  border:1px solid var(--border);overflow:hidden;margin-bottom:1.25rem}
+.card-header{padding:.875rem 1.25rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:.5rem;background:#f8fafc;flex-wrap:wrap}
+.card-header h2{font-size:.9375rem;font-weight:700}
+.card-body{padding:1.25rem}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.875rem}
+.form-group{display:flex;flex-direction:column;gap:.3rem}
+.form-group.full{grid-column:1/-1}
+label{font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+input,select{padding:.45rem .7rem;border:1.5px solid var(--border);border-radius:var(--radius);
+  font-size:.9rem;color:var(--text);background:var(--surface);width:100%;
+  transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+input[readonly]{background:#f8fafc;cursor:default}
+.checkbox-group{display:flex;flex-wrap:wrap;gap:.75rem}
+.check-item{display:flex;align-items:center;gap:.375rem;cursor:pointer;font-size:.9rem}
+.check-item input[type=checkbox]{width:1rem;height:1rem}
+
+/* Licence input */
+.licence-wrap{display:flex;align-items:stretch}
+.licence-prefix{background:#1e3a5f;color:#fff;padding:.45rem .7rem;
+  border-radius:var(--radius) 0 0 var(--radius);font-size:.875rem;font-weight:700;
+  border:1.5px solid #1e3a5f;white-space:nowrap;display:flex;align-items:center}
+.licence-wrap input{border-radius:0 var(--radius) var(--radius) 0;width:70px;flex:none}
+
+/* Panneau ajout collapsable */
+.add-panel{overflow:visible;transition:max-height .35s ease,opacity .25s}
+.add-panel.closed{max-height:0!important;opacity:0;pointer-events:none;overflow:hidden}
+.add-panel.open{opacity:1}
+.add-panel-inner{padding:1.25rem;border-top:1px solid var(--border)}
+
+/* Sélecteur élève collège */
+.college-search-wrap{position:relative}
+.college-results{position:absolute;top:100%;left:0;right:0;z-index:200;
+  background:var(--surface);border:1.5px solid var(--primary);border-radius:var(--radius);
+  box-shadow:var(--shadow-md);max-height:230px;overflow-y:auto;margin-top:2px}
+.college-result-item{padding:.5rem .875rem;cursor:pointer;font-size:.85rem;
+  border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.college-result-item:last-child{border-bottom:none}
+.college-result-item:hover{background:#eff6ff}
+.college-result-item .cri-name{font-weight:600}
+.college-result-item .cri-detail{color:var(--muted);font-size:.78rem}
+.college-hint{background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius);
+  padding:.5rem .875rem;font-size:.8rem;color:#1e40af;margin-bottom:.75rem}
+
+/* BUTTONS */
+.btn{padding:.45rem .9rem;border:none;border-radius:var(--radius);font-size:.8375rem;
+  font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:.35rem}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-warning{background:var(--warning);color:#fff}.btn-warning:hover{background:#b45309}
+.btn-success{background:#059669;color:#fff}.btn-success:hover{background:#047857}
+.btn-teal{background:#0f766e;color:#fff}.btn-teal:hover{background:#0d6060}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}.btn-outline:hover{background:var(--bg)}
+.btn-ghost{background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.35)}.btn-ghost:hover{background:rgba(255,255,255,.28)}
+.btn-sm{padding:.25rem .6rem;font-size:.78rem}
+
+/* ── TABLEAU GÉNÉRAL : 13 colonnes données + Actions = 14 ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.8375rem}
+thead th{padding:.65rem .875rem;text-align:left;font-size:.7rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;color:#fff;white-space:nowrap}
+th[data-sort]{cursor:pointer;user-select:none}
+th[data-sort]:hover{filter:brightness(1.15)}
+.sort-ind{opacity:.8;font-size:.75em;margin-left:.25rem}
+thead th::before,thead th::after{content:''!important}
+
+#mainTable thead th:nth-child(1)  {background:#374151}
+#mainTable thead th:nth-child(2)  {background:#1e40af}
+#mainTable thead th:nth-child(3)  {background:#0f766e}
+#mainTable thead th:nth-child(4)  {background:#7c3aed}
+#mainTable thead th:nth-child(5)  {background:#0e7490}
+#mainTable thead th:nth-child(6)  {background:#be185d}
+#mainTable thead th:nth-child(7)  {background:#9d174d}
+#mainTable thead th:nth-child(8)  {background:#1e3a5f}
+#mainTable thead th:nth-child(9)  {background:#4338ca}
+#mainTable thead th:nth-child(10) {background:#be123c}
+#mainTable thead th:nth-child(11) {background:#6d28d9}
+#mainTable thead th:nth-child(12) {background:#0369a1}
+#mainTable thead th:nth-child(13) {background:#4c1d95}
+#mainTable thead th:nth-child(14) {background:#475569}
+
+#mainTable tbody td:nth-child(1)  {background:#e2e8f0}
+#mainTable tbody td:nth-child(2)  {background:#dbeafe}
+#mainTable tbody td:nth-child(3)  {background:#ccfbf1}
+#mainTable tbody td:nth-child(4)  {background:#ede9fe}
+#mainTable tbody td:nth-child(5)  {background:#cffafe}
+#mainTable tbody td:nth-child(6)  {background:#fae8ff}
+#mainTable tbody td:nth-child(7)  {background:#fce7f3}
+#mainTable tbody td:nth-child(8)  {background:#e0e7ff}
+#mainTable tbody td:nth-child(9)  {background:#f5f3ff}
+#mainTable tbody td:nth-child(10) {background:#fee2e2}
+#mainTable tbody td:nth-child(11) {background:#fef3c7}
+#mainTable tbody td:nth-child(12) {background:#e0f2fe}
+#mainTable tbody td:nth-child(13) {background:#f3e8ff}
+#mainTable tbody td:nth-child(14) {background:#f1f5f9}
+
+.act-table thead th:nth-child(1)  {background:#374151}
+.act-table thead th:nth-child(2)  {background:#1e40af}
+.act-table thead th:nth-child(3)  {background:#0f766e}
+.act-table thead th:nth-child(4)  {background:#7c3aed}
+.act-table thead th:nth-child(5)  {background:#0e7490}
+.act-table thead th:nth-child(6)  {background:#be185d}
+.act-table thead th:nth-child(7)  {background:#9d174d}
+.act-table thead th:nth-child(8)  {background:#1e3a5f}
+.act-table thead th:nth-child(9)  {background:#4338ca}
+.act-table thead th:nth-child(10) {background:#be123c}
+.act-table thead th:nth-child(11) {background:#6d28d9}
+.act-table thead th:nth-child(12) {background:#0369a1}
+.act-table thead th:nth-child(13) {background:#4c1d95}
+.act-table thead th:nth-child(14) {background:#475569}
+
+.act-table tbody td:nth-child(1)  {background:#e2e8f0}
+.act-table tbody td:nth-child(2)  {background:#dbeafe}
+.act-table tbody td:nth-child(3)  {background:#ccfbf1}
+.act-table tbody td:nth-child(4)  {background:#ede9fe}
+.act-table tbody td:nth-child(5)  {background:#cffafe}
+.act-table tbody td:nth-child(6)  {background:#fae8ff}
+.act-table tbody td:nth-child(7)  {background:#fce7f3}
+.act-table tbody td:nth-child(8)  {background:#e0e7ff}
+.act-table tbody td:nth-child(9)  {background:#f5f3ff}
+.act-table tbody td:nth-child(10) {background:#fee2e2}
+.act-table tbody td:nth-child(11) {background:#fef3c7}
+.act-table tbody td:nth-child(12) {background:#e0f2fe}
+.act-table tbody td:nth-child(13) {background:#f3e8ff}
+.act-table tbody td:nth-child(14) {background:#f1f5f9}
+
+/* Tableau liste collège – 4 colonnes */
+.college-table thead th:nth-child(1) {background:#1e40af}
+.college-table thead th:nth-child(2) {background:#7c3aed}
+.college-table thead th:nth-child(3) {background:#0f766e}
+.college-table thead th:nth-child(4) {background:#be185d}
+.college-table thead th:nth-child(5) {background:#0e7490}
+.college-table tbody td:nth-child(1) {background:#dbeafe}
+.college-table tbody td:nth-child(2) {background:#ede9fe}
+.college-table tbody td:nth-child(3) {background:#ccfbf1}
+.college-table tbody td:nth-child(4) {background:#fae8ff}
+.college-table tbody td:nth-child(5) {background:#cffafe}
+
+.cat-group-row td{
+  background:linear-gradient(90deg,#1e3a8a,#3b82f6) !important;
+  color:#fff !important;font-weight:700;font-size:.8rem;padding:.55rem 1rem;letter-spacing:.04em}
+.cat-group-row td span{background:rgba(255,255,255,.25);border-radius:9999px;
+  padding:.1rem .5rem;font-size:.75rem;margin-left:.5rem}
+
+tbody tr:hover td{filter:brightness(.96)}
+tbody tr.cat-group-row:hover td{filter:none}
+tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-align:middle}
+
+/* BADGES */
+.badge{display:inline-block;padding:.1rem .45rem;border-radius:9999px;font-size:.72rem;font-weight:700}
+.b-blue   {background:#bfdbfe;color:#1e40af}
+.b-pink   {background:#fbcfe8;color:#9d174d}
+.b-purple {background:#ddd6fe;color:#5b21b6}
+.b-orange {background:#fed7aa;color:#c2410c}
+.b-red    {background:#fecaca;color:#991b1b}
+.b-sky    {background:#bae6fd;color:#0369a1}
+.b-fuchsia{background:#f5d0fe;color:#86198f}
+.b-indigo {background:#c7d2fe;color:#3730a3}
+.b-rose   {background:#fecdd3;color:#be123c}
+.b-gray   {background:#e2e8f0;color:#475569}
+.b-amber  {background:#fde68a;color:#92400e}
+.b-slate  {background:#cbd5e1;color:#334155}
+.b-teal   {background:#99f6e4;color:#0f766e}
+.act-tag{display:inline-block;padding:.06rem .38rem;border-radius:4px;font-size:.67rem;
+  font-weight:600;background:#ede9fe;color:#5b21b6;margin:.08rem}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:1.125rem 1rem;
+  text-align:center;box-shadow:var(--shadow-md);border:1px solid var(--border)}
+.stat-num{font-size:2rem;font-weight:800;line-height:1;margin-bottom:.2rem}
+.stat-lbl{font-size:.78rem;color:var(--muted);font-weight:500}
+
+.sec-table{width:100%;border-collapse:collapse;font-size:.875rem}
+.sec-table th{padding:.55rem .875rem;background:#1e40af;color:#fff;text-align:left;
+  font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.sec-table td{padding:.55rem .875rem;border-bottom:1px solid var(--border)}
+.sec-table tr:nth-child(odd) td{background:#f8fafc}
+.sec-table tr:nth-child(even) td{background:#fff}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;
+  align-items:center;justify-content:center;z-index:1000;padding:1rem;backdrop-filter:blur(3px)}
+.modal{background:var(--surface);border-radius:12px;width:100%;max-width:660px;
+  max-height:92vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.3)}
+.modal-sm{max-width:420px}
+.modal-header{padding:1.125rem 1.5rem;border-bottom:1px solid var(--border);display:flex;
+  align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
+.modal-header h3{font-size:1.05rem;font-weight:700}
+.modal-body{padding:1.5rem}
+.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;
+  justify-content:flex-end;gap:.625rem;position:sticky;bottom:0;background:var(--surface)}
+.close-btn{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);
+  line-height:1;padding:.1rem .3rem;border-radius:4px}
+.close-btn:hover{color:var(--text);background:var(--border)}
+
+#alertArea{padding:.5rem 1.5rem}
+.alert{padding:.7rem 1rem;border-radius:var(--radius);font-size:.875rem}
+.alert-success{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
+.alert-error  {background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+.alert-info   {background:#dbeafe;color:#1e40af;border:1px solid #93c5fd}
+
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--muted)}
+.empty-state .icon{font-size:2.5rem;margin-bottom:.75rem}
+.empty-state h3{font-size:.975rem;font-weight:600}
+
+.bar-row{margin-bottom:.9rem}
+.bar-label-row{display:flex;justify-content:space-between;font-size:.875rem;margin-bottom:.3rem}
+.bar-label-row span:first-child{font-weight:600}
+.bar-label-row span:last-child{color:var(--muted)}
+.bar-track{background:#e2e8f0;border-radius:9999px;height:9px;overflow:hidden}
+.bar-fill{background:var(--primary);height:100%;border-radius:9999px;transition:width .4s}
+
+.muted{color:var(--muted);font-style:italic;font-size:.78rem}
+.flex{display:flex}.gap2{gap:.5rem}.items-center{align-items:center}
+.hidden{display:none!important}
+#networkStatus{display:flex;align-items:center;gap:.375rem;padding:.3rem .75rem;border-radius:9999px;
+  font-size:.78rem;font-weight:600;white-space:nowrap;transition:all .3s}
+#networkStatus.online{background:#d1fae5;color:#065f46}
+#networkStatus.offline{background:#fee2e2;color:#991b1b}
+#networkStatus.pending{background:#fef3c7;color:#92400e}
+
+@media(max-width:640px){
+  header{flex-direction:column;text-align:center}
+  .tab-panel{padding:1rem}
+  .form-grid{grid-template-columns:1fr}
+  .modal{max-height:96vh}
+}
+
+/* ── TABLETTE : cibles tactiles min 44px, pas de zoom iOS sur focus ── */
+@media(min-width:768px){
+  input,select{font-size:1rem}
+  .btn{min-height:2.75rem;padding:.55rem 1.1rem;font-size:.9rem}
+  .btn-sm{min-height:2.125rem;padding:.35rem .8rem;font-size:.82rem}
+  .tab-btn{min-height:2.875rem;padding:.625rem 1.25rem;font-size:.875rem}
+  tbody td{padding:.7rem 1rem;font-size:.9rem}
+  thead th{padding:.65rem 1rem;font-size:.74rem}
+  .check-item{font-size:.95rem}
+  .check-item input[type=checkbox]{width:1.2rem;height:1.2rem;cursor:pointer}
+  #networkStatus{font-size:.82rem}
+}
+
+/* ── TABLETTE PAYSAGE : layout fixe header+nav, zone contenu défilable ── */
+@media(min-width:768px) and (orientation:landscape){
+  body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+  header{flex:0 0 auto;padding:.45rem 1.25rem;flex-wrap:nowrap}
+  .header-logo img{height:36px}
+  .header-title h1{font-size:.9rem}
+  .header-title p{font-size:.7rem;margin-top:.05rem}
+  .tabs-nav{flex:0 0 auto;position:static}
+  #main-content{flex:1 1 0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+  .tab-panel{padding:1rem 1.25rem}
+  .add-panel-inner{padding:.875rem 1.25rem}
+  .card-body{padding:1rem 1.25rem}
+  .card-header{padding:.65rem 1.25rem}
+  .form-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+  .stats-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+  .modal{max-width:800px;max-height:88vh}
+  .modal-body{padding:1.25rem}
+  .modal-header{padding:.875rem 1.5rem}
+  .modal-footer{padding:.875rem 1.5rem}
+  .empty-state{padding:2rem 1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-logo">
+    <!--
+      LOGO : pour personnaliser, remplacez la valeur de src ci-dessous par votre logo en base64.
+      Convertisseur gratuit : https://www.base64-image.de/
+      Format attendu : src="data:image/png;base64,/9j/4AAQ..."
+    -->
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Crect width='56' height='56' rx='10' fill='rgba(255,255,255,0.2)'/%3E%3Ctext x='28' y='22' text-anchor='middle' fill='white' font-family='Arial' font-weight='900' font-size='14'%3EAS%3C/text%3E%3Ctext x='28' y='36' text-anchor='middle' fill='white' font-family='Arial' font-weight='700' font-size='9'%3EJoliot%3C/text%3E%3Ctext x='28' y='48' text-anchor='middle' fill='white' font-family='Arial' font-weight='700' font-size='9'%3ECurie%3C/text%3E%3C/svg%3E"
+         alt="Logo AS Joliot Curie">
+  </div>
+  <div class="header-title">
+    <h1>AS Joliot Curie &mdash; Gestion des &eacute;l&egrave;ves licenci&eacute;s</h1>
+    <p>Ann&eacute;e scolaire 2026-2027</p>
+  </div>
+  <div class="header-actions">
+    <div id="networkStatus" class="online">🟢 En ligne</div>
+    <button class="btn btn-ghost btn-sm" onclick="clearLocalAndPull()" style="color:#fca5a5" title="Effacer les données locales et recharger depuis Sheets">↩ Réinit.</button>
+  </div>
+</header>
+
+<!-- TABS -->
+<nav class="tabs-nav">
+  <button class="tab-btn active" onclick="switchTab('general',this)">&#128203; G&eacute;n&eacute;ral</button>
+  <button class="tab-btn" onclick="switchTab('fitness',this)">&#128170; Fitness</button>
+  <button class="tab-btn" onclick="switchTab('natation',this)">🏊‍♂️ Natation</button>
+  <button class="tab-btn" onclick="switchTab('sport-partage',this)">&#129309; Sport Partag&eacute;</button>
+  <button class="tab-btn" onclick="switchTab('futsal',this)">&#9917; Futsal</button>
+  <button class="tab-btn" onclick="switchTab('stats',this)">&#128202; Statistiques</button>
+  <button class="tab-btn" style="margin-left:auto" onclick="switchTab('tous-eleves',this)">&#127979; &Eacute;l&egrave;ves de Joliot</button>
+</nav>
+
+<div id="main-content">
+<div id="alertArea"></div>
+
+
+<!-- ===== TAB GÉNÉRAL ===== -->
+<div id="tab-general" class="tab-panel active">
+
+  <div class="card">
+    <div class="card-header">
+      <h2>&#128203; Inscriptions</h2>
+      <button id="toggleFormBtn" class="btn btn-primary" onclick="toggleForm()">
+        &#10133; Ajouter un &eacute;l&egrave;ve
+      </button>
+    </div>
+    <div class="add-panel closed" id="addPanel">
+      <div class="add-panel-inner">
+
+        <!-- Sélecteur depuis la liste du collège -->
+        <div id="collegePickerSection" class="college-hint" style="display:none">
+          &#127979; <strong>Liste du coll&egrave;ge disponible.</strong>
+          Recherchez un &eacute;l&egrave;ve pour remplir automatiquement le formulaire.
+        </div>
+        <div id="collegePickerWrap" style="display:none;margin-bottom:1rem">
+          <label style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.3rem">
+            &#128269; Chercher un &eacute;l&egrave;ve du coll&egrave;ge
+          </label>
+          <div class="college-search-wrap">
+            <input type="text" id="f-search-college" placeholder="Saisir nom ou prénom…"
+                   autocomplete="off" oninput="filterCollegeStudents()" onfocus="filterCollegeStudents()">
+            <div id="college-results" class="college-results hidden"></div>
+          </div>
+        </div>
+
+        <form id="studentForm" onsubmit="handleAdd(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nom *</label>
+              <input type="text" id="f-nom" required placeholder="Nom de famille">
+            </div>
+            <div class="form-group">
+              <label>Pr&eacute;nom *</label>
+              <input type="text" id="f-prenom" required placeholder="Prénom">
+            </div>
+            <div class="form-group">
+              <label>Classe</label>
+              <input type="text" id="f-classe" placeholder="Ex : 6ème A" list="classes-list">
+              <datalist id="classes-list">
+                <option value="6ème A"><option value="6ème B"><option value="6ème C">
+                <option value="5ème A"><option value="5ème B"><option value="5ème C">
+                <option value="4ème A"><option value="4ème B"><option value="4ème C">
+                <option value="3ème A"><option value="3ème B"><option value="3ème C">
+              </datalist>
+            </div>
+            <div class="form-group">
+              <label>Sexe *</label>
+              <select id="f-sexe" onchange="previewCategorie()">
+                <option value="Fille">Fille</option>
+                <option value="Garçon">Gar&ccedil;on</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Date de naissance</label>
+              <input type="text" id="f-ddn" placeholder="JJ/MM/AAAA" oninput="previewCategorie()">
+            </div>
+            <div class="form-group">
+              <label>Cat&eacute;gorie <small style="text-transform:none;font-weight:400">(auto)</small></label>
+              <input type="text" id="f-cat-preview" readonly placeholder="Calculée automatiquement">
+            </div>
+            <div class="form-group">
+              <label>Cotisation</label>
+              <select id="f-cotisation">
+                <option value="20">20 &euro;</option>
+                <option value="35" selected>35 &euro;</option>
+                <option value="20+15">20 + 15 &euro;</option>
+                <option value="15+5">15 + 5 &euro;</option>
+                <option value="Offerte">Offerte</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label>R&egrave;glement (choix cumulables)</label>
+              <div class="checkbox-group">
+                <label class="check-item"><input type="checkbox" id="fr-cheque" checked> &#128197; Ch&egrave;que</label>
+                <label class="check-item"><input type="checkbox" id="fr-especes"> &#128181; Esp&egrave;ces</label>
+                <label class="check-item"><input type="checkbox" id="fr-fond_social"> &#129309; Fond social</label>
+                <label class="check-item"><input type="checkbox" id="fr-bons_associatifs"> &#127915; Bons associatifs</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>T&eacute;l&eacute;phone</label>
+              <input type="tel" id="f-telephone" placeholder="06 xx xx xx xx">
+            </div>
+            <div class="form-group">
+              <label>Tee shirt AS</label>
+              <select id="f-teeshirt">
+                <option value="Non" selected>Non</option>
+                <option value="Oui">Oui</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Section sportive</label>
+              <select id="f-section">
+                <option value="">&mdash; Aucune &mdash;</option>
+                <option value="Natation">🏊‍♂️ Natation</option>
+                <option value="Taekwondo">&#129355; Taekwondo</option>
+                <option value="Handball">&#129336;&#8205;&#9792;&#65039; Handball</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label>Activit&eacute;s AS (choix multiples)</label>
+              <div class="checkbox-group">
+                <label class="check-item"><input type="checkbox" id="fa-fitness"> &#128170; Fitness</label>
+                <label class="check-item"><input type="checkbox" id="fa-natation"> 🏊‍♂️ Natation</label>
+                <label class="check-item"><input type="checkbox" id="fa-sport_partage"> &#129309; Sport Partag&eacute;</label>
+                <label class="check-item"><input type="checkbox" id="fa-futsal"> &#9917; Futsal</label>
+              </div>
+            </div>
+          </div>
+          <p style="font-size:.8rem;color:var(--muted);margin-top:.75rem;font-style:italic">
+            &#128274; Le num&eacute;ro de licence sera renseign&eacute; ult&eacute;rieurement via &laquo;&nbsp;Modifier&nbsp;&raquo;.
+          </p>
+          <div class="flex gap2" style="margin-top:.875rem;flex-wrap:wrap">
+            <button type="submit" class="btn btn-primary">&#10133; Ajouter</button>
+            <button type="button" class="btn btn-outline" onclick="resetAddForm()">&#128260; R&eacute;initialiser</button>
+            <button type="button" class="btn btn-outline" onclick="toggleForm()" style="margin-left:auto">&#215; Fermer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>
+        Liste des &eacute;l&egrave;ves &nbsp;
+        <span id="studentCount" style="background:#dbeafe;color:#1e40af;padding:.1rem .5rem;border-radius:9999px;font-size:.8rem">0</span>
+      </h2>
+      <div class="flex gap2 items-center" style="flex-wrap:wrap">
+        <button id="resetSortBtn" class="btn btn-outline btn-sm hidden" onclick="resetSort()">&#8635; Ordre initial</button>
+        <input type="text" id="searchInput" placeholder="&#128269; Rechercher…" style="width:180px;font-size:.85rem" oninput="renderTable()">
+        <button class="btn btn-success btn-sm" onclick="exportGeneralCSV()">&#128190; Export Excel</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="mainTable">
+        <thead>
+          <tr id="mainThead">
+            <th data-sort="ordre"    onclick="clickSort(this)">#<span class="sort-ind">&#8597;</span></th>
+            <th data-sort="eleve"    onclick="clickSort(this)">&Eacute;l&egrave;ve<span class="sort-ind">&#8597;</span></th>
+            <th data-sort="classe"   onclick="clickSort(this)">Classe<span class="sort-ind">&#8597;</span></th>
+            <th data-sort="sexe"     onclick="clickSort(this)">Sexe<span class="sort-ind">&#8597;</span></th>
+            <th data-sort="ddn"      onclick="clickSort(this)">Date naiss.<span class="sort-ind">&#8597;</span></th>
+            <th data-sort="cat"      onclick="clickSort(this)">Cat&eacute;gorie<span class="sort-ind">&#8597;</span></th>
+            <th data-sort="cotis"    onclick="clickSort(this)">Cotisation<span class="sort-ind">&#8597;</span></th>
+            <th data-sort="regl"     onclick="clickSort(this)">R&egrave;glement<span class="sort-ind">&#8597;</span></th>
+            <th data-sort="licence"  onclick="clickSort(this)">N&deg; Licence<span class="sort-ind">&#8597;</span></th>
+            <th data-sort="tel"      onclick="clickSort(this)">T&eacute;l&eacute;phone<span class="sort-ind">&#8597;</span></th>
+            <th data-sort="teeshirt" onclick="clickSort(this)">Tee shirt<span class="sort-ind">&#8597;</span></th>
+            <th data-sort="section"  onclick="clickSort(this)">Section<span class="sort-ind">&#8597;</span></th>
+            <th>Activit&eacute;s AS</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="mainBody"></tbody>
+      </table>
+      <div id="emptyMain" class="empty-state hidden">
+        <div class="icon">&#128466;</div>
+        <h3>Aucun &eacute;l&egrave;ve inscrit</h3>
+        <p style="margin-top:.35rem;font-size:.85rem">Cliquez sur &laquo;&nbsp;&#10133; Ajouter un &eacute;l&egrave;ve&nbsp;&raquo; pour commencer.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TABS ACTIVITÉS ===== -->
+<div id="tab-fitness" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <h2>&#128170; Fitness &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-fitness" class="badge b-purple">0</span></h2>
+      <button class="btn btn-success btn-sm" onclick="exportActivityCSV('fitness')">&#128190; Export Excel</button>
+    </div>
+    <div class="table-wrap">
+      <table id="tbl-fitness" class="act-table">
+        <thead><tr>
+          <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
+          <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Activit&eacute;s AS</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="body-fitness"></tbody>
+      </table>
+      <div id="empty-fitness" class="empty-state hidden"><div class="icon">&#128170;</div><h3>Aucun &eacute;l&egrave;ve inscrit en Fitness</h3></div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-natation" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <h2>🏊‍♂️ Natation AS &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-natation" class="badge b-blue">0</span></h2>
+      <button class="btn btn-success btn-sm" onclick="exportActivityCSV('natation')">&#128190; Export Excel</button>
+    </div>
+    <div class="table-wrap">
+      <table id="tbl-natation" class="act-table">
+        <thead><tr>
+          <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
+          <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Activit&eacute;s AS</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="body-natation"></tbody>
+      </table>
+      <div id="empty-natation" class="empty-state hidden"><div class="icon">🏊‍♂️</div><h3>Aucun &eacute;l&egrave;ve inscrit en Natation AS</h3></div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-sport-partage" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <h2>&#129309; Sport Partag&eacute; &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-sport_partage" class="badge b-orange">0</span></h2>
+      <button class="btn btn-success btn-sm" onclick="exportActivityCSV('sport_partage')">&#128190; Export Excel</button>
+    </div>
+    <div class="table-wrap">
+      <table id="tbl-sport_partage" class="act-table">
+        <thead><tr>
+          <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
+          <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Activit&eacute;s AS</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="body-sport_partage"></tbody>
+      </table>
+      <div id="empty-sport_partage" class="empty-state hidden"><div class="icon">&#129309;</div><h3>Aucun &eacute;l&egrave;ve inscrit en Sport Partag&eacute;</h3></div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-futsal" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <h2>&#9917; Futsal &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal" class="badge b-red">0</span></h2>
+      <button class="btn btn-success btn-sm" onclick="exportActivityCSV('futsal')">&#128190; Export Excel</button>
+    </div>
+    <div class="table-wrap">
+      <table id="tbl-futsal" class="act-table">
+        <thead><tr>
+          <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
+          <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Activit&eacute;s AS</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="body-futsal"></tbody>
+      </table>
+      <div id="empty-futsal" class="empty-state hidden"><div class="icon">&#9917;</div><h3>Aucun &eacute;l&egrave;ve inscrit en Futsal</h3></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB TOUS LES ÉLÈVES ===== -->
+<div id="tab-tous-eleves" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <h2>
+        &#127979; Liste du coll&egrave;ge &nbsp;
+        <span id="collegeBadge" style="background:#ccfbf1;color:#0f766e;padding:.1rem .5rem;border-radius:9999px;font-size:.8rem">0 &eacute;l&egrave;ves</span>
+      </h2>
+      <div class="flex gap2 items-center" style="flex-wrap:wrap">
+        <input type="text" id="searchCollege" placeholder="&#128269; Rechercher…" style="width:180px;font-size:.85rem" oninput="renderCollegeTab()">
+        <button class="btn btn-teal" onclick="importCollegeStudents()">&#128229; Importer depuis Google Sheets</button>
+      </div>
+    </div>
+    <div style="padding:.75rem 1.25rem;background:#f0fdfa;border-bottom:1px solid #99f6e4;font-size:.82rem;color:#0f766e">
+      &#8505;&#65039; Cette liste est importée depuis l'onglet &laquo;&nbsp;liste des élèves du collège&nbsp;&raquo; du Google Sheet.
+      Elle sert de référentiel pour le formulaire d'ajout d'un élève à l'AS (auto-complétion Nom / Prénom / Classe / Sexe).
+    </div>
+    <div class="table-wrap">
+      <table id="tbl-college" class="college-table">
+        <thead><tr>
+          <th>Nom</th><th>Prénom</th><th>Classe</th><th>Sexe</th><th>Date de naiss.</th>
+        </tr></thead>
+        <tbody id="body-college"></tbody>
+      </table>
+      <div id="empty-college" class="empty-state hidden">
+        <div class="icon">&#127979;</div>
+        <h3>Aucune liste importée</h3>
+        <p style="margin-top:.35rem;font-size:.85rem">Cliquez sur &laquo;&nbsp;&#128229; Importer depuis Google Sheets&nbsp;&raquo; pour charger la liste du coll&egrave;ge.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB STATS ===== -->
+<div id="tab-stats" class="tab-panel">
+  <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:1rem">&#128202; Statistiques</h2>
+  <div class="stats-grid">
+    <div class="stat-card" style="border-top:4px solid #2563eb">
+      <div class="stat-num" style="color:#2563eb" id="s-total">0</div>
+      <div class="stat-lbl">&#128100; &Eacute;l&egrave;ves inscrits</div>
+    </div>
+    <div class="stat-card" style="border-top:4px solid #ec4899">
+      <div class="stat-num" style="color:#ec4899" id="s-filles">0</div>
+      <div class="stat-lbl">&#9792;&#65039; Filles</div>
+    </div>
+    <div class="stat-card" style="border-top:4px solid #3b82f6">
+      <div class="stat-num" style="color:#3b82f6" id="s-garcons">0</div>
+      <div class="stat-lbl">&#9794;&#65039; Gar&ccedil;ons</div>
+    </div>
+    <div class="stat-card" style="border-top:4px solid #8b5cf6">
+      <div class="stat-num" style="color:#8b5cf6" id="s-fitness">0</div>
+      <div class="stat-lbl">&#128170; Fitness</div>
+    </div>
+    <div class="stat-card" style="border-top:4px solid #06b6d4">
+      <div class="stat-num" style="color:#06b6d4" id="s-natation">0</div>
+      <div class="stat-lbl">🏊‍♂️ Natation AS</div>
+    </div>
+    <div class="stat-card" style="border-top:4px solid #f59e0b">
+      <div class="stat-num" style="color:#f59e0b" id="s-sport_partage">0</div>
+      <div class="stat-lbl">&#129309; Sport Partag&eacute;</div>
+    </div>
+    <div class="stat-card" style="border-top:4px solid #ef4444">
+      <div class="stat-num" style="color:#ef4444" id="s-futsal">0</div>
+      <div class="stat-lbl">&#9917; Futsal</div>
+    </div>
+    <div class="stat-card" style="border-top:4px solid #2563eb">
+      <div class="stat-num" style="color:#2563eb;font-size:1.5rem" id="s-cotisation">0&nbsp;&euro;</div>
+      <div class="stat-lbl">&#128176; Total cotisations</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1.25rem">
+    <div class="card-header"><h2>&#127941; &Eacute;l&egrave;ves par section inscrits &agrave; l'AS</h2></div>
+    <div class="card-body" style="padding:0">
+      <table class="sec-table">
+        <thead><tr>
+          <th>Section sportive</th><th>Total dans la section</th><th>Inscrits &agrave; l'AS</th><th>% inscrits &agrave; l'AS</th>
+        </tr></thead>
+        <tbody id="stat-section-as"></tbody>
+      </table>
+      <div id="empty-section-as" class="empty-state hidden">
+        <div class="icon">&#128202;</div><h3>Aucun &eacute;l&egrave;ve avec une section sportive</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1.25rem">
+    <div class="card-header"><h2>R&eacute;partition par section sportive</h2></div>
+    <div class="card-body" id="stat-sections"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h2>R&eacute;partition par mode de r&egrave;glement</h2></div>
+    <div class="card-body" id="stat-reglements"></div>
+  </div>
+</div>
+</div><!-- /main-content -->
+
+<!-- ===== MODAL MODIFIER ===== -->
+<div id="editModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>&#9999;&#65039; Modifier l'&eacute;l&egrave;ve</h3>
+      <button class="close-btn" onclick="closeModal('editModal')">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <form id="editForm" onsubmit="handleEdit(event)">
+        <input type="hidden" id="e-id">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nom *</label>
+            <input type="text" id="e-nom" required>
+          </div>
+          <div class="form-group">
+            <label>Pr&eacute;nom *</label>
+            <input type="text" id="e-prenom" required>
+          </div>
+          <div class="form-group">
+            <label>Classe</label>
+            <input type="text" id="e-classe" placeholder="Ex : 6ème A" list="classes-list-edit">
+            <datalist id="classes-list-edit">
+              <option value="6ème A"><option value="6ème B"><option value="6ème C">
+              <option value="5ème A"><option value="5ème B"><option value="5ème C">
+              <option value="4ème A"><option value="4ème B"><option value="4ème C">
+              <option value="3ème A"><option value="3ème B"><option value="3ème C">
+            </datalist>
+          </div>
+          <div class="form-group">
+            <label>Sexe *</label>
+            <select id="e-sexe" onchange="previewEditCategorie()">
+              <option value="Fille">Fille</option>
+              <option value="Garçon">Gar&ccedil;on</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date de naissance</label>
+            <input type="text" id="e-ddn" placeholder="JJ/MM/AAAA" oninput="previewEditCategorie()">
+          </div>
+          <div class="form-group">
+            <label>Cat&eacute;gorie <small style="text-transform:none;font-weight:400">(auto)</small></label>
+            <input type="text" id="e-cat-preview" readonly>
+          </div>
+          <div class="form-group">
+            <label>Cotisation</label>
+            <select id="e-cotisation">
+              <option value="20">20 &euro;</option>
+              <option value="35">35 &euro;</option>
+              <option value="20+15">20 + 15 &euro;</option>
+              <option value="15+5">15 + 5 &euro;</option>
+              <option value="Offerte">Offerte</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>R&egrave;glement (choix cumulables)</label>
+            <div class="checkbox-group">
+              <label class="check-item"><input type="checkbox" id="er-cheque"> &#128197; Ch&egrave;que</label>
+              <label class="check-item"><input type="checkbox" id="er-especes"> &#128181; Esp&egrave;ces</label>
+              <label class="check-item"><input type="checkbox" id="er-fond_social"> &#129309; Fond social</label>
+              <label class="check-item"><input type="checkbox" id="er-bons_associatifs"> &#127915; Bons associatifs</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>N&deg; Licence (4 chiffres apr&egrave;s 13417)</label>
+            <div class="licence-wrap">
+              <span class="licence-prefix">13417</span>
+              <input type="text" id="e-licence-suffix" maxlength="4" pattern="[0-9]{0,4}"
+                     placeholder="XXXX" oninput="updateLicPreview()">
+            </div>
+            <small>Num&eacute;ro complet : 13417<strong id="e-licence-preview"></strong> &mdash; Laissez vide si non attribu&eacute;</small>
+          </div>
+          <div class="form-group">
+            <label>T&eacute;l&eacute;phone</label>
+            <input type="tel" id="e-telephone">
+          </div>
+          <div class="form-group">
+            <label>Tee shirt AS</label>
+            <select id="e-teeshirt">
+              <option value="Non">Non</option>
+              <option value="Oui">Oui</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Section sportive</label>
+            <select id="e-section">
+              <option value="">&mdash; Aucune &mdash;</option>
+              <option value="Natation">🏊‍♂️ Natation</option>
+              <option value="Taekwondo">&#129355; Taekwondo</option>
+              <option value="Handball">&#129336;&#8205;&#9792;&#65039; Handball</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Activit&eacute;s AS</label>
+            <div class="checkbox-group">
+              <label class="check-item"><input type="checkbox" id="ea-fitness"> &#128170; Fitness</label>
+              <label class="check-item"><input type="checkbox" id="ea-natation"> 🏊‍♂️ Natation</label>
+              <label class="check-item"><input type="checkbox" id="ea-sport_partage"> &#129309; Sport Partag&eacute;</label>
+              <label class="check-item"><input type="checkbox" id="ea-futsal"> &#9917; Futsal</label>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('editModal')">Annuler</button>
+      <button class="btn btn-primary" form="editForm" type="submit">&#128190; Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL SUPPRIMER ===== -->
+<div id="deleteModal" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>&#128465;&#65039; Confirmer la suppression</h3>
+      <button class="close-btn" onclick="closeModal('deleteModal')">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <p>Supprimer <strong id="deleteName"></strong> ?</p>
+      <p style="color:var(--muted);font-size:.85rem;margin-top:.5rem">Cette action est irr&eacute;versible.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('deleteModal')">Annuler</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">&#128465;&#65039; Supprimer</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// URL DU WEB APP GOOGLE APPS SCRIPT — à modifier ici si nécessaire
+// ═══════════════════════════════════════════════════════════════════════════
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrvlhxz4J5Id2ZCY3pX1VY32sN2e01eyyTKrvydPXhdGMrRMXwSGbmVTbF8DiXza3Gew/exec';
+
+// ── CONSTANTES ────────────────────────────────────────────────────────────
+const REGL = {
+  cheque:'Chèque', especes:'Espèces',
+  fond_social:'Fond social', bons_associatifs:'Bons associatifs'
+};
+const REGL_KEYS = ['cheque','especes','fond_social','bons_associatifs'];
+const COTIS_OPTIONS = [
+  {value:'20',    label:'20 €',         badge:'b-orange'},
+  {value:'35',    label:'35 €',         badge:'b-purple'},
+  {value:'20+15', label:'20 + 15 €',    badge:'b-sky'},
+  {value:'15+5',  label:'15 + 5 €',     badge:'b-teal'},
+  {value:'Offerte',label:'Offerte',     badge:'b-gray'}
+];
+const SWIM = '🏊‍♂️';
+const ACTS = {
+  fitness:'💪 Fitness',
+  natation: SWIM + ' Natation',
+  sport_partage:'🤝 Sport Partagé',
+  futsal:'⚽ Futsal'
+};
+const ACT_LABEL   = { fitness:'Fitness', natation:'Natation', sport_partage:'Sport_Partage', futsal:'Futsal' };
+const ACTIVITIES  = ['fitness','natation','sport_partage','futsal'];
+const SECTIONS    = ['Natation','Taekwondo','Handball'];
+const SEC_EMOJI   = { Natation: SWIM, Taekwondo:'🥋', Handball:'🤾‍♀️' };
+const CAT_ORDER   = ['Benj Fille','Benj Garçon','Min Fille','Min Garçon','Cadette','Cadet','—'];
+const CAT_BADGE   = {
+  'Benj Fille':'b-fuchsia','Benj Garçon':'b-blue',
+  'Min Fille':'b-rose',   'Min Garçon':'b-sky',
+  'Cadette':'b-purple',   'Cadet':'b-indigo', '—':'b-gray'
+};
+
+// ── DONNÉES ───────────────────────────────────────────────────────────────
+let students        = [];
+let collegeStudents = [];
+let deletedLog      = {};  // { id: timestamp } — journal des suppressions pour la fusion multi-users
+let pendingSync     = false;
+let deleteTargetId  = null;
+let nextOrdre       = 1;
+
+// ── TRI ───────────────────────────────────────────────────────────────────
+let sortCol = null;
+let sortDir = 1;
+
+const SORT_FNS = {
+  ordre:    s => s.ordre || 0,
+  eleve:    s => ((s.nom||'')+(s.prenom||'')).toLowerCase(),
+  classe:   s => (s.classe||'').toLowerCase(),
+  sexe:     s => s.sexe || '',
+  ddn:      s => { const p=(s.dateNaissance||'').split('/'); return p.length===3?`${p[2]}${p[1]}${p[0]}`:''; },
+  cat:      s => CAT_ORDER.indexOf(getCategorie(s.sexe, s.dateNaissance)),
+  cotis:    s => cotisValue(s.cotisation),
+  licence:  s => s.licence || '',
+  regl:     s => reglArr(s.reglement).map(r=>REGL[r]||r).join(','),
+  tel:      s => s.telephone || '',
+  teeshirt: s => s.teeShirt === 'Oui' ? 0 : 1,
+  section:  s => s.section || ''
+};
+
+function clickSort(th) {
+  const col = th.dataset.sort; if (!col) return;
+  if (sortCol === col) { sortDir===1?(sortDir=-1):(sortCol=null,sortDir=1); }
+  else { sortCol=col; sortDir=1; }
+  updateSortIndicators();
+  document.getElementById('resetSortBtn').classList.toggle('hidden', !sortCol||sortCol==='ordre');
+  renderTable();
+}
+function resetSort() {
+  sortCol=null; sortDir=1; updateSortIndicators();
+  document.getElementById('resetSortBtn').classList.add('hidden'); renderTable();
+}
+function updateSortIndicators() {
+  document.querySelectorAll('#mainThead th .sort-ind').forEach(el=>{el.textContent='↕';});
+  if (sortCol) {
+    const th=document.querySelector(`#mainThead th[data-sort="${sortCol}"] .sort-ind`);
+    if (th) th.textContent=sortDir===1?'↑':'↓';
+  }
+}
+function getSorted(list) {
+  const fn=sortCol?SORT_FNS[sortCol]:SORT_FNS.ordre, dir=sortCol?sortDir:1;
+  return [...list].sort((a,b)=>{const va=fn(a),vb=fn(b);if(va<vb)return -dir;if(va>vb)return dir;return 0;});
+}
+
+// ── CATÉGORIE ─────────────────────────────────────────────────────────────
+function getCategorie(sexe, dateNaissance) {
+  if (!dateNaissance) return '—';
+  const parts = dateNaissance.split('/');
+  if (parts.length!==3||parts[2].length!==4) return '—';
+  const year=parseInt(parts[2],10); if(isNaN(year)) return '—';
+  const f=sexe==='Fille';
+  if(year===2014||year===2015) return f?'Benj Fille':'Benj Garçon';
+  if(year===2012||year===2013) return f?'Min Fille':'Min Garçon';
+  if(year<=2011)               return f?'Cadette':'Cadet';
+  return '—';
+}
+function previewCategorie() {
+  document.getElementById('f-cat-preview').value=getCategorie(
+    document.getElementById('f-sexe').value, document.getElementById('f-ddn').value);
+}
+function previewEditCategorie() {
+  document.getElementById('e-cat-preview').value=getCategorie(
+    document.getElementById('e-sexe').value, document.getElementById('e-ddn').value);
+}
+function updateLicPreview() {
+  document.getElementById('e-licence-preview').textContent=document.getElementById('e-licence-suffix').value;
+}
+
+// ── LICENCE ───────────────────────────────────────────────────────────────
+function licenceSuffix(lic){return (lic||'').startsWith('13417')?lic.slice(5):'';}
+function licenceFull(suf){return suf?'13417'+suf:'';}
+
+// ── STOCKAGE LOCAL ────────────────────────────────────────────────────────
+function load() {
+  try {
+    const s=localStorage.getItem('as-students');    if(s) students=JSON.parse(s).filter(x=>!x.deleted&&x.id!=='__deletedLog__'&&((x.nom||'').trim()||(x.prenom||'').trim()));
+    const c=localStorage.getItem('as-college');     if(c) collegeStudents=JSON.parse(c);
+    const d=localStorage.getItem('as-deleted-log'); if(d) deletedLog=JSON.parse(d);
+    const p=localStorage.getItem('as-pending-sync'); pendingSync = p === '1';
+    initNextOrdre();
+  } catch(e){}
+}
+function save(){try{localStorage.setItem('as-students',JSON.stringify(students));}catch(e){}}
+function saveCollege(){try{localStorage.setItem('as-college',JSON.stringify(collegeStudents));}catch(e){}}
+function saveDeletedLog(){try{localStorage.setItem('as-deleted-log',JSON.stringify(deletedLog));}catch(e){}}
+function savePendingSync(){try{localStorage.setItem('as-pending-sync',pendingSync?'1':'0');}catch(e){}}
+function updateNetworkUI(){
+  const txt=!navigator.onLine?'⚡ Hors ligne':pendingSync?'🔄 Sync en attente':'🟢 En ligne';
+  const cls=!navigator.onLine?'offline':pendingSync?'pending':'online';
+  const el=document.getElementById('networkStatus'); if(el){el.className=cls;el.textContent=txt;}
+}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function initNextOrdre(){
+  nextOrdre=students.length>0?Math.max(...students.map(s=>parseInt(s.ordre)||0))+1:1;
+}
+function liveStudents(){return students.filter(s=>!s.deleted&&s.id!=='__deletedLog__'&&((s.nom||'').trim()||(s.prenom||'').trim()));}
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  renderAll();
+}
+
+// ── SÉLECTEUR ÉLÈVE COLLÈGE ───────────────────────────────────────────────
+function updateCollegePicker() {
+  const show = collegeStudents.length > 0;
+  document.getElementById('collegePickerSection').style.display = show ? '' : 'none';
+  document.getElementById('collegePickerWrap').style.display    = show ? '' : 'none';
+}
+
+function filterCollegeStudents() {
+  const q = (document.getElementById('f-search-college').value || '').toLowerCase().trim();
+  const res = document.getElementById('college-results');
+  if (!q || collegeStudents.length === 0) { res.classList.add('hidden'); return; }
+  const matches = collegeStudents
+    .filter(c => (c.nom+' '+c.prenom).toLowerCase().includes(q) ||
+                 (c.prenom+' '+c.nom).toLowerCase().includes(q))
+    .slice(0, 12);
+  if (!matches.length) { res.innerHTML='<div class="college-result-item" style="color:var(--muted)">Aucun résultat</div>'; res.classList.remove('hidden'); return; }
+  res.innerHTML = matches.map((c,i) =>
+    `<div class="college-result-item" onclick="selectCollegeStudent(${collegeStudents.indexOf(c)})">
+       <span class="cri-name">${x(c.nom)} ${x(c.prenom)}</span>
+       <span class="cri-detail">${x(c.classe||'—')} &bull; ${x(c.sexe||'—')}</span>
+     </div>`).join('');
+  res.classList.remove('hidden');
+}
+
+function selectCollegeStudent(idx) {
+  const c = collegeStudents[idx]; if (!c) return;
+  document.getElementById('f-nom').value    = c.nom    || '';
+  document.getElementById('f-prenom').value = c.prenom || '';
+  document.getElementById('f-classe').value = c.classe || '';
+  if (c.dateNaissance) document.getElementById('f-ddn').value = c.dateNaissance;
+  const sv=(c.sexe||'').toString().trim().toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  // index 0 = Fille, index 1 = Garçon
+  if(sv&&(sv[0]==='G'||sv[0]==='M'||sv==='GARCON'||sv==='MASCULIN'||sv==='HOMME')){
+    document.getElementById('f-sexe').selectedIndex=1;
+  } else if(sv&&(sv[0]==='F'||sv==='FEMININ'||sv==='FEMME')){
+    document.getElementById('f-sexe').selectedIndex=0;
+  }
+  previewCategorie();
+  document.getElementById('f-search-college').value = '';
+  document.getElementById('college-results').classList.add('hidden');
+}
+
+// Fermer le dropdown si clic en dehors
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('college-results');
+  if (wrap && !wrap.contains(e.target) && e.target.id !== 'f-search-college') {
+    wrap.classList.add('hidden');
+  }
+});
+
+// ── FORMULAIRE ────────────────────────────────────────────────────────────
+let formOpen=false;
+function toggleForm(){
+  formOpen=!formOpen;
+  const panel=document.getElementById('addPanel'), btn=document.getElementById('toggleFormBtn');
+  if(formOpen){
+    updateCollegePicker();
+    panel.classList.remove('closed'); panel.classList.add('open');
+    panel.style.maxHeight=panel.scrollHeight+400+'px';
+    btn.innerHTML='&#215; Fermer'; btn.className='btn btn-outline';
+  } else {
+    panel.classList.add('closed'); panel.classList.remove('open');
+    panel.style.maxHeight='';
+    btn.innerHTML='&#10133; Ajouter un &eacute;l&egrave;ve'; btn.className='btn btn-primary';
+  }
+}
+function resetAddForm(){
+  document.getElementById('studentForm').reset();
+  document.getElementById('f-cotisation').value='35';
+  REGL_KEYS.forEach(r=>{document.getElementById('fr-'+r).checked=(r==='cheque');});
+  document.getElementById('f-teeshirt').value='Non';
+  document.getElementById('f-section').value='';
+  document.getElementById('f-cat-preview').value='';
+  document.getElementById('f-search-college').value='';
+  document.getElementById('college-results').classList.add('hidden');
+  ACTIVITIES.forEach(a=>{document.getElementById('fa-'+a).checked=false;});
+}
+function getActivities(prefix){return ACTIVITIES.filter(a=>document.getElementById(prefix+a).checked);}
+function getReglements(prefix){return REGL_KEYS.filter(r=>document.getElementById(prefix+r).checked);}
+
+function handleAdd(e){
+  e.preventDefault();
+  const nom=document.getElementById('f-nom').value.trim();
+  const prenom=document.getElementById('f-prenom').value.trim();
+  if(liveStudents().some(s=>s.nom.toLowerCase()===nom.toLowerCase()&&s.prenom.toLowerCase()===prenom.toLowerCase())){
+    if(!confirm(`⚠️ ${prenom} ${nom} est déjà inscrit(e).\nAjouter quand même ?`)) return;
+  }
+  const reglements=getReglements('fr-');
+  students.push({
+    id:uid(), ordre:nextOrdre++,
+    prenom, nom,
+    classe:document.getElementById('f-classe').value.trim(),
+    sexe:document.getElementById('f-sexe').value,
+    dateNaissance:document.getElementById('f-ddn').value.trim(),
+    cotisation:document.getElementById('f-cotisation').value,
+    reglement:reglements.length?reglements:['cheque'],
+    licence:'',
+    telephone:document.getElementById('f-telephone').value.trim(),
+    teeShirt:document.getElementById('f-teeshirt').value,
+    section:document.getElementById('f-section').value,
+    activites:getActivities('fa-'),
+    lastModified:Date.now()
+  });
+  save(); resetAddForm(); toggleForm(); renderAll();
+  alert2(navigator.onLine?'✅ Élève ajouté — synchronisation en cours…':'💾 Élève ajouté — sauvegardé localement','info');
+  syncWithSheets();
+}
+
+// ── CRUD ──────────────────────────────────────────────────────────────────
+function openEdit(id){
+  const s=students.find(x=>x.id===id); if(!s) return;
+  document.getElementById('e-id').value=s.id;
+  document.getElementById('e-nom').value=s.nom;
+  document.getElementById('e-prenom').value=s.prenom;
+  document.getElementById('e-classe').value=s.classe||'';
+  document.getElementById('e-sexe').value=s.sexe;
+  document.getElementById('e-ddn').value=s.dateNaissance||'';
+  document.getElementById('e-cotisation').value=s.cotisation||'35';
+  const eRegl=reglArr(s.reglement);
+  REGL_KEYS.forEach(r=>{document.getElementById('er-'+r).checked=eRegl.includes(r);});
+  document.getElementById('e-telephone').value=s.telephone||'';
+  document.getElementById('e-teeshirt').value=s.teeShirt||'Non';
+  document.getElementById('e-section').value=s.section||'';
+  document.getElementById('e-cat-preview').value=getCategorie(s.sexe,s.dateNaissance||'');
+  const suf=licenceSuffix(s.licence);
+  document.getElementById('e-licence-suffix').value=suf;
+  document.getElementById('e-licence-preview').textContent=suf;
+  ACTIVITIES.forEach(a=>{document.getElementById('ea-'+a).checked=(s.activites||[]).includes(a);});
+  document.getElementById('editModal').classList.remove('hidden');
+}
+function handleEdit(e){
+  e.preventDefault();
+  const id=document.getElementById('e-id').value;
+  const idx=students.findIndex(x=>x.id===id); if(idx===-1) return;
+  const suffix=document.getElementById('e-licence-suffix').value.trim();
+  if(suffix&&!/^\d{4}$/.test(suffix)){alert2('Le numéro de licence doit comporter exactement 4 chiffres.','error');return;}
+  students[idx]={...students[idx],
+    prenom:document.getElementById('e-prenom').value.trim(),
+    nom:document.getElementById('e-nom').value.trim(),
+    classe:document.getElementById('e-classe').value.trim(),
+    sexe:document.getElementById('e-sexe').value,
+    dateNaissance:document.getElementById('e-ddn').value.trim(),
+    cotisation:document.getElementById('e-cotisation').value,
+    reglement:(()=>{const r=getReglements('er-');return r.length?r:['cheque'];})(),
+    licence:licenceFull(suffix),
+    telephone:document.getElementById('e-telephone').value.trim(),
+    teeShirt:document.getElementById('e-teeshirt').value,
+    section:document.getElementById('e-section').value,
+    activites:getActivities('ea-'),
+    lastModified:Date.now()
+  };
+  save(); closeModal('editModal'); renderAll();
+  alert2(navigator.onLine?'✅ Élève modifié — synchronisation en cours…':'💾 Modification sauvegardée localement','info');
+  syncWithSheets();
+}
+function openDelete(id){
+  const s=students.find(x=>x.id===id); if(!s) return;
+  deleteTargetId=id;
+  document.getElementById('deleteName').textContent=s.prenom+' '+s.nom;
+  document.getElementById('deleteModal').classList.remove('hidden');
+}
+function confirmDelete(){
+  deletedLog[deleteTargetId]=Date.now(); saveDeletedLog();
+  students=students.filter(x=>x.id!==deleteTargetId); deleteTargetId=null;
+  students.sort((a,b)=>(a.ordre||0)-(b.ordre||0)).forEach((s,i)=>{s.ordre=i+1;});
+  nextOrdre=students.length+1;
+  save(); closeModal('deleteModal'); renderAll();
+  alert2(navigator.onLine?'🗑️ Élève supprimé — synchronisation en cours…':'💾 Suppression sauvegardée localement','info');
+  syncWithSheets();
+}
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+
+// ── HELPERS RENDU ─────────────────────────────────────────────────────────
+function x(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function sexeBadge(s){return s==='Fille'?'<span class="badge b-pink">&#9792; Fille</span>':'<span class="badge b-blue">&#9794; Gar&ccedil;on</span>';}
+function catBadge(cat){return `<span class="badge ${CAT_BADGE[cat]||'b-gray'}">${x(cat)}</span>`;}
+function teeBadge(ts){return ts==='Oui'?'<span class="badge b-amber">&#128077; Oui</span>':'<span class="badge b-slate">Non</span>';}
+function actTags(a){return (a||[]).map(k=>`<span class="act-tag">${ACTS[k]||k}</span>`).join('');}
+function sectionBadge(sec){return sec?`<span class="badge b-sky">${SEC_EMOJI[sec]||''} ${x(sec)}</span>`:'<span class="muted">—</span>';}
+function classeBadge(cl){return cl?`<span class="badge b-teal">${x(cl)}</span>`:'<span class="muted">—</span>';}
+function actionBtns(id){return `<div class="flex gap2"><button class="btn btn-warning btn-sm" onclick="openEdit('${id}')">&#9999;&#65039;</button><button class="btn btn-danger btn-sm" onclick="openDelete('${id}')">&#128465;&#65039;</button></div>`;}
+function cotisValue(c){if(c==='Offerte') return 0; if(c==='20+15') return 35; if(c==='15+5') return 20; return +c||0;}
+function cotisBadge(c){const o=COTIS_OPTIONS.find(x=>x.value===String(c))||COTIS_OPTIONS[1];return `<span class="badge ${o.badge}">${o.label}</span>`;}
+function reglArr(r){return Array.isArray(r)?r:(r?String(r).split(',').filter(Boolean):['cheque']);}
+function reglBadges(r){return reglArr(r).map(k=>`<span class="act-tag" style="background:#e0e7ff;color:#3730a3">${REGL[k]||k}</span>`).join('');}
+function reglLabel(r){return reglArr(r).map(k=>REGL[k]||k).join(' + ');}
+
+function studentRow(s){
+  const cat=getCategorie(s.sexe,s.dateNaissance);
+  return `<tr>
+    <td style="font-weight:700;text-align:center">${s.ordre||'—'}</td>
+    <td><strong>${x(s.nom)} ${x(s.prenom)}</strong></td>
+    <td>${classeBadge(s.classe)}</td>
+    <td>${sexeBadge(s.sexe)}</td>
+    <td>${x(s.dateNaissance)||'<span class="muted">—</span>'}</td>
+    <td>${catBadge(cat)}</td>
+    <td>${cotisBadge(s.cotisation)}</td>
+    <td>${reglBadges(s.reglement)}</td>
+    <td>${s.licence?`<code style="font-size:.78rem">${x(s.licence)}</code>`:'<span class="muted">À renseigner</span>'}</td>
+    <td>${x(s.telephone)||'<span class="muted">—</span>'}</td>
+    <td>${teeBadge(s.teeShirt)}</td>
+    <td>${sectionBadge(s.section)}</td>
+    <td>${actTags(s.activites)}</td>
+    <td>${actionBtns(s.id)}</td>
+  </tr>`;
+}
+
+// ── RENDU TABLEAU GÉNÉRAL ─────────────────────────────────────────────────
+function renderTable(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const live=liveStudents();
+  const filtered=live.filter(s=>(s.nom+' '+s.prenom+' '+(s.classe||'')+' '+(s.licence||'')+' '+(s.section||'')).toLowerCase().includes(q));
+  document.getElementById('studentCount').textContent=live.length;
+  const tbody=document.getElementById('mainBody'),empty=document.getElementById('emptyMain'),table=document.getElementById('mainTable');
+  if(filtered.length===0){tbody.innerHTML='';empty.classList.remove('hidden');table.style.display='none';return;}
+  empty.classList.add('hidden');table.style.display='';
+  tbody.innerHTML=getSorted(filtered).map(studentRow).join('');
+}
+
+// ── RENDU ACTIVITÉS ───────────────────────────────────────────────────────
+function renderActivity(act){
+  const filtered=liveStudents().filter(s=>(s.activites||[]).includes(act));
+  document.getElementById('cnt-'+act).textContent=filtered.length;
+  const tbody=document.getElementById('body-'+act),empty=document.getElementById('empty-'+act),table=document.getElementById('tbl-'+act);
+  if(filtered.length===0){tbody.innerHTML='';empty.classList.remove('hidden');table.style.display='none';return;}
+  empty.classList.add('hidden');table.style.display='';
+  const groups={};CAT_ORDER.forEach(cat=>{groups[cat]=[];});
+  filtered.forEach(s=>{const c=getCategorie(s.sexe,s.dateNaissance);(groups[c]=groups[c]||[]).push(s);});
+  let html='';
+  CAT_ORDER.forEach(cat=>{
+    const list=(groups[cat]||[]).sort((a,b)=>(a.ordre||0)-(b.ordre||0));
+    if(!list.length) return;
+    html+=`<tr class="cat-group-row"><td colspan="14">${x(cat)} <span>${list.length} &eacute;l&egrave;ve${list.length>1?'s':''}</span></td></tr>`;
+    html+=list.map(studentRow).join('');
+  });
+  tbody.innerHTML=html;
+}
+
+// ── RENDU ONGLET TOUS LES ÉLÈVES ──────────────────────────────────────────
+function renderCollegeTab(){
+  const q=(document.getElementById('searchCollege').value||'').toLowerCase();
+  const filtered=collegeStudents.filter(c=>(c.nom+' '+c.prenom+' '+(c.classe||'')).toLowerCase().includes(q));
+  document.getElementById('collegeBadge').textContent=collegeStudents.length+' élève'+(collegeStudents.length>1?'s':'');
+  const tbody=document.getElementById('body-college'),empty=document.getElementById('empty-college'),table=document.getElementById('tbl-college');
+  if(filtered.length===0){tbody.innerHTML='';empty.classList.remove('hidden');table.style.display='none';return;}
+  empty.classList.add('hidden');table.style.display='';
+  tbody.innerHTML=[...filtered].sort((a,b)=>{
+    const k=((a.nom||'')+(a.prenom||'')).localeCompare((b.nom||'')+(b.prenom||''));return k;
+  }).map(c=>`<tr>
+    <td><strong>${x(c.nom)}</strong></td>
+    <td>${x(c.prenom)}</td>
+    <td>${classeBadge(c.classe)}</td>
+    <td>${sexeBadge(c.sexe)}</td>
+    <td>${x(c.dateNaissance)||'<span class="muted">—</span>'}</td>
+  </tr>`).join('');
+}
+
+// ── EXPORT EXCEL / CSV ────────────────────────────────────────────────────
+function exportGeneralCSV(){
+  const live=liveStudents();
+  if(!live.length){alert2('Aucun élève à exporter.','error');return;}
+  const headers=['Ordre','Nom','Prénom','Classe','Sexe','Date naiss.','Catégorie','Cotisation (€)',
+    'Règlement','N° Licence','Téléphone','Tee shirt','Section','Activités AS'];
+  const rows=[...live].sort((a,b)=>(a.ordre||0)-(b.ordre||0)).map(s=>{
+    const cat=getCategorie(s.sexe,s.dateNaissance);
+    return [s.ordre||'',s.nom,s.prenom,s.classe||'',s.sexe,s.dateNaissance||'',cat,
+      (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS[1]).label,
+      reglLabel(s.reglement),s.licence||'',s.telephone||'',s.teeShirt||'Non',
+      s.section||'',(s.activites||[]).map(a=>ACTS[a]||a).join(', ')];
+  });
+  const csv=[headers,...rows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`Eleves_AS_Joliot_Curie_2026-2027.csv`; a.click();
+  URL.revokeObjectURL(url);
+  alert2(`Export téléchargé (${live.length} élève${live.length>1?'s':''}).`,'success');
+}
+
+function exportActivityCSV(act){
+  const label=ACT_LABEL[act]||act;
+  const filtered=liveStudents().filter(s=>(s.activites||[]).includes(act));
+  if(!filtered.length){alert2('Aucun élève inscrit en '+label+'.','error');return;}
+  const headers=['Ordre','Nom','Prénom','Classe','Sexe','Date naiss.','Catégorie','Cotisation (€)',
+    'Règlement','N° Licence','Téléphone','Tee shirt','Section','Activités AS'];
+  const rows=[...filtered].sort((a,b)=>(a.ordre||0)-(b.ordre||0)).map(s=>{
+    const cat=getCategorie(s.sexe,s.dateNaissance);
+    return [s.ordre||'',s.nom,s.prenom,s.classe||'',s.sexe,s.dateNaissance||'',cat,
+      (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS[1]).label,
+      reglLabel(s.reglement),s.licence||'',s.telephone||'',s.teeShirt||'Non',
+      s.section||'',(s.activites||[]).map(a=>ACTS[a]||a).join(', ')];
+  });
+  const csv=[headers,...rows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`${label}_AS_Joliot_Curie_2026-2027.csv`; a.click();
+  URL.revokeObjectURL(url);
+  alert2(`Export "${label}" téléchargé (${filtered.length} élève${filtered.length>1?'s':''}).`,'success');
+}
+
+// ── RENDU STATS ───────────────────────────────────────────────────────────
+function renderBar(label,count,total){
+  const pct=total>0?Math.round((count/total)*100):0;
+  return `<div class="bar-row"><div class="bar-label-row"><span>${label}</span><span>${count} élève${count>1?'s':''} (${pct}%)</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div></div>`;
+}
+function renderStats(){
+  const live=liveStudents();
+  const total=live.length;
+  document.getElementById('s-total').textContent=total;
+  document.getElementById('s-filles').textContent=live.filter(s=>s.sexe==='Fille').length;
+  document.getElementById('s-garcons').textContent=live.filter(s=>s.sexe==='Garçon').length;
+  ACTIVITIES.forEach(a=>{document.getElementById('s-'+a).textContent=live.filter(s=>(s.activites||[]).includes(a)).length;});
+  document.getElementById('s-cotisation').textContent=live.reduce((acc,s)=>acc+cotisValue(s.cotisation),0)+' €';
+
+  const secRows=SECTIONS.map(sec=>{
+    const inSec=live.filter(s=>s.section===sec),inAS=inSec.filter(s=>(s.activites||[]).length>0);
+    const pct=inSec.length>0?Math.round((inAS.length/inSec.length)*100):0;
+    return{sec,total:inSec.length,inAS:inAS.length,pct};
+  }).filter(r=>r.total>0);
+  const secBody=document.getElementById('stat-section-as'),secEmpty=document.getElementById('empty-section-as');
+  if(!secRows.length){secBody.innerHTML='';secEmpty.classList.remove('hidden');}
+  else{
+    secEmpty.classList.add('hidden');
+    secBody.innerHTML=secRows.map(r=>`<tr><td><strong>${SEC_EMOJI[r.sec]||''} ${r.sec}</strong></td><td>${r.total} élève${r.total>1?'s':''}</td><td>${r.inAS} élève${r.inAS>1?'s':''}</td><td><div style="display:flex;align-items:center;gap:.5rem"><div class="bar-track" style="width:80px;display:inline-block"><div class="bar-fill" style="width:${r.pct}%"></div></div><span style="font-size:.8rem;font-weight:600">${r.pct}%</span></div></td></tr>`).join('');
+  }
+  const sCounts={};live.forEach(s=>{const k=s.section||'(Aucune section)';sCounts[k]=(sCounts[k]||0)+1;});
+  const allSec=[...SECTIONS,'(Aucune section)'].filter(s=>sCounts[s]);
+  document.getElementById('stat-sections').innerHTML=allSec.length?allSec.map(s=>renderBar((SEC_EMOJI[s]||'')+' '+s,sCounts[s],total)).join(''):'<p class="muted">Aucun élève</p>';
+  const rCounts={};
+  live.forEach(s=>{ reglArr(s.reglement).forEach(r=>{rCounts[r]=(rCounts[r]||0)+1;}); });
+  document.getElementById('stat-reglements').innerHTML=REGL_KEYS.filter(r=>rCounts[r]).length?REGL_KEYS.filter(r=>rCounts[r]).map(r=>renderBar(REGL[r],rCounts[r],total)).join(''):'<p class="muted">Aucun élève</p>';
+}
+
+function renderAll(){renderTable();ACTIVITIES.forEach(renderActivity);renderCollegeTab();renderStats();}
+
+// ── GOOGLE SHEETS (JSONP import / formulaire export) ──────────────────────
+function jsonpFetch(url, timeout=12000){
+  return new Promise((resolve,reject)=>{
+    const controller=new AbortController();
+    const to=setTimeout(()=>{controller.abort();reject(new Error('Timeout'));},timeout);
+    fetch(url,{credentials:'omit',mode:'cors',signal:controller.signal})
+      .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+      .then(data=>{clearTimeout(to);resolve(data);})
+      .catch(e=>{clearTimeout(to);reject(e);});
+  });
+}
+
+async function importFromSheets(){
+  // Synchronisation silencieuse au démarrage : fusion sans remplacement
+  if(!navigator.onLine){
+    updateNetworkUI();
+    alert2(students.length?'📵 Mode hors ligne — données locales chargées':'📵 Mode hors ligne — aucune donnée locale disponible','info');
+    return;
+  }
+  await syncWithSheets(true);
+}
+
+async function importCollegeStudents(){
+  alert2('Importation de la liste du collège…','info');
+  try{
+    const d=await jsonpFetch(SCRIPT_URL+'?type=college');
+    if(d.success&&Array.isArray(d.data)){
+      collegeStudents=d.data.map(r=>{
+        const ci={};Object.entries(r).forEach(([k,v])=>{ci[k.toLowerCase().trim()]=v;});
+        let nom   =cellStr(ci['nom']||'');
+        let prenom=cellStr(ci['prénom']||ci['prenom']||'');
+        // Nom et prénom fusionnés dans une seule colonne → on découpe
+        if(nom&&!prenom){const sp=splitNomPrenom(nom);nom=sp.nom;prenom=sp.prenom;}
+        else if(!nom&&prenom){const sp=splitNomPrenom(prenom);nom=sp.nom;prenom=sp.prenom;}
+        return {
+          nom, prenom,
+          classe:       cellStr(ci['classe']||''),
+          sexe:         normaliseSexe(ci['sexe']||''),
+          dateNaissance:parseDate(ci['date de naissance']||ci['datenaissance']||ci['naissance']||ci['ddn']||'')
+        };
+      }).filter(c=>c.nom||c.prenom);
+      saveCollege();
+      renderAll();
+      alert2(`${collegeStudents.length} élève(s) du collège importé(s).`,'success');
+    } else {
+      alert2('Erreur : '+(d.error||'réponse inattendue'),'error');
+    }
+  }catch(e){
+    alert2('Impossible de contacter Google Sheets. Vérifiez le déploiement Web App ("Tout le monde").','error');
+  }
+}
+
+function mergeStudents(local, remote) {
+  const map = new Map();
+  for (const s of remote) map.set(s.id, s);
+  for (const s of local) {
+    if (!((s.nom||'').trim()||(s.prenom||'').trim())) continue; // ignorer entrées locales sans nom
+    const existing = map.get(s.id);
+    if (!existing || (s.lastModified||0) >= (existing.lastModified||0)) map.set(s.id, s);
+  }
+  for (const [id, deletedAt] of Object.entries(deletedLog)) {
+    const s = map.get(id);
+    if (s && (s.lastModified||0) <= +deletedAt) map.delete(id);
+  }
+  return [...map.values()].filter(s=>!s.deleted&&s.id!=='__deletedLog__'&&((s.nom||'').trim()||(s.prenom||'').trim())).sort((a,b)=>(a.ordre||0)-(b.ordre||0));
+}
+
+async function syncWithSheets(silent=false){
+  if(!navigator.onLine){
+    pendingSync=true; savePendingSync(); updateNetworkUI();
+    if(!silent) alert2('💾 Hors ligne — données sauvegardées localement','info');
+    return false;
+  }
+  // ── LECTURE ──────────────────────────────────────────────────────────────
+  let sheetStudents=[];
+  try{
+    const d=await jsonpFetch(SCRIPT_URL,8000);
+    if(d.success&&Array.isArray(d.data)){
+      const allRows=d.data.map((r,i)=>parseRow(r,i));
+      // Extraire la ligne méta contenant le deletedLog des autres appareils
+      const metaRow=allRows.find(s=>s.id==='__deletedLog__');
+      if(metaRow&&metaRow.prenom){
+        try{
+          const remote=JSON.parse(metaRow.prenom);
+          for(const [id,ts] of Object.entries(remote)){
+            if(!deletedLog[id]||deletedLog[id]<+ts) deletedLog[id]=+ts;
+          }
+          saveDeletedLog();
+        }catch(e){}
+      }
+      // Garder seulement les vrais élèves (ni méta, ni lignes vides)
+      sheetStudents=allRows.filter(s=>s.id!=='__deletedLog__'&&(s.nom||s.prenom));
+    }
+  }catch(e){
+    pendingSync=true; savePendingSync(); updateNetworkUI();
+    if(!silent) alert2('⚠️ Erreur réseau — données sauvegardées localement','error');
+    return false;
+  }
+  // ── FUSION LWW + suppressions ─────────────────────────────────────────────
+  const merged=mergeStudents(students,sheetStudents);
+  // Renuméroter les élèves actifs de façon cohérente après fusion
+  let ord=1; merged.filter(s=>!s.deleted).sort((a,b)=>(a.ordre||0)-(b.ordre||0)).forEach(s=>{s.ordre=ord++;});
+  students=merged; initNextOrdre(); save(); renderAll();
+  // ── ÉCRITURE ─────────────────────────────────────────────────────────────
+  // On n'écrit que les élèves actifs + une ligne méta contenant le deletedLog
+  // → fonctionne avec l'Apps Script existant, sans modification côté serveur
+  const liveOnly=liveStudents();
+  const metaEntry={
+    id:'__deletedLog__',ordre:9999999,
+    prenom:JSON.stringify(deletedLog),nom:'',classe:'',
+    sexe:'',dateNaissance:'',cotisation:'',reglement:'',
+    licence:'',telephone:'',teeShirt:'',section:'',
+    activites:'',lastModified:0
+  };
+  const body='payload='+encodeURIComponent(JSON.stringify({students:[...liveOnly,metaEntry]}));
+  let sent=false;
+  // Méthode 1 : fetch no-cors (Chrome/Firefox/Edge/Safari desktop)
+  try{
+    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',credentials:'omit',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
+    sent=true;
+  }catch(fetchErr){
+    // Méthode 2 : sendBeacon (iOS Safari depuis file://)
+    if(typeof navigator.sendBeacon==='function')
+      sent=navigator.sendBeacon(SCRIPT_URL,new Blob([body],{type:'application/x-www-form-urlencoded'}));
+  }
+  if(sent){
+    pendingSync=false; savePendingSync(); updateNetworkUI();
+    if(!silent) alert2(`${liveOnly.length} élève(s) synchronisé(s) ✓`,'success');
+    return true;
+  }else{
+    pendingSync=true; savePendingSync(); updateNetworkUI();
+    if(!silent) alert2('⚠️ Envoi impossible — données sauvegardées localement','error');
+    return false;
+  }
+}
+async function exportToSheets(){return syncWithSheets(false);}
+
+async function clearLocalAndPull(){
+  if(!navigator.onLine){alert2('⚡ Hors ligne — impossible de recharger depuis Sheets.','error');return;}
+  if(!confirm('⚠️ Remplacer toutes les données locales par celles de Sheets ?\n\nÀ utiliser si cette tablette/cet appareil affiche des données corrompues.')) return;
+  try{
+    const d=await jsonpFetch(SCRIPT_URL,12000);
+    if(!d.success||!Array.isArray(d.data)) throw new Error(d.error||'réponse inattendue');
+    const allRows=d.data.map((r,i)=>parseRow(r,i));
+    const metaRow=allRows.find(s=>s.id==='__deletedLog__');
+    if(metaRow&&metaRow.prenom){try{deletedLog=JSON.parse(metaRow.prenom);saveDeletedLog();}catch(e){}}
+    students=allRows.filter(s=>s.id!=='__deletedLog__'&&!s.deleted&&((s.nom||'').trim()||(s.prenom||'').trim()));
+    students.sort((a,b)=>(a.ordre||0)-(b.ordre||0)).forEach((s,i)=>{s.ordre=i+1;});
+    initNextOrdre(); pendingSync=false; save(); savePendingSync(); updateNetworkUI(); renderAll();
+    alert2(`✅ ${students.length} élève(s) rechargé(s) depuis Sheets.`,'success');
+  }catch(e){
+    alert2('❌ Erreur lecture Sheets : '+e.message,'error');
+  }
+}
+
+async function pushAsAuthority(){
+  if(!navigator.onLine){alert2('⚡ Hors ligne — impossible de forcer la synchronisation.','error');return;}
+  const live=liveStudents();
+  if(!live.length&&!confirm('Aucun élève actif. Écraser Sheets quand même (effacera tout) ?')) return;
+  if(!confirm(`⚠️ Remplacer les données Sheets par la liste locale (${live.length} élève(s)) ?\n\nLes autres appareils récupéreront cette liste à leur prochaine synchronisation.`)) return;
+  const metaEntry={
+    id:'__deletedLog__',ordre:9999999,
+    prenom:JSON.stringify(deletedLog),nom:'',classe:'',
+    sexe:'',dateNaissance:'',cotisation:'',reglement:'',
+    licence:'',telephone:'',teeShirt:'',section:'',
+    activites:'',lastModified:0
+  };
+  const body='payload='+encodeURIComponent(JSON.stringify({students:[...live,metaEntry]}));
+  let sent=false;
+  try{
+    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',credentials:'omit',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
+    sent=true;
+  }catch(e){
+    if(typeof navigator.sendBeacon==='function')
+      sent=navigator.sendBeacon(SCRIPT_URL,new Blob([body],{type:'application/x-www-form-urlencoded'}));
+  }
+  if(sent) alert2(`✅ Sheets remis à jour avec ${live.length} élève(s). Les autres appareils se mettront à jour au prochain Sync.`,'success');
+  else alert2('⚠️ Envoi échoué. Vérifiez votre connexion.','error');
+}
+
+async function doImport(list){
+  if(!list.length){alert2('Aucune donnée dans le Google Sheet.','error');return false;}
+  if(!confirm(`Importer ${list.length} élève(s) depuis Google Sheets ?\nLes données actuelles seront remplacées.`)) return false;
+  students=list; initNextOrdre(); save();
+  deletedLog={}; saveDeletedLog();  // le Sheet devient source de vérité : on efface le journal local
+  renderAll();
+  alert2(`${list.length} élève(s) importé(s) avec succès !`,'success');return true;
+}
+
+function cellStr(val){
+  if(val===null||val===undefined) return '';
+  if(typeof val==='object') return '';
+  return String(val).trim();
+}
+
+// Normalise la valeur du sexe vers 'Fille' ou 'Garçon'
+function normaliseSexe(val){
+  const raw=(val||'').toString().trim();
+  const v=raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  if(['f','fille','femme','feminin','female','girl','2'].includes(v)) return 'Fille';
+  if(['m','g','garcon','masculin','homme','male','boy','1'].includes(v)) return 'Garçon';
+  if(v.startsWith('f')) return 'Fille';
+  if(v.startsWith('m')||v.startsWith('g')) return 'Garçon';
+  return '';
+}
+
+// Sépare "NOM Prénom" fusionné : les mots tout-en-majuscules forment le nom de famille
+function splitNomPrenom(full){
+  const parts=full.trim().split(/\s+/);
+  if(parts.length<=1) return {nom:full.trim(),prenom:''};
+  const isUpper=s=>s.length>0&&s===s.toUpperCase()&&/[A-ZÀÂÇÉÈÊËÎÏÔÙÛÜ]/.test(s);
+  let i=parts.findIndex((p,idx)=>idx>0&&!isUpper(p));
+  if(i===-1) return {nom:parts.join(' '),prenom:''};   // tout en majuscules → nom composé
+  if(i===0)  return {nom:parts[0],prenom:parts.slice(1).join(' ')}; // 1er mot en minuscules
+  return {nom:parts.slice(0,i).join(' '),prenom:parts.slice(i).join(' ')};
+}
+
+function parseDate(val){
+  if(!val&&val!==0) return '';
+  const s=String(val).trim();
+  if(/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return `${m[3]}/${m[2]}/${m[1]}`;
+  return s;
+}
+
+function parseRow(r,i){
+  return{
+    id:r.id||uid(), ordre:parseInt(r.ordre)||i+1,
+    prenom:cellStr(r.prenom), nom:cellStr(r.nom),
+    classe:cellStr(r.classe),
+    sexe:cellStr(r.sexe)||'Fille',
+    dateNaissance:parseDate(r.dateNaissance),
+    cotisation:(['20','35','20+15','15+5','Offerte'].includes(cellStr(r.cotisation))?cellStr(r.cotisation):'35'),
+    reglement:r.reglement?(Array.isArray(r.reglement)?r.reglement:String(r.reglement).split(',').filter(Boolean)):['cheque'],
+    licence:cellStr(r.licence),
+    telephone:cellStr(r.telephone), teeShirt:cellStr(r.teeShirt)||'Non',
+    section:cellStr(r.section),
+    activites:r.activites?String(r.activites).split(',').filter(Boolean):[],
+    lastModified:r.lastModified?+r.lastModified:0,
+    deleted:r.deleted==='TRUE'||r.deleted===true||r.deleted==='true',
+    deletedAt:r.deletedAt?+r.deletedAt:0
+  };
+}
+
+// ── ALERTES ───────────────────────────────────────────────────────────────
+let alertTimer;
+function alert2(msg,type='info'){
+  document.getElementById('alertArea').innerHTML=`<div class="alert alert-${type}">${msg}</div>`;
+  clearTimeout(alertTimer);
+  alertTimer=setTimeout(()=>{document.getElementById('alertArea').innerHTML='';},5000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+['editModal','deleteModal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)this.classList.add('hidden');});
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') ['editModal','deleteModal'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+});
+
+load();
+updateNetworkUI();
+renderAll();
+importFromSheets();
+
+// ── SYNCHRONISATION AUTOMATIQUE ────────────────────────────────────────────
+window.addEventListener('online', async () => {
+  updateNetworkUI();
+  if(pendingSync){
+    alert2('🔄 Connexion rétablie — synchronisation en cours…','info');
+    await syncWithSheets(false);
+  } else {
+    await syncWithSheets(true); // récupère silencieusement les modifs des autres utilisateurs
+  }
+});
+window.addEventListener('offline', () => {
+  updateNetworkUI();
+  alert2('📵 Mode hors ligne — vos modifications seront synchronisées à la reconnexion','info');
+});
+// Sync périodique toutes les 2 minutes (récupère les modifs des autres utilisateurs)
+setInterval(async () => { if(navigator.onLine) await syncWithSheets(true); }, 120000);
+
+/*
+═══════════════════════════════════════════════════════════════════════════════
+  TEMPLATE GOOGLE APPS SCRIPT — à copier dans votre projet Apps Script
+═══════════════════════════════════════════════════════════════════════════════
+
+const SHEET_AS      = 'Eleves';
+const SHEET_COLLEGE = 'liste des élèves du collège';
+
+function doGet(e) {
+  const callback = e.parameter.callback;
+  const type     = e.parameter.type || 'as';
+  const ss       = SpreadsheetApp.getActiveSpreadsheet();
+
+  if (type === 'college') {
+    const sheet = ss.getSheetByName(SHEET_COLLEGE);
+    if (!sheet) return respond({success:false, error:'Feuille "'+SHEET_COLLEGE+'" introuvable'}, callback);
+    const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return respond({success:true, data:[]}, callback);
+    const headers = data[0];
+    const rows = data.slice(1).map(row => {
+      const obj = {}; headers.forEach((h, i) => obj[h] = row[i]); return obj;
+    });
+    return respond({success:true, data:rows}, callback);
+  }
+
+  // Par défaut : élèves AS
+  const sheet = ss.getSheetByName(SHEET_AS);
+  if (!sheet) return respond({success:false, error:'Feuille "'+SHEET_AS+'" introuvable'}, callback);
+  const data = sheet.getDataRange().getValues();
+  if (data.length < 2) return respond({success:true, data:[]}, callback);
+  const headers = data[0];
+  const rows = data.slice(1).map(row => {
+    const obj = {}; headers.forEach((h, i) => obj[h] = row[i]); return obj;
+  });
+  return respond({success:true, data:rows}, callback);
+}
+
+function doPost(e) {
+  try {
+    const raw     = (e.parameter && e.parameter.payload) ? e.parameter.payload : e.postData.contents;
+    const payload = JSON.parse(raw);
+    const ss      = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet     = ss.getSheetByName(SHEET_AS);
+    if (!sheet) sheet = ss.insertSheet(SHEET_AS);
+    const headers = ['id','ordre','prenom','nom','classe','sexe','dateNaissance',
+      'cotisation','reglement','licence','telephone','teeShirt','section','activites','lastModified'];
+    sheet.clearContents();
+    sheet.appendRow(headers);
+    (payload.students || []).forEach(s => {
+      sheet.appendRow([s.id, s.ordre, s.prenom, s.nom, s.classe||'', s.sexe, s.dateNaissance,
+        s.cotisation, s.reglement||'', s.licence||'', s.telephone||'', s.teeShirt||'', s.section||'',
+        Array.isArray(s.activites) ? s.activites.join(',') : (s.activites||''),
+        s.lastModified||'']);
+    });
+    return respond({success:true}, null);
+  } catch(err) { return respond({success:false, error:err.toString()}, null); }
+}
+
+function respond(obj, callback) {
+  const text = JSON.stringify(obj);
+  if (callback) {
+    return ContentService.createTextOutput(callback+'('+text+')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(text).setMimeType(ContentService.MimeType.JSON);
+}
+
+NOTE : L'onglet "liste des élèves du collège" doit avoir une ligne d'en-têtes avec
+les colonnes : Nom | Prénom | Classe | Sexe | Date de naissance
+═══════════════════════════════════════════════════════════════════════════════
+*/
+</script>
+</body>
+</html>

@@ -834,7 +834,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 // ═══════════════════════════════════════════════════════════════════════════
 // URL DU WEB APP GOOGLE APPS SCRIPT — à modifier ici si nécessaire
 // ═══════════════════════════════════════════════════════════════════════════
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrvlhxz4J5Id2ZCY3pX1VY32sN2e01eyyTKrvydPXhdGMrRMXwSGbmVTbF8DiXza3Gew/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0AWfGISFs-7-T0sNB6SENO2B-wfnGlEvD3hYcfZfSCo0vRyPYfu50fKy4wfB0YFk1/exec';
 
 // ── CONSTANTES ────────────────────────────────────────────────────────────
 const REGL = {
@@ -1543,18 +1543,31 @@ function parseDate(val){
 }
 
 function parseRow(r,i){
+  // Compatibilité anciens en-têtes anglais ET nouveaux en-têtes français
+  const nom       = r['Nom']          || r.nom          || '';
+  const prenom    = r['Prénom']       || r.prenom       || '';
+  const classe    = r['Classe']       || r.classe       || '';
+  const sexe      = r['Sexe']         || r.sexe         || '';
+  const ddn       = r['Date de naissance'] || r.dateNaissance || '';
+  const cotis     = r['Cotisation']   || r.cotisation   || '';
+  const regl      = r['Règlement']    || r.reglement    || '';
+  const licence   = r['N° Licence']   || r.licence      || '';
+  const tel       = r['Téléphone']    || r.telephone    || '';
+  const tee       = r['Tee-shirt']    || r.teeShirt     || '';
+  const section   = r['Section']      || r.section      || '';
+  const activites = r['Activités']    || r.activites    || '';
   return{
-    id:r.id||uid(), ordre:parseInt(r.ordre)||i+1,
-    prenom:cellStr(r.prenom), nom:cellStr(r.nom),
-    classe:cellStr(r.classe),
-    sexe:cellStr(r.sexe)||'Fille',
-    dateNaissance:parseDate(r.dateNaissance),
-    cotisation:(['20','35','20+15','15+5','Offerte'].includes(cellStr(r.cotisation))?cellStr(r.cotisation):'35'),
-    reglement:r.reglement?(Array.isArray(r.reglement)?r.reglement:String(r.reglement).split(',').filter(Boolean)):['cheque'],
-    licence:cellStr(r.licence),
-    telephone:cellStr(r.telephone), teeShirt:cellStr(r.teeShirt)||'Non',
-    section:cellStr(r.section),
-    activites:r.activites?String(r.activites).split(',').filter(Boolean):[],
+    id:r.id||uid(), ordre:parseInt(r['Ordre']||r.ordre)||i+1,
+    prenom:cellStr(prenom), nom:cellStr(nom),
+    classe:cellStr(classe),
+    sexe:cellStr(sexe)||'Fille',
+    dateNaissance:parseDate(ddn),
+    cotisation:(['20','35','20+15','15+5','Offerte'].includes(cellStr(cotis))?cellStr(cotis):'35'),
+    reglement:regl?(Array.isArray(regl)?regl:String(regl).split(',').filter(Boolean)):['cheque'],
+    licence:cellStr(licence),
+    telephone:cellStr(tel), teeShirt:cellStr(tee)||'Non',
+    section:cellStr(section),
+    activites:activites?String(activites).split(',').filter(Boolean):[],
     lastModified:r.lastModified?+r.lastModified:0,
     deleted:r.deleted==='TRUE'||r.deleted===true||r.deleted==='true',
     deletedAt:r.deletedAt?+r.deletedAt:0

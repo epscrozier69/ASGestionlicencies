@@ -333,6 +333,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   </div>
   <div class="header-actions">
     <div id="networkStatus" class="online">🟢 En ligne</div>
+    <button id="syncBtn" class="btn btn-ghost btn-sm" onclick="manualSync()" title="Synchroniser maintenant avec Google Sheets">🔄 Synchroniser</button>
     <button class="btn btn-ghost btn-sm" onclick="clearLocalAndPull()" style="color:#fca5a5" title="Effacer les données locales et recharger depuis Sheets">↩ Réinit.</button>
   </div>
 </header>
@@ -1451,6 +1452,16 @@ async function syncWithSheets(silent=false){
   }
 }
 async function exportToSheets(){return syncWithSheets(false);}
+
+async function manualSync(){
+  const btn=document.getElementById('syncBtn');
+  if(btn){btn.disabled=true;btn.textContent='🔄 Synchro...';}
+  try{
+    await syncWithSheets(false);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='🔄 Synchroniser';}
+  }
+}
 
 async function clearLocalAndPull(){
   if(!navigator.onLine){alert2('⚡ Hors ligne — impossible de recharger depuis Sheets.','error');return;}

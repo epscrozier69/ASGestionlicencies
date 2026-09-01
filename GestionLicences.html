@@ -1342,7 +1342,7 @@ async function importCollegeStudents(){
   try{
     const d=await jsonpFetch(SCRIPT_URL+'?type=college');
     if(d.success&&Array.isArray(d.data)){
-      collegeStudents=d.data.map(r=>{
+      const raw=d.data.map(r=>{
         const ci={};Object.entries(r).forEach(([k,v])=>{ci[k.toLowerCase().trim()]=v;});
         let nom   =cellStr(ci['nom']||'');
         let prenom=cellStr(ci['prénom']||ci['prenom']||'');
@@ -1356,9 +1356,33 @@ async function importCollegeStudents(){
           dateNaissance:parseDate(ci['date de naissance']||ci['datenaissance']||ci['naissance']||ci['ddn']||'')
         };
       }).filter(c=>c.nom||c.prenom);
+
+      // Fusion des doublons (même nom + prénom, ex. ligne ajoutée par le collège
+      // au lieu de mettre à jour la ligne existante) : on complète les champs
+      // manquants et, en cas de conflit, la ligne la plus récente du fichier gagne.
+      const norm=s=>(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+      const map=new Map();
+      for(const c of raw){
+        const key=norm(c.nom)+'|'+norm(c.prenom);
+        const existing=map.get(key);
+        map.set(key, existing ? {
+          nom:           c.nom           || existing.nom,
+          prenom:        c.prenom        || existing.prenom,
+          classe:        c.classe        || existing.classe,
+          sexe:          c.sexe          || existing.sexe,
+          dateNaissance: c.dateNaissance || existing.dateNaissance
+        } : c);
+      }
+      collegeStudents=[...map.values()];
       saveCollege();
       renderAll();
-      alert2(`${collegeStudents.length} élève(s) du collège importé(s).`,'success');
+
+      const nbDoublons=raw.length-collegeStudents.length;
+      const sansDdn=collegeStudents.filter(c=>!c.dateNaissance).length;
+      let msg=`${collegeStudents.length} élève(s) du collège importé(s).`;
+      if(nbDoublons>0) msg+=` ${nbDoublons} doublon(s) fusionné(s).`;
+      if(sansDdn>0) msg+=` ⚠️ ${sansDdn} sans date de naissance — à corriger dans le Google Sheet.`;
+      alert2(msg, (nbDoublons>0||sansDdn>0) ? 'info' : 'success');
     } else {
       alert2('Erreur : '+(d.error||'réponse inattendue'),'error');
     }

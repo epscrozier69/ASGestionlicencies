@@ -344,7 +344,8 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   <button class="tab-btn" onclick="switchTab('fitness',this)">&#128170; Fitness</button>
   <button class="tab-btn" onclick="switchTab('natation',this)">🏊‍♂️ Natation</button>
   <button class="tab-btn" onclick="switchTab('sport-partage',this)">&#129309; Sport Partag&eacute;</button>
-  <button class="tab-btn" onclick="switchTab('futsal',this)">&#9917; Futsal</button>
+  <button class="tab-btn" onclick="switchTab('futsal-benj',this)">&#9917; Futsal Benj</button>
+  <button class="tab-btn" onclick="switchTab('futsal-min',this)">&#9917; Futsal Min</button>
   <button class="tab-btn" onclick="switchTab('stats',this)">&#128202; Statistiques</button>
   <button class="tab-btn" style="margin-left:auto" onclick="switchTab('tous-eleves',this)">&#127979; &Eacute;l&egrave;ves de Joliot</button>
 </nav>
@@ -457,6 +458,13 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
                 <option value="Handball">&#129336;&#8205;&#9792;&#65039; Handball</option>
               </select>
             </div>
+            <div class="form-group">
+              <label>&Eacute;l&egrave;ve en situation de handicap</label>
+              <select id="f-handicap">
+                <option value="Non" selected>Non</option>
+                <option value="Oui">Oui</option>
+              </select>
+            </div>
             <div class="form-group full">
               <label>Activit&eacute;s AS (choix multiples)</label>
               <div class="checkbox-group">
@@ -508,6 +516,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
             <th data-sort="tel"      onclick="clickSort(this)">T&eacute;l&eacute;phone<span class="sort-ind">&#8597;</span></th>
             <th data-sort="teeshirt" onclick="clickSort(this)">Tee shirt<span class="sort-ind">&#8597;</span></th>
             <th data-sort="section"  onclick="clickSort(this)">Section<span class="sort-ind">&#8597;</span></th>
+            <th data-sort="handicap" onclick="clickSort(this)">Handicap<span class="sort-ind">&#8597;</span></th>
             <th>Activit&eacute;s AS</th>
             <th>Actions</th>
           </tr>
@@ -535,7 +544,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <thead><tr>
           <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
           <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
-          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Activit&eacute;s AS</th><th>Actions</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Handicap</th><th>Activit&eacute;s AS</th><th>Actions</th>
         </tr></thead>
         <tbody id="body-fitness"></tbody>
       </table>
@@ -555,7 +564,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <thead><tr>
           <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
           <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
-          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Activit&eacute;s AS</th><th>Actions</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Handicap</th><th>Activit&eacute;s AS</th><th>Actions</th>
         </tr></thead>
         <tbody id="body-natation"></tbody>
       </table>
@@ -575,7 +584,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <thead><tr>
           <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
           <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
-          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Activit&eacute;s AS</th><th>Actions</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Handicap</th><th>Activit&eacute;s AS</th><th>Actions</th>
         </tr></thead>
         <tbody id="body-sport_partage"></tbody>
       </table>
@@ -584,22 +593,42 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   </div>
 </div>
 
-<div id="tab-futsal" class="tab-panel">
+<div id="tab-futsal-benj" class="tab-panel">
   <div class="card">
     <div class="card-header">
-      <h2>&#9917; Futsal &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal" class="badge b-red">0</span></h2>
-      <button class="btn btn-success btn-sm" onclick="exportActivityCSV('futsal')">&#128190; Export Excel</button>
+      <h2>&#9917; Futsal Benj &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-benj" class="badge b-red">0</span></h2>
+      <button class="btn btn-success btn-sm" onclick="exportFutsalGroupCSV('Benj')">&#128190; Export Excel</button>
     </div>
     <div class="table-wrap">
-      <table id="tbl-futsal" class="act-table">
+      <table id="tbl-futsal-benj" class="act-table">
         <thead><tr>
           <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
           <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
-          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Activit&eacute;s AS</th><th>Actions</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Handicap</th><th>Activit&eacute;s AS</th><th>Actions</th>
         </tr></thead>
-        <tbody id="body-futsal"></tbody>
+        <tbody id="body-futsal-benj"></tbody>
       </table>
-      <div id="empty-futsal" class="empty-state hidden"><div class="icon">&#9917;</div><h3>Aucun &eacute;l&egrave;ve inscrit en Futsal</h3></div>
+      <div id="empty-futsal-benj" class="empty-state hidden"><div class="icon">&#9917;</div><h3>Aucun &eacute;l&egrave;ve inscrit en Futsal Benj</h3></div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-futsal-min" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <h2>&#9917; Futsal Min &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-min" class="badge b-red">0</span></h2>
+      <button class="btn btn-success btn-sm" onclick="exportFutsalGroupCSV('Min')">&#128190; Export Excel</button>
+    </div>
+    <div class="table-wrap">
+      <table id="tbl-futsal-min" class="act-table">
+        <thead><tr>
+          <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
+          <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Handicap</th><th>Activit&eacute;s AS</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="body-futsal-min"></tbody>
+      </table>
+      <div id="empty-futsal-min" class="empty-state hidden"><div class="icon">&#9917;</div><h3>Aucun &eacute;l&egrave;ve inscrit en Futsal Min</h3></div>
     </div>
   </div>
 </div>
@@ -652,6 +681,10 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
     <div class="stat-card" style="border-top:4px solid #3b82f6">
       <div class="stat-num" style="color:#3b82f6" id="s-garcons">0</div>
       <div class="stat-lbl">&#9794;&#65039; Gar&ccedil;ons</div>
+    </div>
+    <div class="stat-card" style="border-top:4px solid #f97316">
+      <div class="stat-num" style="color:#f97316" id="s-handicap">0</div>
+      <div class="stat-lbl">&#9855; &Eacute;l&egrave;ves en situation de handicap</div>
     </div>
     <div class="stat-card" style="border-top:4px solid #8b5cf6">
       <div class="stat-num" style="color:#8b5cf6" id="s-fitness">0</div>
@@ -795,6 +828,13 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
               <option value="Handball">&#129336;&#8205;&#9792;&#65039; Handball</option>
             </select>
           </div>
+          <div class="form-group">
+            <label>&Eacute;l&egrave;ve en situation de handicap</label>
+            <select id="e-handicap">
+              <option value="Non">Non</option>
+              <option value="Oui">Oui</option>
+            </select>
+          </div>
           <div class="form-group full">
             <label>Activit&eacute;s AS</label>
             <div class="checkbox-group">
@@ -895,7 +935,8 @@ const SORT_FNS = {
   regl:     s => reglArr(s.reglement).map(r=>REGL[r]||r).join(','),
   tel:      s => s.telephone || '',
   teeshirt: s => s.teeShirt === 'Oui' ? 0 : 1,
-  section:  s => s.section || ''
+  section:  s => s.section || '',
+  handicap: s => s.handicap === 'Oui' ? 0 : 1
 };
 
 function clickSort(th) {
@@ -1056,6 +1097,7 @@ function resetAddForm(){
   REGL_KEYS.forEach(r=>{document.getElementById('fr-'+r).checked=(r==='cheque');});
   document.getElementById('f-teeshirt').value='Non';
   document.getElementById('f-section').value='';
+  document.getElementById('f-handicap').value='Non';
   document.getElementById('f-cat-preview').value='';
   document.getElementById('f-search-college').value='';
   document.getElementById('college-results').classList.add('hidden');
@@ -1084,6 +1126,7 @@ function handleAdd(e){
     telephone:document.getElementById('f-telephone').value.trim(),
     teeShirt:document.getElementById('f-teeshirt').value,
     section:document.getElementById('f-section').value,
+    handicap:document.getElementById('f-handicap').value,
     activites:getActivities('fa-'),
     lastModified:Date.now()
   });
@@ -1107,6 +1150,7 @@ function openEdit(id){
   document.getElementById('e-telephone').value=s.telephone||'';
   document.getElementById('e-teeshirt').value=s.teeShirt||'Non';
   document.getElementById('e-section').value=s.section||'';
+  document.getElementById('e-handicap').value=s.handicap||'Non';
   document.getElementById('e-cat-preview').value=getCategorie(s.sexe,s.dateNaissance||'');
   const suf=licenceSuffix(s.licence);
   document.getElementById('e-licence-suffix').value=suf;
@@ -1132,6 +1176,7 @@ function handleEdit(e){
     telephone:document.getElementById('e-telephone').value.trim(),
     teeShirt:document.getElementById('e-teeshirt').value,
     section:document.getElementById('e-section').value,
+    handicap:document.getElementById('e-handicap').value,
     activites:getActivities('ea-'),
     lastModified:Date.now()
   };
@@ -1161,6 +1206,7 @@ function x(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').re
 function sexeBadge(s){return s==='Fille'?'<span class="badge b-pink">&#9792; Fille</span>':'<span class="badge b-blue">&#9794; Gar&ccedil;on</span>';}
 function catBadge(cat){return `<span class="badge ${CAT_BADGE[cat]||'b-gray'}">${x(cat)}</span>`;}
 function teeBadge(ts){return ts==='Oui'?'<span class="badge b-amber">&#128077; Oui</span>':'<span class="badge b-slate">Non</span>';}
+function handicapBadge(h){return h==='Oui'?'<span class="badge b-red">&#9855; Oui</span>':'<span class="badge b-slate">Non</span>';}
 function actTags(a){return (a||[]).map(k=>`<span class="act-tag">${ACTS[k]||k}</span>`).join('');}
 function sectionBadge(sec){return sec?`<span class="badge b-sky">${SEC_EMOJI[sec]||''} ${x(sec)}</span>`:'<span class="muted">—</span>';}
 function classeBadge(cl){return cl?`<span class="badge b-teal">${x(cl)}</span>`:'<span class="muted">—</span>';}
@@ -1186,6 +1232,7 @@ function studentRow(s){
     <td>${x(s.telephone)||'<span class="muted">—</span>'}</td>
     <td>${teeBadge(s.teeShirt)}</td>
     <td>${sectionBadge(s.section)}</td>
+    <td>${handicapBadge(s.handicap)}</td>
     <td>${actTags(s.activites)}</td>
     <td>${actionBtns(s.id)}</td>
   </tr>`;
@@ -1216,7 +1263,31 @@ function renderActivity(act){
   CAT_ORDER.forEach(cat=>{
     const list=(groups[cat]||[]).sort((a,b)=>(a.ordre||0)-(b.ordre||0));
     if(!list.length) return;
-    html+=`<tr class="cat-group-row"><td colspan="14">${x(cat)} <span>${list.length} &eacute;l&egrave;ve${list.length>1?'s':''}</span></td></tr>`;
+    html+=`<tr class="cat-group-row"><td colspan="15">${x(cat)} <span>${list.length} &eacute;l&egrave;ve${list.length>1?'s':''}</span></td></tr>`;
+    html+=list.map(studentRow).join('');
+  });
+  tbody.innerHTML=html;
+}
+
+// Futsal est scindé en deux onglets par tranche d'âge (Benj / Min), à partir
+// de la même sélection d'activité "futsal" — group = 'Benj' ou 'Min'.
+const FUTSAL_CATS = { Benj:['Benj Fille','Benj Garçon'], Min:['Min Fille','Min Garçon'] };
+function futsalGroupStudents(group){
+  const cats=FUTSAL_CATS[group];
+  return liveStudents().filter(s=>(s.activites||[]).includes('futsal')&&cats.includes(getCategorie(s.sexe,s.dateNaissance)));
+}
+function renderFutsalGroup(group){
+  const id='futsal-'+group.toLowerCase();
+  const filtered=futsalGroupStudents(group);
+  document.getElementById('cnt-'+id).textContent=filtered.length;
+  const tbody=document.getElementById('body-'+id),empty=document.getElementById('empty-'+id),table=document.getElementById('tbl-'+id);
+  if(filtered.length===0){tbody.innerHTML='';empty.classList.remove('hidden');table.style.display='none';return;}
+  empty.classList.add('hidden');table.style.display='';
+  let html='';
+  FUTSAL_CATS[group].forEach(cat=>{
+    const list=filtered.filter(s=>getCategorie(s.sexe,s.dateNaissance)===cat).sort((a,b)=>(a.ordre||0)-(b.ordre||0));
+    if(!list.length) return;
+    html+=`<tr class="cat-group-row"><td colspan="15">${x(cat)} <span>${list.length} &eacute;l&egrave;ve${list.length>1?'s':''}</span></td></tr>`;
     html+=list.map(studentRow).join('');
   });
   tbody.innerHTML=html;
@@ -1246,13 +1317,13 @@ function exportGeneralCSV(){
   const live=liveStudents();
   if(!live.length){alert2('Aucun élève à exporter.','error');return;}
   const headers=['Ordre','Nom','Prénom','Classe','Sexe','Date naiss.','Catégorie','Cotisation (€)',
-    'Règlement','N° Licence','Téléphone','Tee shirt','Section','Activités AS'];
+    'Règlement','N° Licence','Téléphone','Tee shirt','Section','Handicap','Activités AS'];
   const rows=[...live].sort((a,b)=>(a.ordre||0)-(b.ordre||0)).map(s=>{
     const cat=getCategorie(s.sexe,s.dateNaissance);
     return [s.ordre||'',s.nom,s.prenom,s.classe||'',s.sexe,s.dateNaissance||'',cat,
       (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS.find(o=>o.value==='35')).label,
       reglLabel(s.reglement),s.licence||'',s.telephone||'',s.teeShirt||'Non',
-      s.section||'',(s.activites||[]).map(a=>ACTS[a]||a).join(', ')];
+      s.section||'',s.handicap||'Non',(s.activites||[]).map(a=>ACTS[a]||a).join(', ')];
   });
   const csv=[headers,...rows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\r\n');
   const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
@@ -1267,18 +1338,39 @@ function exportActivityCSV(act){
   const filtered=liveStudents().filter(s=>(s.activites||[]).includes(act));
   if(!filtered.length){alert2('Aucun élève inscrit en '+label+'.','error');return;}
   const headers=['Ordre','Nom','Prénom','Classe','Sexe','Date naiss.','Catégorie','Cotisation (€)',
-    'Règlement','N° Licence','Téléphone','Tee shirt','Section','Activités AS'];
+    'Règlement','N° Licence','Téléphone','Tee shirt','Section','Handicap','Activités AS'];
   const rows=[...filtered].sort((a,b)=>(a.ordre||0)-(b.ordre||0)).map(s=>{
     const cat=getCategorie(s.sexe,s.dateNaissance);
     return [s.ordre||'',s.nom,s.prenom,s.classe||'',s.sexe,s.dateNaissance||'',cat,
       (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS.find(o=>o.value==='35')).label,
       reglLabel(s.reglement),s.licence||'',s.telephone||'',s.teeShirt||'Non',
-      s.section||'',(s.activites||[]).map(a=>ACTS[a]||a).join(', ')];
+      s.section||'',s.handicap||'Non',(s.activites||[]).map(a=>ACTS[a]||a).join(', ')];
   });
   const csv=[headers,...rows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\r\n');
   const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a'); a.href=url; a.download=`${label}_AS_Joliot_Curie_2026-2027.csv`; a.click();
+  URL.revokeObjectURL(url);
+  alert2(`Export "${label}" téléchargé (${filtered.length} élève${filtered.length>1?'s':''}).`,'success');
+}
+
+function exportFutsalGroupCSV(group){
+  const label='Futsal '+group;
+  const filtered=futsalGroupStudents(group);
+  if(!filtered.length){alert2('Aucun élève inscrit en '+label+'.','error');return;}
+  const headers=['Ordre','Nom','Prénom','Classe','Sexe','Date naiss.','Catégorie','Cotisation (€)',
+    'Règlement','N° Licence','Téléphone','Tee shirt','Section','Handicap','Activités AS'];
+  const rows=[...filtered].sort((a,b)=>(a.ordre||0)-(b.ordre||0)).map(s=>{
+    const cat=getCategorie(s.sexe,s.dateNaissance);
+    return [s.ordre||'',s.nom,s.prenom,s.classe||'',s.sexe,s.dateNaissance||'',cat,
+      (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS.find(o=>o.value==='35')).label,
+      reglLabel(s.reglement),s.licence||'',s.telephone||'',s.teeShirt||'Non',
+      s.section||'',s.handicap||'Non',(s.activites||[]).map(a=>ACTS[a]||a).join(', ')];
+  });
+  const csv=[headers,...rows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`${label.replace(' ','_')}_AS_Joliot_Curie_2026-2027.csv`; a.click();
   URL.revokeObjectURL(url);
   alert2(`Export "${label}" téléchargé (${filtered.length} élève${filtered.length>1?'s':''}).`,'success');
 }
@@ -1294,6 +1386,7 @@ function renderStats(){
   document.getElementById('s-total').textContent=total;
   document.getElementById('s-filles').textContent=live.filter(s=>s.sexe==='Fille').length;
   document.getElementById('s-garcons').textContent=live.filter(s=>s.sexe==='Garçon').length;
+  document.getElementById('s-handicap').textContent=live.filter(s=>s.handicap==='Oui').length;
   ACTIVITIES.forEach(a=>{document.getElementById('s-'+a).textContent=live.filter(s=>(s.activites||[]).includes(a)).length;});
   document.getElementById('s-cotisation').textContent=live.reduce((acc,s)=>acc+cotisValue(s.cotisation),0)+' €';
 
@@ -1316,7 +1409,7 @@ function renderStats(){
   document.getElementById('stat-reglements').innerHTML=REGL_KEYS.filter(r=>rCounts[r]).length?REGL_KEYS.filter(r=>rCounts[r]).map(r=>renderBar(REGL[r],rCounts[r],total)).join(''):'<p class="muted">Aucun élève</p>';
 }
 
-function renderAll(){renderTable();ACTIVITIES.forEach(renderActivity);renderCollegeTab();renderStats();}
+function renderAll(){renderTable();['fitness','natation','sport_partage'].forEach(renderActivity);renderFutsalGroup('Benj');renderFutsalGroup('Min');renderCollegeTab();renderStats();}
 
 // ── GOOGLE SHEETS (JSONP import / formulaire export) ──────────────────────
 function jsonpFetch(url, timeout=12000){
@@ -1453,7 +1546,7 @@ async function syncWithSheets(silent=false){
     id:'__deletedLog__',ordre:9999999,
     prenom:JSON.stringify(deletedLog),nom:'',classe:'',
     sexe:'',dateNaissance:'',cotisation:'',reglement:'',
-    licence:'',telephone:'',teeShirt:'',section:'',
+    licence:'',telephone:'',teeShirt:'',section:'',handicap:'',
     activites:'',lastModified:0
   };
   const body='payload='+encodeURIComponent(JSON.stringify({students:[...liveOnly,metaEntry]}));
@@ -1517,7 +1610,7 @@ async function pushAsAuthority(){
     id:'__deletedLog__',ordre:9999999,
     prenom:JSON.stringify(deletedLog),nom:'',classe:'',
     sexe:'',dateNaissance:'',cotisation:'',reglement:'',
-    licence:'',telephone:'',teeShirt:'',section:'',
+    licence:'',telephone:'',teeShirt:'',section:'',handicap:'',
     activites:'',lastModified:0
   };
   const body='payload='+encodeURIComponent(JSON.stringify({students:[...live,metaEntry]}));
@@ -1593,6 +1686,7 @@ function parseRow(r,i){
   const tel       = r['Téléphone']    || r.telephone    || '';
   const tee       = r['Tee-shirt']    || r.teeShirt     || '';
   const section   = r['Section']      || r.section      || '';
+  const handicap  = r['Handicap']     || r.handicap     || '';
   const activites = r['Activités']    || r.activites    || '';
   return{
     id:r.id||uid(), ordre:parseInt(r['Ordre']||r.ordre)||i+1,
@@ -1605,6 +1699,7 @@ function parseRow(r,i){
     licence:cellStr(licence),
     telephone:cellStr(tel), teeShirt:cellStr(tee)||'Non',
     section:cellStr(section),
+    handicap:cellStr(handicap)||'Non',
     activites:activites?String(activites).split(',').filter(Boolean):[],
     lastModified:r.lastModified?+r.lastModified:0,
     deleted:r.deleted==='TRUE'||r.deleted===true||r.deleted==='true',
@@ -1697,12 +1792,13 @@ function doPost(e) {
     let sheet     = ss.getSheetByName(SHEET_AS);
     if (!sheet) sheet = ss.insertSheet(SHEET_AS);
     const headers = ['id','ordre','prenom','nom','classe','sexe','dateNaissance',
-      'cotisation','reglement','licence','telephone','teeShirt','section','activites','lastModified'];
+      'cotisation','reglement','licence','telephone','teeShirt','section','handicap','activites','lastModified'];
     sheet.clearContents();
     sheet.appendRow(headers);
     (payload.students || []).forEach(s => {
       sheet.appendRow([s.id, s.ordre, s.prenom, s.nom, s.classe||'', s.sexe, s.dateNaissance,
         s.cotisation, s.reglement||'', s.licence||'', s.telephone||'', s.teeShirt||'', s.section||'',
+        s.handicap||'',
         Array.isArray(s.activites) ? s.activites.join(',') : (s.activites||''),
         s.lastModified||'']);
     });

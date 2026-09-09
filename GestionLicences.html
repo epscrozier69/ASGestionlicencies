@@ -440,7 +440,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
             </div>
             <div class="form-group">
               <label>T&eacute;l&eacute;phone</label>
-              <input type="tel" id="f-telephone" placeholder="06 xx xx xx xx">
+              <input type="tel" id="f-telephone" placeholder="06 xx xx xx xx" oninput="formatPhoneInput(this)">
             </div>
             <div class="form-group">
               <label>Tee shirt AS</label>
@@ -810,7 +810,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
           </div>
           <div class="form-group">
             <label>T&eacute;l&eacute;phone</label>
-            <input type="tel" id="e-telephone">
+            <input type="tel" id="e-telephone" placeholder="06 xx xx xx xx" oninput="formatPhoneInput(this)">
           </div>
           <div class="form-group">
             <label>Tee shirt AS</label>
@@ -991,6 +991,18 @@ function updateLicPreview() {
 function licenceSuffix(lic){return (lic||'').startsWith('13417')?lic.slice(5):'';}
 function licenceFull(suf){return suf?'13417'+suf:'';}
 
+// ── TÉLÉPHONE ─────────────────────────────────────────────────────────────
+// Formate en groupes de 2 chiffres : "06 xx xx xx xx" (10 chiffres max).
+function formatPhoneNumber(v){
+  const digits=(v||'').replace(/\D/g,'').slice(0,10);
+  return (digits.match(/.{1,2}/g)||[]).join(' ');
+}
+function formatPhoneInput(el){
+  const cursorAtEnd = el.selectionStart===el.value.length;
+  el.value=formatPhoneNumber(el.value);
+  if(cursorAtEnd) el.setSelectionRange(el.value.length,el.value.length);
+}
+
 // ── STOCKAGE LOCAL ────────────────────────────────────────────────────────
 function load() {
   try {
@@ -1147,7 +1159,7 @@ function openEdit(id){
   document.getElementById('e-cotisation').value=s.cotisation||'35';
   const eRegl=reglArr(s.reglement);
   REGL_KEYS.forEach(r=>{document.getElementById('er-'+r).checked=eRegl.includes(r);});
-  document.getElementById('e-telephone').value=s.telephone||'';
+  document.getElementById('e-telephone').value=formatPhoneNumber(s.telephone||'');
   document.getElementById('e-teeshirt').value=s.teeShirt||'Non';
   document.getElementById('e-section').value=s.section||'';
   document.getElementById('e-handicap').value=s.handicap||'Non';
@@ -1697,7 +1709,7 @@ function parseRow(r,i){
     cotisation:(['-','20','35','20+15','15+5','Offerte'].includes(cellStr(cotis))?cellStr(cotis):'35'),
     reglement:regl?(Array.isArray(regl)?regl:String(regl).split(',').filter(Boolean)):['cheque'],
     licence:cellStr(licence),
-    telephone:cellStr(tel), teeShirt:cellStr(tee)||'Non',
+    telephone:formatPhoneNumber(cellStr(tel)), teeShirt:cellStr(tee)||'Non',
     section:cellStr(section),
     handicap:cellStr(handicap)||'Non',
     activites:activites?String(activites).split(',').filter(Boolean):[],

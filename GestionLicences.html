@@ -596,7 +596,9 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 <div id="tab-futsal-benj" class="tab-panel">
   <div class="card">
     <div class="card-header">
-      <h2>&#9917; Futsal Benj &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-benj" class="badge b-red">0</span></h2>
+      <h2>&#9917; Futsal Benj &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-benj" class="badge b-red">0</span>
+        &nbsp;<span id="cnt-futsal-benj-f" class="badge b-pink">0 Fille</span>
+        <span id="cnt-futsal-benj-g" class="badge b-blue">0 Gar&ccedil;on</span></h2>
       <button class="btn btn-success btn-sm" onclick="exportFutsalGroupCSV('Benj')">&#128190; Export Excel</button>
     </div>
     <div class="table-wrap">
@@ -616,7 +618,9 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 <div id="tab-futsal-min" class="tab-panel">
   <div class="card">
     <div class="card-header">
-      <h2>&#9917; Futsal Min &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-min" class="badge b-red">0</span></h2>
+      <h2>&#9917; Futsal Min &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-min" class="badge b-red">0</span>
+        &nbsp;<span id="cnt-futsal-min-f" class="badge b-pink">0 Fille</span>
+        <span id="cnt-futsal-min-g" class="badge b-blue">0 Gar&ccedil;on</span></h2>
       <button class="btn btn-success btn-sm" onclick="exportFutsalGroupCSV('Min')">&#128190; Export Excel</button>
     </div>
     <div class="table-wrap">
@@ -1292,6 +1296,9 @@ function renderFutsalGroup(group){
   const id='futsal-'+group.toLowerCase();
   const filtered=futsalGroupStudents(group);
   document.getElementById('cnt-'+id).textContent=filtered.length;
+  const nbF=filtered.filter(s=>s.sexe==='Fille').length, nbG=filtered.filter(s=>s.sexe==='Garçon').length;
+  document.getElementById('cnt-'+id+'-f').textContent=`${nbF} Fille${nbF>1?'s':''}`;
+  document.getElementById('cnt-'+id+'-g').textContent=`${nbG} Garçon${nbG>1?'s':''}`;
   const tbody=document.getElementById('body-'+id),empty=document.getElementById('empty-'+id),table=document.getElementById('tbl-'+id);
   if(filtered.length===0){tbody.innerHTML='';empty.classList.remove('hidden');table.style.display='none';return;}
   empty.classList.add('hidden');table.style.display='';

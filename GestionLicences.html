@@ -420,6 +420,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
             <div class="form-group">
               <label>Cotisation</label>
               <select id="f-cotisation">
+                <option value="-">-</option>
                 <option value="20">20 &euro;</option>
                 <option value="35" selected>35 &euro;</option>
                 <option value="20+15">20 + 15 &euro;</option>
@@ -748,6 +749,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
           <div class="form-group">
             <label>Cotisation</label>
             <select id="e-cotisation">
+              <option value="-">-</option>
               <option value="20">20 &euro;</option>
               <option value="35">35 &euro;</option>
               <option value="20+15">20 + 15 &euro;</option>
@@ -844,6 +846,7 @@ const REGL = {
 };
 const REGL_KEYS = ['cheque','especes','fond_social','bons_associatifs'];
 const COTIS_OPTIONS = [
+  {value:'-',     label:'-',            badge:'b-red'},
   {value:'20',    label:'20 €',         badge:'b-orange'},
   {value:'35',    label:'35 €',         badge:'b-purple'},
   {value:'20+15', label:'20 + 15 €',    badge:'b-sky'},
@@ -1163,7 +1166,7 @@ function sectionBadge(sec){return sec?`<span class="badge b-sky">${SEC_EMOJI[sec
 function classeBadge(cl){return cl?`<span class="badge b-teal">${x(cl)}</span>`:'<span class="muted">—</span>';}
 function actionBtns(id){return `<div class="flex gap2"><button class="btn btn-warning btn-sm" onclick="openEdit('${id}')">&#9999;&#65039;</button><button class="btn btn-danger btn-sm" onclick="openDelete('${id}')">&#128465;&#65039;</button></div>`;}
 function cotisValue(c){if(c==='Offerte') return 0; if(c==='20+15') return 35; if(c==='15+5') return 20; return +c||0;}
-function cotisBadge(c){const o=COTIS_OPTIONS.find(x=>x.value===String(c))||COTIS_OPTIONS[1];return `<span class="badge ${o.badge}">${o.label}</span>`;}
+function cotisBadge(c){const o=COTIS_OPTIONS.find(x=>x.value===String(c))||COTIS_OPTIONS.find(x=>x.value==='35');return `<span class="badge ${o.badge}">${o.label}</span>`;}
 function reglArr(r){return Array.isArray(r)?r:(r?String(r).split(',').filter(Boolean):['cheque']);}
 function reglBadges(r){return reglArr(r).map(k=>`<span class="act-tag" style="background:#e0e7ff;color:#3730a3">${REGL[k]||k}</span>`).join('');}
 function reglLabel(r){return reglArr(r).map(k=>REGL[k]||k).join(' + ');}
@@ -1247,7 +1250,7 @@ function exportGeneralCSV(){
   const rows=[...live].sort((a,b)=>(a.ordre||0)-(b.ordre||0)).map(s=>{
     const cat=getCategorie(s.sexe,s.dateNaissance);
     return [s.ordre||'',s.nom,s.prenom,s.classe||'',s.sexe,s.dateNaissance||'',cat,
-      (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS[1]).label,
+      (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS.find(o=>o.value==='35')).label,
       reglLabel(s.reglement),s.licence||'',s.telephone||'',s.teeShirt||'Non',
       s.section||'',(s.activites||[]).map(a=>ACTS[a]||a).join(', ')];
   });
@@ -1268,7 +1271,7 @@ function exportActivityCSV(act){
   const rows=[...filtered].sort((a,b)=>(a.ordre||0)-(b.ordre||0)).map(s=>{
     const cat=getCategorie(s.sexe,s.dateNaissance);
     return [s.ordre||'',s.nom,s.prenom,s.classe||'',s.sexe,s.dateNaissance||'',cat,
-      (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS[1]).label,
+      (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS.find(o=>o.value==='35')).label,
       reglLabel(s.reglement),s.licence||'',s.telephone||'',s.teeShirt||'Non',
       s.section||'',(s.activites||[]).map(a=>ACTS[a]||a).join(', ')];
   });
@@ -1597,7 +1600,7 @@ function parseRow(r,i){
     classe:cellStr(classe),
     sexe:cellStr(sexe)||'Fille',
     dateNaissance:parseDate(ddn),
-    cotisation:(['20','35','20+15','15+5','Offerte'].includes(cellStr(cotis))?cellStr(cotis):'35'),
+    cotisation:(['-','20','35','20+15','15+5','Offerte'].includes(cellStr(cotis))?cellStr(cotis):'35'),
     reglement:regl?(Array.isArray(regl)?regl:String(regl).split(',').filter(Boolean)):['cheque'],
     licence:cellStr(licence),
     telephone:cellStr(tel), teeShirt:cellStr(tee)||'Non',

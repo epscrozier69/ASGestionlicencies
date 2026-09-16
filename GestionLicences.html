@@ -106,7 +106,7 @@ input[readonly]{background:#f8fafc;cursor:default}
 .btn-sm{padding:.25rem .6rem;font-size:.78rem}
 
 /* ── TABLEAU GÉNÉRAL : 15 colonnes données + Actions = 16 ── */
-.table-wrap{overflow-x:auto;overflow-y:visible}
+.table-wrap{overflow:auto;max-height:68vh}
 table{width:100%;border-collapse:collapse;font-size:.8375rem}
 thead th{padding:.65rem .875rem;text-align:left;font-size:.7rem;font-weight:700;
   text-transform:uppercase;letter-spacing:.06em;color:#fff;white-space:nowrap}
@@ -201,17 +201,12 @@ thead th::before,thead th::after{content:''!important}
 }
 #mainTable tbody td:nth-child(2), .act-table tbody td:nth-child(2) { z-index:2; }
 
-/* Ligne d'en-tête figée pour le défilement vertical (sous le bandeau d'onglets, lui-même figé) */
+/* Ligne d'en-tête figée pour le défilement vertical : le tableau défile
+   dans son propre cadre (max-height ci-dessus), donc top:0 suffit partout. */
 #mainTable thead th, .act-table thead th {
-  position:sticky; top:2.75rem; z-index:4;
+  position:sticky; top:0; z-index:4;
 }
 #mainTable thead th:nth-child(2), .act-table thead th:nth-child(2) { z-index:5; }
-@media(min-width:768px){
-  #mainTable thead th, .act-table thead th { top:3rem; }
-}
-@media(min-width:768px) and (orientation:landscape){
-  #mainTable thead th, .act-table thead th { top:0; }
-}
 
 /* Tableau liste collège – 4 colonnes */
 .college-table thead th:nth-child(1) {background:#1e40af}
@@ -357,6 +352,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 @media print{
   header,.tabs-nav,#alertArea,.btn,#networkStatus,.check-item,.sort-ind,#addPanel,.modal-overlay{display:none!important}
   #main-content{overflow:visible!important}
+  .table-wrap{max-height:none!important;overflow:visible!important}
   .tab-panel{display:none!important}
   .tab-panel.active{display:block!important}
   .card{box-shadow:none;border:1px solid #cbd5e1}

@@ -386,7 +386,10 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   </div>
   <div class="header-actions">
     <div id="networkStatus" class="online">🟢 En ligne</div>
-    <button id="syncBtn" class="btn btn-ghost btn-sm" onclick="manualSync()" title="Synchroniser maintenant avec Google Sheets">🔄 Synchroniser</button>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:.1rem">
+      <button id="syncBtn" class="btn btn-ghost btn-sm" onclick="manualSync()" title="Synchroniser maintenant avec Google Sheets">🔄 Synchroniser</button>
+      <span id="lastSyncInfo" style="font-size:.65rem;color:rgba(255,255,255,.75)"></span>
+    </div>
     <button class="btn btn-ghost btn-sm" onclick="openReinitModal()" style="color:#fca5a5;margin-left:1.25rem" title="Effacer les données locales et recharger depuis Sheets">↩ Réinit.</button>
   </div>
 </header>
@@ -1126,6 +1129,19 @@ function updateNetworkUI(){
   const cls=!navigator.onLine?'offline':pendingSync?'pending':'online';
   const el=document.getElementById('networkStatus'); if(el){el.className=cls;el.textContent=txt;}
 }
+function saveLastSync(){
+  try{localStorage.setItem('as-last-sync',String(Date.now()));}catch(e){}
+  updateLastSyncUI();
+}
+function updateLastSyncUI(){
+  const el=document.getElementById('lastSyncInfo'); if(!el) return;
+  let ts=null;
+  try{ts=+localStorage.getItem('as-last-sync');}catch(e){}
+  if(!ts){el.textContent='';return;}
+  const d=new Date(ts);
+  const hh=String(d.getHours()).padStart(2,'0'), mm=String(d.getMinutes()).padStart(2,'0');
+  el.textContent=`Dernière synchro ${hh}:${mm}`;
+}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function initNextOrdre(){
   nextOrdre=students.length>0?Math.max(...students.map(s=>parseInt(s.ordre)||0))+1:1;
@@ -1693,6 +1709,7 @@ async function syncWithSheets(silent=false){
   }
   if(sent){
     pendingSync=false; savePendingSync(); updateNetworkUI();
+    saveLastSync();
     if(!silent) alert2(`${liveOnly.length} élève(s) synchronisé(s) ✓`,'success');
     return true;
   }else{
@@ -1869,6 +1886,7 @@ document.addEventListener('keydown',e=>{
 
 load();
 updateNetworkUI();
+updateLastSyncUI();
 renderAll();
 importFromSheets();
 

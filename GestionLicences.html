@@ -115,6 +115,16 @@ th[data-sort]:hover{filter:brightness(1.15)}
 .sort-ind{opacity:.8;font-size:.75em;margin-left:.25rem}
 thead th::before,thead th::after{content:''!important}
 
+/* Ajustement largeur : Classe/Règlement/Tee shirt resserrés, Téléphone élargi */
+#mainTable th:nth-child(3),  .act-table th:nth-child(3),
+#mainTable td:nth-child(3),  .act-table td:nth-child(3)  {width:4rem}
+#mainTable th:nth-child(8),  .act-table th:nth-child(8),
+#mainTable td:nth-child(8),  .act-table td:nth-child(8)  {width:5rem}
+#mainTable th:nth-child(10), .act-table th:nth-child(10),
+#mainTable td:nth-child(10), .act-table td:nth-child(10) {width:9rem;white-space:nowrap}
+#mainTable th:nth-child(11), .act-table th:nth-child(11),
+#mainTable td:nth-child(11), .act-table td:nth-child(11) {width:4rem}
+
 #mainTable thead th:nth-child(1)  {background:#374151}
 #mainTable thead th:nth-child(2)  {background:#1e40af}
 #mainTable thead th:nth-child(3)  {background:#0f766e}
@@ -215,13 +225,14 @@ tbody tr.cat-group-row:hover td{filter:none}
 tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-align:middle}
 
 /* BADGES */
-.badge{display:inline-block;padding:.1rem .45rem;border-radius:9999px;font-size:.72rem;font-weight:700}
+.badge{display:inline-block;padding:.1rem .45rem;border-radius:9999px;font-size:.72rem;font-weight:700;white-space:nowrap}
 .count-badge{font-size:1.05rem;padding:.2rem .65rem}
 .b-blue   {background:#bfdbfe;color:#1e40af}
 .b-pink   {background:#fbcfe8;color:#9d174d}
 .b-purple {background:#ddd6fe;color:#5b21b6}
 .b-orange {background:#fed7aa;color:#c2410c}
 .b-red    {background:#fecaca;color:#991b1b}
+.b-red-solid{background:#dc2626;color:#fff;font-size:1.15rem;padding:.35rem 1.4rem}
 .b-sky    {background:#bae6fd;color:#0369a1}
 .b-fuchsia{background:#f5d0fe;color:#86198f}
 .b-indigo {background:#c7d2fe;color:#3730a3}
@@ -230,7 +241,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 .b-amber  {background:#fde68a;color:#92400e}
 .b-slate  {background:#cbd5e1;color:#334155}
 .b-teal   {background:#99f6e4;color:#0f766e}
-.act-tag{display:inline-block;padding:.06rem .38rem;border-radius:4px;font-size:.67rem;
+.act-tag{display:inline-block;padding:.06rem .38rem;border-radius:4px;font-size:.78rem;
   font-weight:600;background:#ede9fe;color:#5b21b6;margin:.08rem}
 
 /* STATS */
@@ -311,12 +322,12 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 
 /* ── TABLETTE PAYSAGE : layout fixe header+nav, zone contenu défilable ── */
 @media(min-width:768px) and (orientation:landscape){
-  body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
-  header{flex:0 0 auto;padding:.45rem 1.25rem;flex-wrap:nowrap}
+  body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow-y:auto;overflow-x:hidden}
+  header{flex:0 0 auto;padding:.45rem calc(1.25rem + env(safe-area-inset-right,0px)) .45rem calc(1.25rem + env(safe-area-inset-left,0px));flex-wrap:nowrap}
   .header-logo img{height:36px}
   .header-title h1{font-size:.9rem}
   .header-title p{font-size:.7rem;margin-top:.05rem}
-  .tabs-nav{flex:0 0 auto;position:static}
+  .tabs-nav{flex:0 0 auto;position:static;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
   #main-content{flex:1 1 0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
   .tab-panel{padding:1rem 1.25rem}
   .add-panel-inner{padding:.875rem 1.25rem}
@@ -465,7 +476,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
               <div class="checkbox-group">
                 <label class="check-item"><input type="checkbox" id="fr-cheque" checked> &#128197; Ch&egrave;que</label>
                 <label class="check-item"><input type="checkbox" id="fr-especes"> &#128181; Esp&egrave;ces</label>
-                <label class="check-item"><input type="checkbox" id="fr-fond_social"> &#129309; Fond social</label>
+                <label class="check-item"><input type="checkbox" id="fr-fond_social"> &#127963;&#65039; Fond social</label>
                 <label class="check-item"><input type="checkbox" id="fr-bons_associatifs"> &#127915; Bons associatifs</label>
               </div>
             </div>
@@ -554,9 +565,9 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
             <th data-sort="tel"      onclick="clickSort(this)">T&eacute;l&eacute;phone<span class="sort-ind">&#8597;</span></th>
             <th data-sort="teeshirt" onclick="clickSort(this)">Tee shirt<span class="sort-ind">&#8597;</span></th>
             <th data-sort="section"  onclick="clickSort(this)">Section<span class="sort-ind">&#8597;</span></th>
+            <th>Activit&eacute;s AS</th>
             <th data-sort="handicap" onclick="clickSort(this)">Handicap<span class="sort-ind">&#8597;</span></th>
             <th data-sort="droitimage" onclick="clickSort(this)">Droit image<span class="sort-ind">&#8597;</span></th>
-            <th>Activit&eacute;s AS</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -584,7 +595,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <thead><tr>
           <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
           <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
-          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Handicap</th><th>Droit image</th><th>Activit&eacute;s AS</th><th>Actions</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Activit&eacute;s AS</th><th>Handicap</th><th>Droit image</th><th>Actions</th>
         </tr></thead>
         <tbody id="body-fitness"></tbody>
       </table>
@@ -605,7 +616,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <thead><tr>
           <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
           <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
-          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Handicap</th><th>Droit image</th><th>Activit&eacute;s AS</th><th>Actions</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Activit&eacute;s AS</th><th>Handicap</th><th>Droit image</th><th>Actions</th>
         </tr></thead>
         <tbody id="body-natation"></tbody>
       </table>
@@ -626,7 +637,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <thead><tr>
           <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
           <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
-          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Handicap</th><th>Droit image</th><th>Activit&eacute;s AS</th><th>Actions</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Activit&eacute;s AS</th><th>Handicap</th><th>Droit image</th><th>Actions</th>
         </tr></thead>
         <tbody id="body-sport_partage"></tbody>
       </table>
@@ -649,7 +660,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <thead><tr>
           <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
           <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
-          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Handicap</th><th>Droit image</th><th>Activit&eacute;s AS</th><th>Actions</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Activit&eacute;s AS</th><th>Handicap</th><th>Droit image</th><th>Actions</th>
         </tr></thead>
         <tbody id="body-futsal-benj"></tbody>
       </table>
@@ -672,7 +683,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <thead><tr>
           <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Sexe</th><th>Date naiss.</th><th>Cat&eacute;gorie</th>
           <th>Cotisation</th><th>N&deg; Licence</th><th>R&egrave;glement</th>
-          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Handicap</th><th>Droit image</th><th>Activit&eacute;s AS</th><th>Actions</th>
+          <th>T&eacute;l&eacute;phone</th><th>Tee shirt</th><th>Section</th><th>Activit&eacute;s AS</th><th>Handicap</th><th>Droit image</th><th>Actions</th>
         </tr></thead>
         <tbody id="body-futsal-min"></tbody>
       </table>
@@ -732,7 +743,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
     </div>
     <div class="stat-card" style="border-top:4px solid #f97316">
       <div class="stat-num" style="color:#f97316" id="s-handicap">0</div>
-      <div class="stat-lbl">&#129474; &Eacute;l&egrave;ves en situation de handicap</div>
+      <div class="stat-lbl">&#129309; &Eacute;l&egrave;ves en situation de handicap</div>
     </div>
     <div class="stat-card" style="border-top:4px solid #8b5cf6">
       <div class="stat-num" style="color:#8b5cf6" id="s-fitness">0</div>
@@ -843,7 +854,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
             <div class="checkbox-group">
               <label class="check-item"><input type="checkbox" id="er-cheque"> &#128197; Ch&egrave;que</label>
               <label class="check-item"><input type="checkbox" id="er-especes"> &#128181; Esp&egrave;ces</label>
-              <label class="check-item"><input type="checkbox" id="er-fond_social"> &#129309; Fond social</label>
+              <label class="check-item"><input type="checkbox" id="er-fond_social"> &#127963;&#65039; Fond social</label>
               <label class="check-item"><input type="checkbox" id="er-bons_associatifs"> &#127915; Bons associatifs</label>
             </div>
           </div>
@@ -961,7 +972,7 @@ const REGL = {
 };
 const REGL_KEYS = ['cheque','especes','fond_social','bons_associatifs'];
 const COTIS_OPTIONS = [
-  {value:'-',     label:'-',            badge:'b-red'},
+  {value:'-',     label:'-',            badge:'b-red-solid'},
   {value:'20',    label:'20 €',         badge:'b-orange'},
   {value:'35',    label:'35 €',         badge:'b-purple'},
   {value:'20+15', label:'20 + 15 €',    badge:'b-sky'},
@@ -1304,10 +1315,10 @@ function x(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').re
 function sexeBadge(s){return s==='Fille'?'<span class="badge b-pink">&#9792; Fille</span>':'<span class="badge b-blue">&#9794; Gar&ccedil;on</span>';}
 function catBadge(cat){return `<span class="badge ${CAT_BADGE[cat]||'b-gray'}">${x(cat)}</span>`;}
 function teeBadge(ts){return ts==='Oui'?'<span class="badge b-amber">&#128077; Oui</span>':'<span class="badge b-slate">Non</span>';}
-function handicapBadge(h){return h==='Oui'?'<span class="badge b-red">&#129474; Oui</span>':'<span class="badge b-slate">Non</span>';}
+function handicapBadge(h){return h==='Oui'?'<span class="badge b-red">&#129309; Oui</span>':'<span class="badge b-slate">Non</span>';}
 function droitImageBadge(d){return d!=='Non'?'<span class="badge b-teal">&#128247; Oui</span>':'<span class="badge b-red">&#128683; Non</span>';}
 function actTags(a){return (a||[]).map(k=>`<span class="act-tag">${ACTS[k]||k}</span>`).join('');}
-function sectionBadge(sec){return sec?`<span class="badge b-sky">${SEC_EMOJI[sec]||''} ${x(sec)}</span>`:'<span class="muted">—</span>';}
+function sectionBadge(sec){return sec?`<span class="badge b-sky" style="font-size:.62rem;white-space:nowrap">${SEC_EMOJI[sec]||''} ${x(sec)}</span>`:'<span class="muted">—</span>';}
 function classeBadge(cl){return cl?`<span class="badge b-teal">${x(cl)}</span>`:'<span class="muted">—</span>';}
 function actionBtns(id){return `<div class="flex gap2"><button class="btn btn-warning btn-sm" onclick="openEdit('${id}')">&#9999;&#65039;</button><button class="btn btn-danger btn-sm" onclick="openDelete('${id}')">&#128465;&#65039;</button></div>`;}
 function cotisValue(c){if(c==='Offerte') return 0; if(c==='20+15') return 35; if(c==='15+5') return 20; return +c||0;}
@@ -1320,7 +1331,7 @@ function studentRow(s){
   const cat=getCategorie(s.sexe,s.dateNaissance);
   return `<tr>
     <td style="font-weight:700;text-align:center">${s.ordre||'—'}</td>
-    <td><strong>${s.droitImage==='Non'?`<span title="Pas de droit à l'image">&#128247;&#128683;</span> `:''}${x(s.nom)} ${x(s.prenom)}</strong></td>
+    <td><strong>${s.handicap==='Oui'?`<span title="Élève en situation de handicap">&#129309;</span> `:''}${s.droitImage==='Non'?`<span title="Pas de droit à l'image">&#128247;&#128683;</span> `:''}${x(s.nom)} ${x(s.prenom)}</strong></td>
     <td>${classeBadge(s.classe)}</td>
     <td>${sexeBadge(s.sexe)}</td>
     <td>${x(s.dateNaissance)||'<span class="muted">—</span>'}</td>
@@ -1331,9 +1342,9 @@ function studentRow(s){
     <td>${x(s.telephone)||'<span class="muted">—</span>'}</td>
     <td>${teeBadge(s.teeShirt)}</td>
     <td>${sectionBadge(s.section)}</td>
+    <td>${actTags(s.activites)}</td>
     <td>${handicapBadge(s.handicap)}</td>
     <td>${droitImageBadge(s.droitImage)}</td>
-    <td>${actTags(s.activites)}</td>
     <td>${actionBtns(s.id)}</td>
   </tr>`;
 }
@@ -1425,13 +1436,13 @@ function exportGeneralCSV(){
   const live=liveStudents();
   if(!live.length){alert2('Aucun élève à exporter.','error');return;}
   const headers=['Ordre','Nom','Prénom','Classe','Sexe','Date naiss.','Catégorie','Cotisation (€)',
-    'Règlement','N° Licence','Téléphone','Tee shirt','Section','Handicap','Droit à l\'image','Activités AS'];
+    'Règlement','N° Licence','Téléphone','Tee shirt','Section','Activités AS','Handicap','Droit à l\'image'];
   const rows=[...live].sort((a,b)=>(a.ordre||0)-(b.ordre||0)).map(s=>{
     const cat=getCategorie(s.sexe,s.dateNaissance);
     return [s.ordre||'',s.nom,s.prenom,s.classe||'',s.sexe,s.dateNaissance||'',cat,
       (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS.find(o=>o.value==='35')).label,
       reglLabel(s.reglement),s.licence||'',s.telephone||'',s.teeShirt||'Non',
-      s.section||'',s.handicap||'Non',s.droitImage||'Oui',(s.activites||[]).map(a=>ACTS[a]||a).join(', ')];
+      s.section||'',(s.activites||[]).map(a=>ACTS[a]||a).join(', '),s.handicap||'Non',s.droitImage||'Oui'];
   });
   const csv=[headers,...rows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\r\n');
   const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
@@ -1446,13 +1457,13 @@ function exportActivityCSV(act){
   const filtered=liveStudents().filter(s=>(s.activites||[]).includes(act));
   if(!filtered.length){alert2('Aucun élève inscrit en '+label+'.','error');return;}
   const headers=['Ordre','Nom','Prénom','Classe','Sexe','Date naiss.','Catégorie','Cotisation (€)',
-    'Règlement','N° Licence','Téléphone','Tee shirt','Section','Handicap','Droit à l\'image','Activités AS'];
+    'Règlement','N° Licence','Téléphone','Tee shirt','Section','Activités AS','Handicap','Droit à l\'image'];
   const rows=[...filtered].sort((a,b)=>(a.ordre||0)-(b.ordre||0)).map(s=>{
     const cat=getCategorie(s.sexe,s.dateNaissance);
     return [s.ordre||'',s.nom,s.prenom,s.classe||'',s.sexe,s.dateNaissance||'',cat,
       (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS.find(o=>o.value==='35')).label,
       reglLabel(s.reglement),s.licence||'',s.telephone||'',s.teeShirt||'Non',
-      s.section||'',s.handicap||'Non',s.droitImage||'Oui',(s.activites||[]).map(a=>ACTS[a]||a).join(', ')];
+      s.section||'',(s.activites||[]).map(a=>ACTS[a]||a).join(', '),s.handicap||'Non',s.droitImage||'Oui'];
   });
   const csv=[headers,...rows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\r\n');
   const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
@@ -1467,13 +1478,13 @@ function exportFutsalGroupCSV(group){
   const filtered=futsalGroupStudents(group);
   if(!filtered.length){alert2('Aucun élève inscrit en '+label+'.','error');return;}
   const headers=['Ordre','Nom','Prénom','Classe','Sexe','Date naiss.','Catégorie','Cotisation (€)',
-    'Règlement','N° Licence','Téléphone','Tee shirt','Section','Handicap','Droit à l\'image','Activités AS'];
+    'Règlement','N° Licence','Téléphone','Tee shirt','Section','Activités AS','Handicap','Droit à l\'image'];
   const rows=[...filtered].sort((a,b)=>(a.ordre||0)-(b.ordre||0)).map(s=>{
     const cat=getCategorie(s.sexe,s.dateNaissance);
     return [s.ordre||'',s.nom,s.prenom,s.classe||'',s.sexe,s.dateNaissance||'',cat,
       (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS.find(o=>o.value==='35')).label,
       reglLabel(s.reglement),s.licence||'',s.telephone||'',s.teeShirt||'Non',
-      s.section||'',s.handicap||'Non',s.droitImage||'Oui',(s.activites||[]).map(a=>ACTS[a]||a).join(', ')];
+      s.section||'',(s.activites||[]).map(a=>ACTS[a]||a).join(', '),s.handicap||'Non',s.droitImage||'Oui'];
   });
   const csv=[headers,...rows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\r\n');
   const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});

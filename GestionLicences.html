@@ -1264,7 +1264,7 @@ function sexeBadge(s){return s==='Fille'?'<span class="badge b-pink">&#9792; Fil
 function catBadge(cat){return `<span class="badge ${CAT_BADGE[cat]||'b-gray'}">${x(cat)}</span>`;}
 function teeBadge(ts){return ts==='Oui'?'<span class="badge b-amber">&#128077; Oui</span>':'<span class="badge b-slate">Non</span>';}
 function handicapBadge(h){return h==='Oui'?'<span class="badge b-red">&#9855; Oui</span>':'<span class="badge b-slate">Non</span>';}
-function droitImageBadge(d){return d!=='Non'?'<span class="badge b-teal">&#128247; Oui</span>':'<span class="badge b-slate">Non</span>';}
+function droitImageBadge(d){return d!=='Non'?'<span class="badge b-teal">&#128247; Oui</span>':'<span class="badge b-red">&#128683; Non</span>';}
 function actTags(a){return (a||[]).map(k=>`<span class="act-tag">${ACTS[k]||k}</span>`).join('');}
 function sectionBadge(sec){return sec?`<span class="badge b-sky">${SEC_EMOJI[sec]||''} ${x(sec)}</span>`:'<span class="muted">—</span>';}
 function classeBadge(cl){return cl?`<span class="badge b-teal">${x(cl)}</span>`:'<span class="muted">—</span>';}
@@ -1279,7 +1279,7 @@ function studentRow(s){
   const cat=getCategorie(s.sexe,s.dateNaissance);
   return `<tr>
     <td style="font-weight:700;text-align:center">${s.ordre||'—'}</td>
-    <td><strong>${x(s.nom)} ${x(s.prenom)}</strong></td>
+    <td><strong>${s.droitImage==='Non'?`<span title="Pas de droit à l'image">&#128247;&#128683;</span> `:''}${x(s.nom)} ${x(s.prenom)}</strong></td>
     <td>${classeBadge(s.classe)}</td>
     <td>${sexeBadge(s.sexe)}</td>
     <td>${x(s.dateNaissance)||'<span class="muted">—</span>'}</td>

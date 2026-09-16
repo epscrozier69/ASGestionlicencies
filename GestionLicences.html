@@ -216,6 +216,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 
 /* BADGES */
 .badge{display:inline-block;padding:.1rem .45rem;border-radius:9999px;font-size:.72rem;font-weight:700}
+.count-badge{font-size:1.05rem;padding:.2rem .65rem}
 .b-blue   {background:#bfdbfe;color:#1e40af}
 .b-pink   {background:#fbcfe8;color:#9d174d}
 .b-purple {background:#ddd6fe;color:#5b21b6}
@@ -329,6 +330,19 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   .modal-footer{padding:.875rem 1.5rem}
   .empty-state{padding:2rem 1rem}
 }
+
+/* ── EXPORT PDF (impression du navigateur, "Enregistrer au format PDF") ── */
+@media print{
+  header,.tabs-nav,#alertArea,.btn,#networkStatus,.check-item,.sort-ind,#addPanel,.modal-overlay{display:none!important}
+  #main-content{overflow:visible!important}
+  .tab-panel{display:none!important}
+  .tab-panel.active{display:block!important}
+  .card{box-shadow:none;border:1px solid #cbd5e1}
+  table td:last-child,table th:last-child{display:none!important}
+  #mainTable thead th:nth-child(2),.act-table thead th:nth-child(2),
+  #mainTable tbody td:nth-child(2),.act-table tbody td:nth-child(2){position:static;box-shadow:none}
+  body{background:#fff}
+}
 </style>
 </head>
 <body>
@@ -351,7 +365,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   <div class="header-actions">
     <div id="networkStatus" class="online">🟢 En ligne</div>
     <button id="syncBtn" class="btn btn-ghost btn-sm" onclick="manualSync()" title="Synchroniser maintenant avec Google Sheets">🔄 Synchroniser</button>
-    <button class="btn btn-ghost btn-sm" onclick="clearLocalAndPull()" style="color:#fca5a5" title="Effacer les données locales et recharger depuis Sheets">↩ Réinit.</button>
+    <button class="btn btn-ghost btn-sm" onclick="openReinitModal()" style="color:#fca5a5;margin-left:1.25rem" title="Effacer les données locales et recharger depuis Sheets">↩ Réinit.</button>
   </div>
 </header>
 
@@ -521,6 +535,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <button id="resetSortBtn" class="btn btn-outline btn-sm hidden" onclick="resetSort()">&#8635; Ordre initial</button>
         <input type="text" id="searchInput" placeholder="&#128269; Rechercher…" style="width:180px;font-size:.85rem" oninput="renderTable()">
         <button class="btn btn-success btn-sm" onclick="exportGeneralCSV()">&#128190; Export Excel</button>
+        <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
       </div>
     </div>
     <div class="table-wrap">
@@ -560,8 +575,9 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 <div id="tab-fitness" class="tab-panel">
   <div class="card">
     <div class="card-header">
-      <h2>&#128170; Fitness &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-fitness" class="badge b-purple">0</span></h2>
+      <h2>&#128170; Fitness &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-fitness" class="badge b-purple count-badge">0</span></h2>
       <button class="btn btn-success btn-sm" onclick="exportActivityCSV('fitness')">&#128190; Export Excel</button>
+      <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
     <div class="table-wrap">
       <table id="tbl-fitness" class="act-table">
@@ -580,8 +596,9 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 <div id="tab-natation" class="tab-panel">
   <div class="card">
     <div class="card-header">
-      <h2>🏊‍♂️ Natation AS &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-natation" class="badge b-blue">0</span></h2>
+      <h2>🏊‍♂️ Natation AS &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-natation" class="badge b-blue count-badge">0</span></h2>
       <button class="btn btn-success btn-sm" onclick="exportActivityCSV('natation')">&#128190; Export Excel</button>
+      <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
     <div class="table-wrap">
       <table id="tbl-natation" class="act-table">
@@ -600,8 +617,9 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 <div id="tab-sport-partage" class="tab-panel">
   <div class="card">
     <div class="card-header">
-      <h2>&#129309; Sport Partag&eacute; &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-sport_partage" class="badge b-orange">0</span></h2>
+      <h2>&#129309; Sport Partag&eacute; &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-sport_partage" class="badge b-orange count-badge">0</span></h2>
       <button class="btn btn-success btn-sm" onclick="exportActivityCSV('sport_partage')">&#128190; Export Excel</button>
+      <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
     <div class="table-wrap">
       <table id="tbl-sport_partage" class="act-table">
@@ -620,10 +638,11 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 <div id="tab-futsal-benj" class="tab-panel">
   <div class="card">
     <div class="card-header">
-      <h2>&#9917; Futsal Benj &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-benj" class="badge b-red">0</span>
+      <h2>&#9917; Futsal Benj &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-benj" class="badge b-red count-badge">0</span>
         &nbsp;<span id="cnt-futsal-benj-f" class="badge b-pink">0 Fille</span>
         <span id="cnt-futsal-benj-g" class="badge b-blue">0 Gar&ccedil;on</span></h2>
       <button class="btn btn-success btn-sm" onclick="exportFutsalGroupCSV('Benj')">&#128190; Export Excel</button>
+      <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
     <div class="table-wrap">
       <table id="tbl-futsal-benj" class="act-table">
@@ -642,10 +661,11 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 <div id="tab-futsal-min" class="tab-panel">
   <div class="card">
     <div class="card-header">
-      <h2>&#9917; Futsal Min &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-min" class="badge b-red">0</span>
+      <h2>&#9917; Futsal Min &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-min" class="badge b-red count-badge">0</span>
         &nbsp;<span id="cnt-futsal-min-f" class="badge b-pink">0 Fille</span>
         <span id="cnt-futsal-min-g" class="badge b-blue">0 Gar&ccedil;on</span></h2>
       <button class="btn btn-success btn-sm" onclick="exportFutsalGroupCSV('Min')">&#128190; Export Excel</button>
+      <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
     <div class="table-wrap">
       <table id="tbl-futsal-min" class="act-table">
@@ -712,7 +732,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
     </div>
     <div class="stat-card" style="border-top:4px solid #f97316">
       <div class="stat-num" style="color:#f97316" id="s-handicap">0</div>
-      <div class="stat-lbl">&#9855; &Eacute;l&egrave;ves en situation de handicap</div>
+      <div class="stat-lbl">&#129474; &Eacute;l&egrave;ves en situation de handicap</div>
     </div>
     <div class="stat-card" style="border-top:4px solid #8b5cf6">
       <div class="stat-num" style="color:#8b5cf6" id="s-fitness">0</div>
@@ -902,6 +922,27 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('deleteModal')">Annuler</button>
       <button class="btn btn-danger" onclick="confirmDelete()">&#128465;&#65039; Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div id="reinitModal" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>&#9888;&#65039; Confirmer la r&eacute;initialisation</h3>
+      <button class="close-btn" onclick="closeReinitModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <p>Cette action va <strong>effacer toutes les donn&eacute;es de cet appareil</strong> et les remplacer par celles du Google Sheet.</p>
+      <p style="color:var(--muted);font-size:.85rem;margin-top:.5rem">&Agrave; utiliser uniquement si cet appareil affiche des donn&eacute;es corrompues. Vos saisies non synchronis&eacute;es seront perdues.</p>
+      <p style="margin-top:.75rem;font-size:.85rem">Tapez <strong>REINIT</strong> ci-dessous pour confirmer :</p>
+      <input type="text" id="reinitConfirmInput" placeholder="REINIT" autocomplete="off"
+             oninput="document.getElementById('reinitConfirmBtn').disabled=(this.value.trim().toUpperCase()!=='REINIT')"
+             style="margin-top:.5rem;width:100%;padding:.5rem .75rem;border:1px solid var(--border);border-radius:var(--radius);font-size:.9rem">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeReinitModal()">Annuler</button>
+      <button id="reinitConfirmBtn" class="btn btn-danger" disabled onclick="confirmReinit()">&#8617; R&eacute;initialiser</button>
     </div>
   </div>
 </div>
@@ -1263,7 +1304,7 @@ function x(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').re
 function sexeBadge(s){return s==='Fille'?'<span class="badge b-pink">&#9792; Fille</span>':'<span class="badge b-blue">&#9794; Gar&ccedil;on</span>';}
 function catBadge(cat){return `<span class="badge ${CAT_BADGE[cat]||'b-gray'}">${x(cat)}</span>`;}
 function teeBadge(ts){return ts==='Oui'?'<span class="badge b-amber">&#128077; Oui</span>':'<span class="badge b-slate">Non</span>';}
-function handicapBadge(h){return h==='Oui'?'<span class="badge b-red">&#9855; Oui</span>':'<span class="badge b-slate">Non</span>';}
+function handicapBadge(h){return h==='Oui'?'<span class="badge b-red">&#129474; Oui</span>':'<span class="badge b-slate">Non</span>';}
 function droitImageBadge(d){return d!=='Non'?'<span class="badge b-teal">&#128247; Oui</span>':'<span class="badge b-red">&#128683; Non</span>';}
 function actTags(a){return (a||[]).map(k=>`<span class="act-tag">${ACTS[k]||k}</span>`).join('');}
 function sectionBadge(sec){return sec?`<span class="badge b-sky">${SEC_EMOJI[sec]||''} ${x(sec)}</span>`:'<span class="muted">—</span>';}
@@ -1375,6 +1416,11 @@ function renderCollegeTab(){
 }
 
 // ── EXPORT EXCEL / CSV ────────────────────────────────────────────────────
+// ── EXPORT PDF (impression du navigateur) ──────────────────────────────────
+function printTab(){
+  window.print();
+}
+
 function exportGeneralCSV(){
   const live=liveStudents();
   if(!live.length){alert2('Aucun élève à exporter.','error');return;}
@@ -1645,9 +1691,21 @@ async function manualSync(){
   }
 }
 
+function openReinitModal(){
+  if(!navigator.onLine){alert2('⚡ Hors ligne — impossible de recharger depuis Sheets.','error');return;}
+  document.getElementById('reinitConfirmInput').value='';
+  document.getElementById('reinitConfirmBtn').disabled=true;
+  document.getElementById('reinitModal').classList.remove('hidden');
+}
+function closeReinitModal(){
+  document.getElementById('reinitModal').classList.add('hidden');
+}
+async function confirmReinit(){
+  closeReinitModal();
+  await clearLocalAndPull();
+}
 async function clearLocalAndPull(){
   if(!navigator.onLine){alert2('⚡ Hors ligne — impossible de recharger depuis Sheets.','error');return;}
-  if(!confirm('⚠️ Remplacer toutes les données locales par celles de Sheets ?\n\nÀ utiliser si cette tablette/cet appareil affiche des données corrompues.')) return;
   try{
     const d=await jsonpFetch(SCRIPT_URL,12000);
     if(!d.success||!Array.isArray(d.data)) throw new Error(d.error||'réponse inattendue');
@@ -1780,11 +1838,11 @@ function alert2(msg,type='info'){
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────
-['editModal','deleteModal'].forEach(id=>{
+['editModal','deleteModal','reinitModal'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)this.classList.add('hidden');});
 });
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape') ['editModal','deleteModal'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  if(e.key==='Escape') ['editModal','deleteModal','reinitModal'].forEach(id=>document.getElementById(id).classList.add('hidden'));
 });
 
 load();

@@ -50,6 +50,7 @@ header{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;
 .card-header{padding:.875rem 1.25rem;border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;gap:.5rem;background:#f8fafc;flex-wrap:wrap}
 .card-header h2{font-size:.9375rem;font-weight:700}
+.apsa-schedule{font-size:.78rem;color:var(--muted);margin-top:.2rem;font-weight:500}
 .card-body{padding:1.25rem}
 
 /* FORM */
@@ -361,6 +362,19 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   #mainTable tbody td:nth-child(2),.act-table tbody td:nth-child(2){position:static;box-shadow:none}
   body{background:#fff}
 }
+
+/* ── EXPORT PDF "PAR APSA" ── */
+#printApsaSection{display:none}
+@media print{
+  body.printing-apsa .tab-panel.active{display:none!important}
+  body.printing-apsa #printApsaSection{display:block!important}
+}
+.apsa-print-block{margin-bottom:1.75rem;page-break-inside:avoid}
+.apsa-print-block h2{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;padding-bottom:.25rem;border-bottom:2px solid #1e3a8a}
+.apsa-print-meta{font-size:.8rem;color:#475569;margin-bottom:.5rem}
+.apsa-print-block table{width:100%;border-collapse:collapse;font-size:.85rem}
+.apsa-print-block th,.apsa-print-block td{border:1px solid #cbd5e1;padding:.35rem .6rem;text-align:left}
+.apsa-print-block th{background:#f1f5f9}
 </style>
 </head>
 <body>
@@ -557,6 +571,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <input type="text" id="searchInput" placeholder="&#128269; Rechercher…" style="width:180px;font-size:.85rem" oninput="renderTable()">
         <button class="btn btn-success btn-sm" onclick="exportGeneralCSV()">&#128190; Export Excel</button>
         <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
+        <button class="btn btn-outline btn-sm" onclick="printByAPSA()">&#128196; Export PDF par APSA</button>
       </div>
     </div>
     <div class="table-wrap">
@@ -596,7 +611,10 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 <div id="tab-fitness" class="tab-panel">
   <div class="card">
     <div class="card-header">
-      <h2>&#128170; Fitness &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-fitness" class="badge b-purple count-badge">0</span></h2>
+      <div>
+        <h2>&#128170; Fitness &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-fitness" class="badge b-purple count-badge">0</span></h2>
+        <p class="apsa-schedule">&#128197; Mercredi 12h45 &ndash; 14h &mdash; Mme JOUD</p>
+      </div>
       <button class="btn btn-success btn-sm" onclick="exportActivityCSV('fitness')">&#128190; Export Excel</button>
       <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
@@ -617,7 +635,10 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 <div id="tab-natation" class="tab-panel">
   <div class="card">
     <div class="card-header">
-      <h2>🏊‍♂️ Natation AS &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-natation" class="badge b-blue count-badge">0</span></h2>
+      <div>
+        <h2>🏊‍♂️ Natation AS &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-natation" class="badge b-blue count-badge">0</span></h2>
+        <p class="apsa-schedule">&#128197; Mercredi 13h &ndash; 14h &mdash; Mme MEKRALDI</p>
+      </div>
       <button class="btn btn-success btn-sm" onclick="exportActivityCSV('natation')">&#128190; Export Excel</button>
       <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
@@ -638,7 +659,10 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 <div id="tab-sport-partage" class="tab-panel">
   <div class="card">
     <div class="card-header">
-      <h2>&#129309; Sport Partag&eacute; &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-sport_partage" class="badge b-orange count-badge">0</span></h2>
+      <div>
+        <h2>&#129309; Sport Partag&eacute; &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-sport_partage" class="badge b-orange count-badge">0</span></h2>
+        <p class="apsa-schedule">&#128197; Lundi 12h30 &ndash; 13h45 &mdash; Mme JOUD et Mme CROZIER</p>
+      </div>
       <button class="btn btn-success btn-sm" onclick="exportActivityCSV('sport_partage')">&#128190; Export Excel</button>
       <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
@@ -659,9 +683,12 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 <div id="tab-futsal-benj" class="tab-panel">
   <div class="card">
     <div class="card-header">
-      <h2>&#9917; Futsal Benj &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-benj" class="badge b-red count-badge">0</span>
-        &nbsp;<span id="cnt-futsal-benj-f" class="badge b-pink">0 Fille</span>
-        <span id="cnt-futsal-benj-g" class="badge b-blue">0 Gar&ccedil;on</span></h2>
+      <div>
+        <h2>&#9917; Futsal Benj &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-benj" class="badge b-red count-badge">0</span>
+          &nbsp;<span id="cnt-futsal-benj-f" class="badge b-pink">0 Fille</span>
+          <span id="cnt-futsal-benj-g" class="badge b-blue">0 Gar&ccedil;on</span></h2>
+        <p class="apsa-schedule">&#128197; Mercredi 12h45 &ndash; 14h &mdash; Mme CROZIER</p>
+      </div>
       <button class="btn btn-success btn-sm" onclick="exportFutsalGroupCSV('Benj')">&#128190; Export Excel</button>
       <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
@@ -682,9 +709,12 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 <div id="tab-futsal-min" class="tab-panel">
   <div class="card">
     <div class="card-header">
-      <h2>&#9917; Futsal Min &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-min" class="badge b-red count-badge">0</span>
-        &nbsp;<span id="cnt-futsal-min-f" class="badge b-pink">0 Fille</span>
-        <span id="cnt-futsal-min-g" class="badge b-blue">0 Gar&ccedil;on</span></h2>
+      <div>
+        <h2>&#9917; Futsal Min &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-futsal-min" class="badge b-red count-badge">0</span>
+          &nbsp;<span id="cnt-futsal-min-f" class="badge b-pink">0 Fille</span>
+          <span id="cnt-futsal-min-g" class="badge b-blue">0 Gar&ccedil;on</span></h2>
+        <p class="apsa-schedule">&#128197; Mardi 12h30 &ndash; 13h45 &mdash; Mme MEKRALDI</p>
+      </div>
       <button class="btn btn-success btn-sm" onclick="exportFutsalGroupCSV('Min')">&#128190; Export Excel</button>
       <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
@@ -968,6 +998,8 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   </div>
 </div>
 
+<!-- Contenu généré pour l'export PDF "par APSA" (invisible à l'écran, affiché uniquement à l'impression) -->
+<div id="printApsaSection"></div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
@@ -998,6 +1030,13 @@ const ACTS = {
 };
 const ACT_LABEL   = { fitness:'Fitness', natation:'Natation', sport_partage:'Sport_Partage', futsal:'Futsal' };
 const ACTIVITIES  = ['fitness','natation','sport_partage','futsal'];
+const ACT_SCHEDULE = {
+  fitness:       'Mercredi 12h45 – 14h — Mme JOUD',
+  sport_partage: 'Lundi 12h30 – 13h45 — Mme JOUD et Mme CROZIER',
+  natation:      'Mercredi 13h – 14h — Mme MEKRALDI',
+  'futsal-min':  'Mardi 12h30 – 13h45 — Mme MEKRALDI',
+  'futsal-benj': 'Mercredi 12h45 – 14h — Mme CROZIER'
+};
 const SECTIONS    = ['Natation','Taekwondo'];
 const SEC_EMOJI   = { Natation: SWIM, Taekwondo:'🥋' };
 const CAT_ORDER   = ['Benj Fille','Benj Garçon','Min Fille','Min Garçon','Cadette','Cadet','—'];
@@ -1350,6 +1389,7 @@ function reglArr(r){return Array.isArray(r)?r:(r?String(r).split(',').filter(Boo
 function reglBadges(r){return reglArr(r).map(k=>`<span class="act-tag" style="background:#e0e7ff;color:#3730a3">${REGL[k]||k}</span>`).join('');}
 function reglLabel(r){return reglArr(r).map(k=>REGL[k]||k).join(' + ');}
 
+function sortByName(a,b){return ((a.nom||'')+' '+(a.prenom||'')).localeCompare((b.nom||'')+' '+(b.prenom||''),'fr',{sensitivity:'base'});}
 function studentRow(s){
   const cat=getCategorie(s.sexe,s.dateNaissance);
   return `<tr>
@@ -1395,7 +1435,7 @@ function renderActivity(act){
   filtered.forEach(s=>{const c=getCategorie(s.sexe,s.dateNaissance);(groups[c]=groups[c]||[]).push(s);});
   let html='';
   CAT_ORDER.forEach(cat=>{
-    const list=(groups[cat]||[]).sort((a,b)=>(a.ordre||0)-(b.ordre||0));
+    const list=(groups[cat]||[]).sort(sortByName);
     if(!list.length) return;
     html+=`<tr class="cat-group-row"><td colspan="16">${x(cat)} <span>${list.length} &eacute;l&egrave;ve${list.length>1?'s':''}</span></td></tr>`;
     html+=list.map(studentRow).join('');
@@ -1422,7 +1462,7 @@ function renderFutsalGroup(group){
   empty.classList.add('hidden');table.style.display='';
   let html='';
   FUTSAL_CATS[group].forEach(cat=>{
-    const list=filtered.filter(s=>getCategorie(s.sexe,s.dateNaissance)===cat).sort((a,b)=>(a.ordre||0)-(b.ordre||0));
+    const list=filtered.filter(s=>getCategorie(s.sexe,s.dateNaissance)===cat).sort(sortByName);
     if(!list.length) return;
     html+=`<tr class="cat-group-row"><td colspan="16">${x(cat)} <span>${list.length} &eacute;l&egrave;ve${list.length>1?'s':''}</span></td></tr>`;
     html+=list.map(studentRow).join('');
@@ -1455,6 +1495,34 @@ function printTab(){
   window.print();
 }
 
+// Export PDF regroupant tous les élèves par APSA (Nom Prénom + Classe),
+// indépendamment de l'onglet actuellement affiché.
+const APSA_GROUPS = [
+  {key:'fitness',      label:'Fitness',      students:()=>liveStudents().filter(s=>(s.activites||[]).includes('fitness'))},
+  {key:'natation',     label:'Natation AS',  students:()=>liveStudents().filter(s=>(s.activites||[]).includes('natation'))},
+  {key:'sport_partage',label:'Sport Partagé',students:()=>liveStudents().filter(s=>(s.activites||[]).includes('sport_partage'))},
+  {key:'futsal-benj',  label:'Futsal Benj',  students:()=>futsalGroupStudents('Benj')},
+  {key:'futsal-min',   label:'Futsal Min',   students:()=>futsalGroupStudents('Min')}
+];
+function printByAPSA(){
+  const html=APSA_GROUPS.map(g=>{
+    const list=g.students().sort(sortByName);
+    const rows=list.length
+      ? list.map(s=>`<tr><td>${x(s.nom)} ${x(s.prenom)}</td><td>${x(s.classe)||'—'}</td></tr>`).join('')
+      : `<tr><td colspan="2" style="color:#64748b;font-style:italic">Aucun élève inscrit</td></tr>`;
+    const meta=ACT_SCHEDULE[g.key]?`<p class="apsa-print-meta">${x(ACT_SCHEDULE[g.key])}</p>`:'';
+    return `<div class="apsa-print-block">
+      <h2>${x(g.label)} (${list.length} élève${list.length>1?'s':''})</h2>
+      ${meta}
+      <table><thead><tr><th>Élève</th><th>Classe</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>`;
+  }).join('');
+  document.getElementById('printApsaSection').innerHTML=html;
+  document.body.classList.add('printing-apsa');
+  window.print();
+}
+window.addEventListener('afterprint', ()=>{document.body.classList.remove('printing-apsa');});
+
 function exportGeneralCSV(){
   const live=liveStudents();
   if(!live.length){alert2('Aucun élève à exporter.','error');return;}
@@ -1481,7 +1549,7 @@ function exportActivityCSV(act){
   if(!filtered.length){alert2('Aucun élève inscrit en '+label+'.','error');return;}
   const headers=['Ordre','Nom','Prénom','Classe','Sexe','Date naiss.','Catégorie','Cotisation (€)',
     'Règlement','N° Licence','Téléphone','Tee shirt','Section','Activités AS','Handicap','Droit à l\'image'];
-  const rows=[...filtered].sort((a,b)=>(a.ordre||0)-(b.ordre||0)).map(s=>{
+  const rows=[...filtered].sort(sortByName).map(s=>{
     const cat=getCategorie(s.sexe,s.dateNaissance);
     return [s.ordre||'',s.nom,s.prenom,s.classe||'',s.sexe,s.dateNaissance||'',cat,
       (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS.find(o=>o.value==='35')).label,
@@ -1502,7 +1570,7 @@ function exportFutsalGroupCSV(group){
   if(!filtered.length){alert2('Aucun élève inscrit en '+label+'.','error');return;}
   const headers=['Ordre','Nom','Prénom','Classe','Sexe','Date naiss.','Catégorie','Cotisation (€)',
     'Règlement','N° Licence','Téléphone','Tee shirt','Section','Activités AS','Handicap','Droit à l\'image'];
-  const rows=[...filtered].sort((a,b)=>(a.ordre||0)-(b.ordre||0)).map(s=>{
+  const rows=[...filtered].sort(sortByName).map(s=>{
     const cat=getCategorie(s.sexe,s.dateNaissance);
     return [s.ordre||'',s.nom,s.prenom,s.classe||'',s.sexe,s.dateNaissance||'',cat,
       (COTIS_OPTIONS.find(o=>o.value===String(s.cotisation))||COTIS_OPTIONS.find(o=>o.value==='35')).label,

@@ -957,6 +957,17 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
               <label class="check-item"><input type="checkbox" id="ea-futsal"> &#9917; Futsal</label>
             </div>
           </div>
+          <div class="form-group full">
+            <label class="check-item"><input type="checkbox" id="e-exclu" onchange="toggleExcluFields()"> &#9940; Exclu de l'AS</label>
+            <div id="e-exclu-details" class="hidden" style="margin-top:.6rem;display:flex;gap:1.25rem;flex-wrap:wrap;align-items:center">
+              <label class="check-item"><input type="radio" name="e-exclu-type" value="15j" id="e-exclu-15j" onchange="toggleExcluDate()"> 15 jours</label>
+              <label class="check-item"><input type="radio" name="e-exclu-type" value="definitif" id="e-exclu-def" onchange="toggleExcluDate()"> D&eacute;finitivement</label>
+              <div id="e-exclu-date-wrap" class="hidden">
+                <label style="font-size:.75rem;display:block;color:var(--muted)">Fin d'exclusion (JJ/MM/AAAA)</label>
+                <input type="text" id="e-exclu-date" placeholder="JJ/MM/AAAA" style="width:9rem">
+              </div>
+            </div>
+          </div>
         </div>
       </form>
     </div>
@@ -1334,7 +1345,40 @@ function openEdit(id){
   document.getElementById('e-licence-suffix').value=suf;
   document.getElementById('e-licence-preview').textContent=suf;
   ACTIVITIES.forEach(a=>{document.getElementById('ea-'+a).checked=(s.activites||[]).includes(a);});
+  document.getElementById('e-exclu').checked=!!s.exclusion;
+  document.getElementById('e-exclu-15j').checked=s.exclusion==='15j';
+  document.getElementById('e-exclu-def').checked=s.exclusion==='definitif';
+  document.getElementById('e-exclu-date').value=s.exclusionFin||'';
+  toggleExcluFields(); toggleExcluDate();
   document.getElementById('editModal').classList.remove('hidden');
+}
+function toggleExcluFields(){
+  const on=document.getElementById('e-exclu').checked;
+  document.getElementById('e-exclu-details').classList.toggle('hidden',!on);
+  if(!on){document.getElementById('e-exclu-15j').checked=false;document.getElementById('e-exclu-def').checked=false;}
+}
+function toggleExcluDate(){
+  const is15j=document.getElementById('e-exclu-15j').checked;
+  document.getElementById('e-exclu-date-wrap').classList.toggle('hidden',!is15j);
+  if(is15j&&!document.getElementById('e-exclu-date').value.trim()){
+    const d=new Date(); d.setDate(d.getDate()+15);
+    document.getElementById('e-exclu-date').value=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+  }
+}
+function ddmmyyyyToDate(str){
+  const p=(str||'').split('/'); if(p.length!==3) return null;
+  const d=new Date(+p[2],+p[1]-1,+p[0]); return isNaN(d.getTime())?null:d;
+}
+function isExcluded(s){
+  if(!s.exclusion) return false;
+  if(s.exclusion==='definitif') return true;
+  if(s.exclusion==='15j'){
+    const fin=ddmmyyyyToDate(s.exclusionFin);
+    if(!fin) return true;
+    const today=new Date(); today.setHours(0,0,0,0); fin.setHours(0,0,0,0);
+    return today<=fin;
+  }
+  return false;
 }
 function handleEdit(e){
   e.preventDefault();
@@ -1357,6 +1401,11 @@ function handleEdit(e){
     handicap:document.getElementById('e-handicap').value,
     droitImage:document.getElementById('e-droitimage').value,
     activites:getActivities('ea-'),
+    exclusion:document.getElementById('e-exclu').checked
+      ? (document.getElementById('e-exclu-def').checked?'definitif':(document.getElementById('e-exclu-15j').checked?'15j':''))
+      : '',
+    exclusionFin:document.getElementById('e-exclu').checked&&document.getElementById('e-exclu-15j').checked
+      ? document.getElementById('e-exclu-date').value.trim() : '',
     lastModified:Date.now()
   };
   save(); closeModal('editModal'); renderAll();
@@ -1402,11 +1451,17 @@ function sortByClasseThenName(a,b){
   const c=(a.classe||'').localeCompare(b.classe||'','fr',{numeric:true,sensitivity:'base'});
   return c!==0?c:sortByName(a,b);
 }
+function excludedNameHtml(s){
+  const name=`${x(s.nom)} ${x(s.prenom)}`;
+  if(!isExcluded(s)) return name;
+  const reason=s.exclusion==='definitif' ? 'Exclu de l\'AS (définitivement)' : ('Exclu de l\'AS jusqu\'au '+(s.exclusionFin||''));
+  return `<span title="${x(reason)}" style="color:#dc2626;text-decoration:line-through">${name}</span>`;
+}
 function studentRow(s){
   const cat=getCategorie(s.sexe,s.dateNaissance);
   return `<tr>
     <td style="font-weight:700;text-align:center">${s.ordre||'—'}</td>
-    <td><strong>${s.handicap==='Oui'?`<span title="Élève en situation de handicap">&#129309;</span> `:''}${s.droitImage==='Non'?`<span title="Pas de droit à l'image">&#128247;&#128683;</span> `:''}${x(s.nom)} ${x(s.prenom)}</strong></td>
+    <td><strong>${s.handicap==='Oui'?`<span title="Élève en situation de handicap">&#129309;</span> `:''}${s.droitImage==='Non'?`<span title="Pas de droit à l'image">&#128247;&#128683;</span> `:''}${excludedNameHtml(s)}</strong></td>
     <td>${classeBadge(s.classe)}</td>
     <td>${sexeBadge(s.sexe)}</td>
     <td>${x(s.dateNaissance)||'<span class="muted">—</span>'}</td>
@@ -1544,8 +1599,8 @@ function printByAPSA(){
 
     const items=combined.length
       ? combined.map(s=>{
-          const style=s.status==='added'?' style="color:#16a34a;font-weight:700"'
-            :s.status==='removed'?' style="color:#dc2626;text-decoration:line-through"':'';
+          const style=isExcluded(s)||s.status==='removed'?' style="color:#dc2626;text-decoration:line-through"'
+            :s.status==='added'?' style="color:#16a34a;font-weight:700"':'';
           return `<li${style}>${x(s.nom)} ${x(s.prenom)}<span>${x(s.classe)||'—'}</span></li>`;
         }).join('')
       : '';
@@ -1804,7 +1859,7 @@ async function syncWithSheets(silent=false){
     id:'__deletedLog__',ordre:9999999,
     prenom:JSON.stringify(deletedLog),nom:'',classe:'',
     sexe:'',dateNaissance:'',cotisation:'',reglement:'',
-    licence:'',telephone:'',teeShirt:'',section:'',handicap:'',droitImage:'',
+    licence:'',telephone:'',teeShirt:'',section:'',handicap:'',droitImage:'',exclusion:'',exclusionFin:'',
     activites:'',lastModified:0
   };
   const body='payload='+encodeURIComponent(JSON.stringify({students:[...liveOnly,metaEntry]}));
@@ -1881,7 +1936,7 @@ async function pushAsAuthority(){
     id:'__deletedLog__',ordre:9999999,
     prenom:JSON.stringify(deletedLog),nom:'',classe:'',
     sexe:'',dateNaissance:'',cotisation:'',reglement:'',
-    licence:'',telephone:'',teeShirt:'',section:'',handicap:'',droitImage:'',
+    licence:'',telephone:'',teeShirt:'',section:'',handicap:'',droitImage:'',exclusion:'',exclusionFin:'',
     activites:'',lastModified:0
   };
   const body='payload='+encodeURIComponent(JSON.stringify({students:[...live,metaEntry]}));
@@ -1959,6 +2014,8 @@ function parseRow(r,i){
   const section   = r['Section']      || r.section      || '';
   const handicap  = r['Handicap']     || r.handicap     || '';
   const droitImg  = r['Droit image']  || r['Droit à l\'image'] || r.droitImage || '';
+  const exclu     = r['Exclusion']    || r.exclusion    || '';
+  const excluFin  = r['Exclusion fin']|| r.exclusionFin || '';
   const activites = r['Activités']    || r.activites    || '';
   return{
     id:r.id||uid(), ordre:parseInt(r['Ordre']||r.ordre)||i+1,
@@ -1973,6 +2030,8 @@ function parseRow(r,i){
     section:cellStr(section),
     handicap:cellStr(handicap)||'Non',
     droitImage:cellStr(droitImg)||'Oui',
+    exclusion:(['15j','definitif'].includes(cellStr(exclu))?cellStr(exclu):''),
+    exclusionFin:cellStr(excluFin),
     activites:activites?String(activites).split(',').filter(Boolean):[],
     lastModified:r.lastModified?+r.lastModified:0,
     deleted:r.deleted==='TRUE'||r.deleted===true||r.deleted==='true',
@@ -2066,13 +2125,13 @@ function doPost(e) {
     let sheet     = ss.getSheetByName(SHEET_AS);
     if (!sheet) sheet = ss.insertSheet(SHEET_AS);
     const headers = ['id','ordre','prenom','nom','classe','sexe','dateNaissance',
-      'cotisation','reglement','licence','telephone','teeShirt','section','handicap','droitImage','activites','lastModified'];
+      'cotisation','reglement','licence','telephone','teeShirt','section','handicap','droitImage','exclusion','exclusionFin','activites','lastModified'];
     sheet.clearContents();
     sheet.appendRow(headers);
     (payload.students || []).forEach(s => {
       sheet.appendRow([s.id, s.ordre, s.prenom, s.nom, s.classe||'', s.sexe, s.dateNaissance,
         s.cotisation, s.reglement||'', s.licence||'', s.telephone||'', s.teeShirt||'', s.section||'',
-        s.handicap||'', s.droitImage||'',
+        s.handicap||'', s.droitImage||'', s.exclusion||'', s.exclusionFin||'',
         Array.isArray(s.activites) ? s.activites.join(',') : (s.activites||''),
         s.lastModified||'']);
     });

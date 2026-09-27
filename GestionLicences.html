@@ -366,15 +366,23 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 /* ── EXPORT PDF "PAR APSA" ── */
 #printApsaSection{display:none}
 @media print{
+  body.printing-apsa{display:block}
   body.printing-apsa .tab-panel.active{display:none!important}
-  body.printing-apsa #printApsaSection{display:block!important}
+  body.printing-apsa #printApsaSection{display:block!important;width:100%}
 }
-.apsa-print-block{margin-bottom:1.75rem;page-break-inside:avoid}
-.apsa-print-block h2{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;padding-bottom:.25rem;border-bottom:2px solid #1e3a8a}
-.apsa-print-meta{font-size:.8rem;color:#475569;margin-bottom:.5rem}
-.apsa-print-block table{width:100%;border-collapse:collapse;font-size:.85rem}
-.apsa-print-block th,.apsa-print-block td{border:1px solid #cbd5e1;padding:.35rem .6rem;text-align:left}
-.apsa-print-block th{background:#f1f5f9}
+.apsa-print-title{font-size:1.15rem;font-weight:700;text-align:center;color:#1e3a8a;margin:0 0 .35rem}
+.apsa-print-legend{font-size:.65rem;text-align:center;color:#475569;margin:0 0 1rem}
+.apsa-print-grid{display:flex;gap:.4rem;align-items:flex-start;width:100%}
+.apsa-print-col{flex:1 1 0;min-width:0;border:1px solid #cbd5e1;page-break-inside:avoid}
+.apsa-print-col h2{font-size:.68rem;font-weight:700;color:#fff;
+  padding:.3rem .3rem;margin:0;line-height:1.2}
+.apsa-print-count{font-size:.6rem;font-weight:700;padding:.2rem .3rem 0;margin:0}
+.apsa-print-meta{font-size:.52rem;color:#475569;padding:.1rem .3rem .2rem;margin:0;
+  border-bottom:1px solid #cbd5e1;line-height:1.25}
+.apsa-print-list{list-style:none;margin:0;padding:0}
+.apsa-print-list li{font-size:.6rem;padding:.2rem .3rem;border-bottom:1px solid #e2e8f0;line-height:1.2}
+.apsa-print-list li span{display:block;color:#64748b;font-size:.9em}
+.apsa-print-empty{font-size:.58rem;color:#94a3b8;font-style:italic;padding:.3rem}
 </style>
 </head>
 <body>
@@ -1390,6 +1398,10 @@ function reglBadges(r){return reglArr(r).map(k=>`<span class="act-tag" style="ba
 function reglLabel(r){return reglArr(r).map(k=>REGL[k]||k).join(' + ');}
 
 function sortByName(a,b){return ((a.nom||'')+' '+(a.prenom||'')).localeCompare((b.nom||'')+' '+(b.prenom||''),'fr',{sensitivity:'base'});}
+function sortByClasseThenName(a,b){
+  const c=(a.classe||'').localeCompare(b.classe||'','fr',{numeric:true,sensitivity:'base'});
+  return c!==0?c:sortByName(a,b);
+}
 function studentRow(s){
   const cat=getCategorie(s.sexe,s.dateNaissance);
   return `<tr>
@@ -1498,28 +1510,64 @@ function printTab(){
 // Export PDF regroupant tous les élèves par APSA (Nom Prénom + Classe),
 // indépendamment de l'onglet actuellement affiché.
 const APSA_GROUPS = [
-  {key:'fitness',      label:'Fitness',      students:()=>liveStudents().filter(s=>(s.activites||[]).includes('fitness'))},
-  {key:'natation',     label:'Natation AS',  students:()=>liveStudents().filter(s=>(s.activites||[]).includes('natation'))},
-  {key:'sport_partage',label:'Sport Partagé',students:()=>liveStudents().filter(s=>(s.activites||[]).includes('sport_partage'))},
-  {key:'futsal-benj',  label:'Futsal Benj',  students:()=>futsalGroupStudents('Benj')},
-  {key:'futsal-min',   label:'Futsal Min',   students:()=>futsalGroupStudents('Min')}
+  {key:'fitness',      label:'Fitness',      color:'#7c3aed', students:()=>liveStudents().filter(s=>(s.activites||[]).includes('fitness'))},
+  {key:'natation',     label:'Natation AS',  color:'#0369a1', students:()=>liveStudents().filter(s=>(s.activites||[]).includes('natation'))},
+  {key:'sport_partage',label:'Sport Partagé',color:'#c2410c', students:()=>liveStudents().filter(s=>(s.activites||[]).includes('sport_partage'))},
+  {key:'futsal-benj',  label:'Futsal Benj',  color:'#be123c', students:()=>futsalGroupStudents('Benj')},
+  {key:'futsal-min',   label:'Futsal Min',   color:'#a21caf', students:()=>futsalGroupStudents('Min')}
 ];
+function loadApsaLastExport(){
+  try{return JSON.parse(localStorage.getItem('as-apsa-last-export')||'null');}catch(e){return null;}
+}
+function saveApsaLastExport(snapshot){
+  try{localStorage.setItem('as-apsa-last-export',JSON.stringify(snapshot));}catch(e){}
+}
 function printByAPSA(){
-  const html=APSA_GROUPS.map(g=>{
-    const list=g.students().sort(sortByName);
-    const rows=list.length
-      ? list.map(s=>`<tr><td>${x(s.nom)} ${x(s.prenom)}</td><td>${x(s.classe)||'—'}</td></tr>`).join('')
-      : `<tr><td colspan="2" style="color:#64748b;font-style:italic">Aucun élève inscrit</td></tr>`;
+  const prev=loadApsaLastExport();
+  const now=new Date();
+  const dateStr=String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
+  const newSnapshot={date:now.getTime(),groups:{}};
+
+  const cols=APSA_GROUPS.map(g=>{
+    const current=g.students().sort(sortByClasseThenName);
+    newSnapshot.groups[g.key]=current.map(s=>({id:s.id,nom:s.nom,prenom:s.prenom,classe:s.classe}));
+
+    const prevList=prev?.groups?.[g.key]||[];
+    const prevIds=new Set(prevList.map(s=>s.id));
+    const currentIds=new Set(current.map(s=>s.id));
+    const removed=prev?prevList.filter(s=>!currentIds.has(s.id)):[];
+
+    const combined=[
+      ...current.map(s=>({...s,status:(prev&&!prevIds.has(s.id))?'added':'normal'})),
+      ...removed.map(s=>({...s,status:'removed'}))
+    ].sort(sortByClasseThenName);
+
+    const items=combined.length
+      ? combined.map(s=>{
+          const style=s.status==='added'?' style="color:#16a34a;font-weight:700"'
+            :s.status==='removed'?' style="color:#dc2626;text-decoration:line-through"':'';
+          return `<li${style}>${x(s.nom)} ${x(s.prenom)}<span>${x(s.classe)||'—'}</span></li>`;
+        }).join('')
+      : '';
+    const empty=combined.length?'':`<div class="apsa-print-empty">Aucun élève</div>`;
     const meta=ACT_SCHEDULE[g.key]?`<p class="apsa-print-meta">${x(ACT_SCHEDULE[g.key])}</p>`:'';
-    return `<div class="apsa-print-block">
-      <h2>${x(g.label)} (${list.length} élève${list.length>1?'s':''})</h2>
+    return `<div class="apsa-print-col" style="border-top:4px solid ${g.color}">
+      <h2 style="background:${g.color}">${x(g.label)}</h2>
+      <p class="apsa-print-count" style="color:${g.color}">${current.length} élève${current.length>1?'s':''}</p>
       ${meta}
-      <table><thead><tr><th>Élève</th><th>Classe</th></tr></thead><tbody>${rows}</tbody></table>
+      <ul class="apsa-print-list">${items}</ul>
+      ${empty}
     </div>`;
   }).join('');
-  document.getElementById('printApsaSection').innerHTML=html;
+
+  const title=`<h1 class="apsa-print-title">AS Joliot Curie &mdash; Liste des &eacute;l&egrave;ves licenci&eacute;s 2026-2027 &mdash; Export du ${dateStr}</h1>`;
+  const legend=prev
+    ? `<p class="apsa-print-legend">Compar&eacute; &agrave; l'export du ${new Date(prev.date).toLocaleDateString('fr-FR')} &mdash; <span style="color:#16a34a;font-weight:700">vert</span> = ajout&eacute;(s) depuis &mdash; <span style="color:#dc2626;text-decoration:line-through">rouge barr&eacute;</span> = retir&eacute;(s) depuis</p>`
+    : '';
+  document.getElementById('printApsaSection').innerHTML=`${title}${legend}<div class="apsa-print-grid">${cols}</div>`;
   document.body.classList.add('printing-apsa');
   window.print();
+  saveApsaLastExport(newSnapshot);
 }
 window.addEventListener('afterprint', ()=>{document.body.classList.remove('printing-apsa');});
 

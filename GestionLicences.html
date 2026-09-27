@@ -194,6 +194,9 @@ thead th::before,thead th::after{content:''!important}
 .act-table tbody td:nth-child(15) {background:#fdf2f8}
 .act-table tbody td:nth-child(16) {background:#fef2f2}
 
+/* Élève exclu définitivement : toute la ligne est barrée */
+tr.excluded-row td{text-decoration:line-through}
+
 /* Colonne "Élève" figée pour le défilement horizontal */
 #mainTable thead th:nth-child(2), .act-table thead th:nth-child(2),
 #mainTable tbody td:nth-child(2), .act-table tbody td:nth-child(2) {
@@ -1454,12 +1457,14 @@ function sortByClasseThenName(a,b){
 function excludedNameHtml(s){
   const name=`${x(s.nom)} ${x(s.prenom)}`;
   if(!isExcluded(s)) return name;
-  const reason=s.exclusion==='definitif' ? 'Exclu de l\'AS (définitivement)' : ('Exclu de l\'AS jusqu\'au '+(s.exclusionFin||''));
-  return `<span title="${x(reason)}" style="color:#dc2626;text-decoration:line-through">${name}</span>`;
+  const label=s.exclusion==='definitif' ? 'Exclu définitivement' : ('Exclu jusqu\'au '+(s.exclusionFin||'—'));
+  return `<span style="color:#dc2626;text-decoration:line-through" title="${x(label)}">${name}</span>`
+    +`<br><span style="color:#dc2626;font-size:.72rem;font-weight:600;text-decoration:none;display:inline-block">${x(label)}</span>`;
 }
 function studentRow(s){
   const cat=getCategorie(s.sexe,s.dateNaissance);
-  return `<tr>
+  const rowClass=(s.exclusion==='definitif'&&isExcluded(s))?' class="excluded-row"':'';
+  return `<tr${rowClass}>
     <td style="font-weight:700;text-align:center">${s.ordre||'—'}</td>
     <td><strong>${s.handicap==='Oui'?`<span title="Élève en situation de handicap">&#129309;</span> `:''}${s.droitImage==='Non'?`<span title="Pas de droit à l'image">&#128247;&#128683;</span> `:''}${excludedNameHtml(s)}</strong></td>
     <td>${classeBadge(s.classe)}</td>

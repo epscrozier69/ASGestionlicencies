@@ -195,7 +195,7 @@ thead th::before,thead th::after{content:''!important}
 .act-table tbody td:nth-child(16) {background:#fef2f2}
 
 /* Élève exclu définitivement : toute la ligne est barrée */
-tr.excluded-row td{text-decoration:line-through}
+tr.excluded-row td,tr.excluded-row td *{text-decoration:line-through}
 
 /* Colonne "Élève" figée pour le défilement horizontal */
 #mainTable thead th:nth-child(2), .act-table thead th:nth-child(2),
@@ -386,6 +386,52 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 .apsa-print-list li{font-size:.6rem;padding:.2rem .3rem;border-bottom:1px solid #e2e8f0;line-height:1.2}
 .apsa-print-list li span{display:block;color:#64748b;font-size:.9em}
 .apsa-print-empty{font-size:.58rem;color:#94a3b8;font-style:italic;padding:.3rem}
+
+/* ── SORTIES AS (onglet orange, distinct des activités) ── */
+.tab-btn.tab-sorties{color:#c2410c;background:#fff7ed}
+.tab-btn.tab-sorties:hover{background:#ffedd5;color:#9a3412}
+.tab-btn.tab-sorties.active{color:#ea580c;border-bottom-color:#ea580c;background:#ffedd5}
+.btn-orange{background:#ea580c;color:#fff}.btn-orange:hover{background:#c2410c}
+.sortie-subnav{display:flex;gap:.4rem;overflow-x:auto;padding:.75rem 1.25rem;
+  border-bottom:1px solid var(--border);background:#fff7ed}
+.sortie-chip{flex:none;padding:.4rem .85rem;border-radius:9999px;border:1.5px solid #fdba74;
+  background:#fff;color:#9a3412;font-weight:600;font-size:.82rem;cursor:pointer;white-space:nowrap}
+.sortie-chip:hover{background:#ffedd5}
+.sortie-chip.active{background:#ea580c;border-color:#ea580c;color:#fff}
+.sortie-info{display:flex;flex-wrap:wrap;gap:.35rem 1.25rem;font-size:.85rem;color:var(--muted);margin-top:.3rem}
+.pay-cell{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.pay-cell .check-item{font-size:.8rem;text-transform:none;letter-spacing:0;color:var(--text);font-weight:600}
+.sortie-table thead th:nth-child(1){background:#374151}
+.sortie-table thead th:nth-child(2){background:#1e40af}
+.sortie-table thead th:nth-child(3){background:#0f766e}
+.sortie-table thead th:nth-child(4){background:#be123c}
+.sortie-table thead th:nth-child(5){background:#7c3aed}
+.sortie-table thead th:nth-child(6){background:#ea580c}
+.sortie-table thead th:nth-child(7){background:#0369a1}
+.sortie-table thead th:nth-child(8){background:#b91c1c}
+.sortie-table tbody td:nth-child(1){background:#e2e8f0}
+.sortie-table tbody td:nth-child(2){background:#dbeafe}
+.sortie-table tbody td:nth-child(3){background:#ccfbf1}
+.sortie-table tbody td:nth-child(4){background:#fee2e2}
+.sortie-table tbody td:nth-child(5){background:#ede9fe}
+.sortie-table tbody td:nth-child(6){background:#ffedd5}
+.sortie-table tbody td:nth-child(7){background:#e0f2fe}
+.sortie-table tbody td:nth-child(8){background:#fef2f2}
+
+/* ── EXPORT PDF D'UNE SORTIE ── */
+#printSortieSection{display:none}
+@media print{
+  body.printing-sortie .tab-panel.active{display:none!important}
+  body.printing-sortie #printSortieSection{display:block!important;width:100%}
+  #printSortieSection table td:last-child,#printSortieSection table th:last-child{display:table-cell!important}
+}
+.sortie-print-title{font-size:1.15rem;font-weight:700;text-align:center;color:#9a3412;margin:0 0 .3rem}
+.sortie-print-sub{font-size:.8rem;text-align:center;color:#475569;margin:0 0 .9rem}
+.sortie-print-table{width:100%;border-collapse:collapse;font-size:.78rem;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+.sortie-print-table th{background:#ea580c;color:#fff;padding:.35rem .5rem;text-align:left;font-size:.7rem}
+.sortie-print-table td{padding:.3rem .5rem;border:1px solid #cbd5e1}
+.sortie-print-table tr:nth-child(even) td{background:#fff7ed}
 </style>
 </head>
 <body>
@@ -423,6 +469,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   <button class="tab-btn" onclick="switchTab('sport-partage',this)">&#129309; Sport Partag&eacute;</button>
   <button class="tab-btn" onclick="switchTab('futsal-benj',this)">&#9917; Futsal Benj</button>
   <button class="tab-btn" onclick="switchTab('futsal-min',this)">&#9917; Futsal Min</button>
+  <button class="tab-btn tab-sorties" onclick="switchTab('sorties',this)">&#128652; Sorties AS</button>
   <button class="tab-btn" onclick="switchTab('stats',this)">&#128202; Statistiques</button>
   <button class="tab-btn" style="margin-left:auto" onclick="switchTab('tous-eleves',this)">&#127979; &Eacute;l&egrave;ves de Joliot</button>
 </nav>
@@ -743,6 +790,61 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   </div>
 </div>
 
+<!-- ===== TAB SORTIES AS ===== -->
+<div id="tab-sorties" class="tab-panel">
+  <div class="card">
+    <div class="card-header" style="background:#fff7ed">
+      <h2>&#128652; Sorties AS &nbsp;<span id="sortiesCount" class="badge b-orange">0</span></h2>
+      <button class="btn btn-orange" onclick="openSortieModal()">&#10133; Cr&eacute;er une sortie</button>
+    </div>
+    <div id="sortieSubnav" class="sortie-subnav hidden"></div>
+    <div id="sortieEmpty" class="empty-state">
+      <div class="icon">&#128652;</div>
+      <h3>Aucune sortie cr&eacute;&eacute;e</h3>
+      <p style="margin-top:.35rem;font-size:.85rem">Cliquez sur &laquo;&nbsp;&#10133; Cr&eacute;er une sortie&nbsp;&raquo; pour commencer.</p>
+    </div>
+    <div id="sortieContent" class="hidden">
+      <div class="card-body" style="border-bottom:1px solid var(--border)">
+        <div class="flex" style="justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.75rem">
+          <div>
+            <h2 id="sortieTitle" style="font-size:1.05rem;font-weight:700"></h2>
+            <div class="sortie-info">
+              <span>&#128197; Date : <strong id="sortieDate"></strong></span>
+              <span>&#128182; Montant : <strong id="sortieMontant"></strong></span>
+              <span>&#128176; Encaiss&eacute; : <strong id="sortieEncaisse"></strong></span>
+            </div>
+          </div>
+          <div class="flex gap2" style="flex-wrap:wrap">
+            <button class="btn btn-warning btn-sm" onclick="openSortieModal(currentSortieId)">&#9999;&#65039; Modifier la sortie</button>
+            <button class="btn btn-danger btn-sm" onclick="openDeleteSortie()">&#128465;&#65039; Effacer la sortie</button>
+          </div>
+        </div>
+      </div>
+      <div class="card-header">
+        <h2>&Eacute;l&egrave;ves inscrits &agrave; la sortie &nbsp;<span id="sortieNbEleves" class="badge b-orange count-badge">0</span>
+          &nbsp;<span id="sortieNbPayes" class="badge b-teal"></span></h2>
+        <div class="flex gap2" style="flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="openParticipantModal()">&#10133; Ajouter un &eacute;l&egrave;ve</button>
+          <button class="btn btn-outline btn-sm" onclick="printSortie()">&#128196; Export PDF</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="tbl-sortie" class="sortie-table">
+          <thead><tr>
+            <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>T&eacute;l&eacute;phone</th>
+            <th>Autorisation parentale</th><th>Paiement</th><th>Carte TCL</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="sortieBody"></tbody>
+        </table>
+        <div id="sortieEmptyList" class="empty-state hidden">
+          <div class="icon">&#128101;</div>
+          <h3>Aucun &eacute;l&egrave;ve inscrit &agrave; cette sortie</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== TAB TOUS LES ÉLÈVES ===== -->
 <div id="tab-tous-eleves" class="tab-panel">
   <div class="card">
@@ -1020,8 +1122,131 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   </div>
 </div>
 
+<!-- ===== MODAL SORTIE (création / modification) ===== -->
+<div id="sortieModal" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 id="sortieModalTitle">&#128652; Cr&eacute;er une sortie</h3>
+      <button class="close-btn" onclick="closeModal('sortieModal')">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <form id="sortieForm" onsubmit="handleSortie(event)">
+        <input type="hidden" id="so-id">
+        <div class="form-grid" style="grid-template-columns:1fr">
+          <div class="form-group">
+            <label>Date de la sortie *</label>
+            <input type="date" id="so-date" required>
+          </div>
+          <div class="form-group">
+            <label>Intitul&eacute; <small style="text-transform:none;font-weight:400">(facultatif)</small></label>
+            <input type="text" id="so-libelle" placeholder="Ex : Accrobranche, Patinoire…">
+          </div>
+          <div class="form-group">
+            <label>Montant par &eacute;l&egrave;ve (&euro;)</label>
+            <input type="number" id="so-montant" min="0" step="0.5" placeholder="Ex : 10">
+            <small class="muted">Report&eacute; automatiquement sur chaque &eacute;l&egrave;ve inscrit.</small>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('sortieModal')">Annuler</button>
+      <button class="btn btn-orange" form="sortieForm" type="submit">&#128190; Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL INSCRIPTION À UNE SORTIE ===== -->
+<div id="participantModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="participantModalTitle">&#10133; Inscrire un &eacute;l&egrave;ve &agrave; la sortie</h3>
+      <button class="close-btn" onclick="closeModal('participantModal')">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div id="p-pickerWrap" style="margin-bottom:1rem">
+        <label style="display:block;margin-bottom:.3rem">&#128269; Chercher un &eacute;l&egrave;ve inscrit &agrave; l'AS</label>
+        <div class="college-search-wrap">
+          <input type="text" id="p-search" placeholder="Saisir nom ou prénom…" autocomplete="off"
+                 oninput="filterSortieStudents()" onfocus="filterSortieStudents()">
+          <div id="p-results" class="college-results hidden"></div>
+        </div>
+      </div>
+      <form id="participantForm" onsubmit="handleParticipant(event)">
+        <input type="hidden" id="p-id">
+        <input type="hidden" id="p-student">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nom</label>
+            <input type="text" id="p-nom" readonly placeholder="Choisir un élève ci-dessus">
+          </div>
+          <div class="form-group">
+            <label>Pr&eacute;nom</label>
+            <input type="text" id="p-prenom" readonly>
+          </div>
+          <div class="form-group">
+            <label>Classe</label>
+            <input type="text" id="p-classe" list="classes-list">
+          </div>
+          <div class="form-group">
+            <label>T&eacute;l&eacute;phone</label>
+            <input type="tel" id="p-telephone" placeholder="06 xx xx xx xx" oninput="formatPhoneInput(this)">
+          </div>
+          <div class="form-group">
+            <label>Autorisation parentale</label>
+            <select id="p-autorisation">
+              <option value="Non">Non</option>
+              <option value="Oui">Oui</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Montant (&euro;)</label>
+            <input type="number" id="p-montant" min="0" step="0.5">
+          </div>
+          <div class="form-group full">
+            <label>Somme re&ccedil;ue &mdash; moyen de paiement</label>
+            <div class="checkbox-group">
+              <label class="check-item"><input type="checkbox" id="p-moyen-cheque" onchange="exclusiveCheck(this,'p-moyen-especes')"> &#128197; Ch&egrave;que</label>
+              <label class="check-item"><input type="checkbox" id="p-moyen-especes" onchange="exclusiveCheck(this,'p-moyen-cheque')"> &#128181; Esp&egrave;ces</label>
+            </div>
+          </div>
+          <div class="form-group full">
+            <label>Carte TCL</label>
+            <div class="checkbox-group">
+              <label class="check-item"><input type="radio" name="p-tcl" value="/" id="p-tcl-none"> /</label>
+              <label class="check-item"><input type="radio" name="p-tcl" value="Oui" id="p-tcl-oui"> Oui</label>
+              <label class="check-item"><input type="radio" name="p-tcl" value="Non" id="p-tcl-non"> Non</label>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('participantModal')">Annuler</button>
+      <button class="btn btn-primary" form="participantForm" type="submit">&#128190; Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL CONFIRMATION GÉNÉRIQUE ===== -->
+<div id="confirmModal" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>&#128465;&#65039; Confirmer</h3>
+      <button class="close-btn" onclick="closeModal('confirmModal')">&#215;</button>
+    </div>
+    <div class="modal-body"><p id="confirmMsg"></p></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('confirmModal')">Annuler</button>
+      <button class="btn btn-danger" onclick="runConfirm()">&#128465;&#65039; Effacer</button>
+    </div>
+  </div>
+</div>
+
 <!-- Contenu généré pour l'export PDF "par APSA" (invisible à l'écran, affiché uniquement à l'impression) -->
 <div id="printApsaSection"></div>
+<!-- Contenu généré pour l'export PDF d'une sortie -->
+<div id="printSortieSection"></div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1170,8 +1395,9 @@ function formatPhoneInput(el){
 // ── STOCKAGE LOCAL ────────────────────────────────────────────────────────
 function load() {
   try {
-    const s=localStorage.getItem('as-students');    if(s) students=JSON.parse(s).filter(x=>!x.deleted&&x.id!=='__deletedLog__'&&((x.nom||'').trim()||(x.prenom||'').trim()));
+    const s=localStorage.getItem('as-students');    if(s) students=JSON.parse(s).filter(x=>!x.deleted&&!isMetaId(x.id)&&((x.nom||'').trim()||(x.prenom||'').trim()));
     const c=localStorage.getItem('as-college');     if(c) collegeStudents=JSON.parse(c);
+    const so=localStorage.getItem('as-sorties');    if(so) sorties=JSON.parse(so);
     const d=localStorage.getItem('as-deleted-log'); if(d) deletedLog=JSON.parse(d);
     const p=localStorage.getItem('as-pending-sync'); pendingSync = p === '1';
     initNextOrdre();
@@ -1203,7 +1429,7 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 function initNextOrdre(){
   nextOrdre=students.length>0?Math.max(...students.map(s=>parseInt(s.ordre)||0))+1:1;
 }
-function liveStudents(){return students.filter(s=>!s.deleted&&s.id!=='__deletedLog__'&&((s.nom||'').trim()||(s.prenom||'').trim()));}
+function liveStudents(){return students.filter(s=>!s.deleted&&!isMetaId(s.id)&&((s.nom||'').trim()||(s.prenom||'').trim()));}
 
 // ── TABS ──────────────────────────────────────────────────────────────────
 function switchTab(id,btn){
@@ -1589,7 +1815,13 @@ function printByAPSA(){
   const newSnapshot={date:now.getTime(),groups:{}};
 
   const cols=APSA_GROUPS.map(g=>{
-    const current=g.students().sort(sortByClasseThenName);
+    // "current" exclut uniquement les exclusions DÉFINITIVES : celles-ci
+    // sortent du groupe exactement comme une désinscription (signalées une
+    // fois en rouge barré grâce à la comparaison, puis absentes des exports
+    // suivants). Une exclusion 15 jours reste dans "current" : l'élève garde
+    // sa place dans la liste (et le comptage), avec une mention rouge tant
+    // que la date de fin n'est pas dépassée, puis redevient normal.
+    const current=g.students().filter(s=>s.exclusion!=='definitif').sort(sortByClasseThenName);
     newSnapshot.groups[g.key]=current.map(s=>({id:s.id,nom:s.nom,prenom:s.prenom,classe:s.classe}));
 
     const prevList=prev?.groups?.[g.key]||[];
@@ -1604,9 +1836,12 @@ function printByAPSA(){
 
     const items=combined.length
       ? combined.map(s=>{
-          const style=isExcluded(s)||s.status==='removed'?' style="color:#dc2626;text-decoration:line-through"'
-            :s.status==='added'?' style="color:#16a34a;font-weight:700"':'';
-          return `<li${style}>${x(s.nom)} ${x(s.prenom)}<span>${x(s.classe)||'—'}</span></li>`;
+          if(s.status==='removed') return `<li style="color:#dc2626;text-decoration:line-through">${x(s.nom)} ${x(s.prenom)}<span>${x(s.classe)||'—'}</span></li>`;
+          if(s.status==='added')   return `<li style="color:#16a34a;font-weight:700">${x(s.nom)} ${x(s.prenom)}<span>${x(s.classe)||'—'}</span></li>`;
+          if(s.exclusion==='15j'&&isExcluded(s)){
+            return `<li>${x(s.nom)} ${x(s.prenom)}<span>${x(s.classe)||'—'}</span><br><span style="color:#dc2626;font-weight:700;font-size:.9em">Exclu 15 jours (jusqu'au ${x(s.exclusionFin||'—')})</span></li>`;
+          }
+          return `<li>${x(s.nom)} ${x(s.prenom)}<span>${x(s.classe)||'—'}</span></li>`;
         }).join('')
       : '';
     const empty=combined.length?'':`<div class="apsa-print-empty">Aucun élève</div>`;
@@ -1622,7 +1857,7 @@ function printByAPSA(){
 
   const title=`<h1 class="apsa-print-title">AS Joliot Curie &mdash; Liste des &eacute;l&egrave;ves licenci&eacute;s 2026-2027 &mdash; Export du ${dateStr}</h1>`;
   const legend=prev
-    ? `<p class="apsa-print-legend">Compar&eacute; &agrave; l'export du ${new Date(prev.date).toLocaleDateString('fr-FR')} &mdash; <span style="color:#16a34a;font-weight:700">vert</span> = ajout&eacute;(s) depuis &mdash; <span style="color:#dc2626;text-decoration:line-through">rouge barr&eacute;</span> = retir&eacute;(s) depuis</p>`
+    ? `<p class="apsa-print-legend"><span style="color:#16a34a;font-weight:700">Vert</span> = A AJOUTER &nbsp;&nbsp; <span style="color:#dc2626;text-decoration:line-through">Rouge barr&eacute;</span> = A ENLEVER</p>`
     : '';
   document.getElementById('printApsaSection').innerHTML=`${title}${legend}<div class="apsa-print-grid">${cols}</div>`;
   document.body.classList.add('printing-apsa');
@@ -1727,7 +1962,284 @@ function renderStats(){
   document.getElementById('stat-reglements').innerHTML=REGL_KEYS.filter(r=>rCounts[r]).length?REGL_KEYS.filter(r=>rCounts[r]).map(r=>renderBar(REGL[r],rCounts[r],total)).join(''):'<p class="muted">Aucun élève</p>';
 }
 
-function renderAll(){renderTable();['fitness','natation','sport_partage'].forEach(renderActivity);renderFutsalGroup('Benj');renderFutsalGroup('Min');renderCollegeTab();renderStats();}
+function renderAll(){renderTable();['fitness','natation','sport_partage'].forEach(renderActivity);renderFutsalGroup('Benj');renderFutsalGroup('Min');renderSorties();renderCollegeTab();renderStats();}
+
+// ── SORTIES AS ────────────────────────────────────────────────────────────
+// Les sorties sont synchronisées via des lignes "méta" de la feuille Eleves
+// (id "__sortie__<id>", JSON de la sortie dans la colonne prenom), comme le
+// journal des suppressions : aucune modification de l'Apps Script n'est requise.
+const SORTIE_PREFIX = '__sortie__';
+let sorties         = [];
+let currentSortieId = null;
+let confirmAction   = null;
+let sortieSyncTimer = null;
+
+function isMetaId(id){return String(id||'').startsWith('__');}
+function saveSorties(){try{localStorage.setItem('as-sorties',JSON.stringify(sorties));}catch(e){}}
+function getSortie(id){return sorties.find(s=>s.id===id);}
+function sortedSorties(){return [...sorties].sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.lastModified||0)-(b.lastModified||0));}
+function isoToFr(iso){const m=(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:(iso||'—');}
+function todayIso(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function montantLabel(m){const n=parseFloat(m);if(isNaN(n)) return '—';return (Number.isInteger(n)?String(n):n.toFixed(2).replace('.',','))+' €';}
+function sortieLabel(s){return isoToFr(s.date)+(s.libelle?' — '+s.libelle:'');}
+function exclusiveCheck(el,otherId){if(el.checked) document.getElementById(otherId).checked=false;}
+function tclBadge(t){return t==='Oui'?'<span class="badge b-teal">Oui</span>':t==='Non'?'<span class="badge b-red">Non</span>':'<span class="muted">/</span>';}
+
+// Plusieurs clics rapprochés (cases à cocher) → un seul envoi vers Sheets
+function scheduleSortieSync(){
+  pendingSync=true; savePendingSync(); updateNetworkUI();
+  clearTimeout(sortieSyncTimer);
+  sortieSyncTimer=setTimeout(()=>syncWithSheets(true),1500);
+}
+function touchSortie(s){
+  s.lastModified=Date.now();
+  saveSorties(); renderSorties(); scheduleSortieSync();
+}
+
+function mergeSorties(local,remote){
+  const map=new Map();
+  remote.forEach(s=>{if(s&&s.id) map.set(s.id,s);});
+  local.forEach(s=>{const e=map.get(s.id);if(!e||(s.lastModified||0)>=(e.lastModified||0)) map.set(s.id,s);});
+  for(const [id,ts] of Object.entries(deletedLog)){const s=map.get(id);if(s&&(s.lastModified||0)<=+ts) map.delete(id);}
+  return [...map.values()];
+}
+function sortiesFromRows(rows){
+  return rows.filter(r=>String(r.id).startsWith(SORTIE_PREFIX))
+    .map(r=>{try{return JSON.parse(r.prenom);}catch(e){return null;}})
+    .filter(s=>s&&s.id);
+}
+function metaEntry(id,json,ordre){
+  return {id,ordre,prenom:json,nom:'',classe:'',sexe:'',dateNaissance:'',cotisation:'',reglement:'',
+    licence:'',telephone:'',teeShirt:'',section:'',handicap:'',droitImage:'',exclusion:'',exclusionFin:'',
+    activites:'',lastModified:0};
+}
+function metaRows(){
+  return [...sorties.map((s,i)=>metaEntry(SORTIE_PREFIX+s.id,JSON.stringify(s),9999000+i)),
+          metaEntry('__deletedLog__',JSON.stringify(deletedLog),9999999)];
+}
+
+function selectSortie(id){currentSortieId=id;renderSorties();}
+
+function renderSorties(){
+  const list=sortedSorties();
+  document.getElementById('sortiesCount').textContent=list.length;
+  if(!getSortie(currentSortieId)) currentSortieId=list.length?list[list.length-1].id:null;
+  const nav=document.getElementById('sortieSubnav');
+  nav.classList.toggle('hidden',!list.length);
+  nav.innerHTML=list.map(s=>`<button class="sortie-chip${s.id===currentSortieId?' active':''}" onclick="selectSortie('${s.id}')">&#128652; ${x(sortieLabel(s))} (${(s.participants||[]).length})</button>`).join('');
+  const s=getSortie(currentSortieId);
+  document.getElementById('sortieEmpty').classList.toggle('hidden',!!s);
+  document.getElementById('sortieContent').classList.toggle('hidden',!s);
+  if(!s) return;
+
+  const parts=[...(s.participants||[])].sort(sortByName);
+  const payes=parts.filter(p=>p.moyen);
+  document.getElementById('sortieTitle').textContent='Sortie AS'+(s.libelle?' — '+s.libelle:'');
+  document.getElementById('sortieDate').textContent=isoToFr(s.date);
+  document.getElementById('sortieMontant').textContent=montantLabel(s.montant);
+  document.getElementById('sortieEncaisse').textContent=montantLabel(payes.reduce((acc,p)=>acc+(parseFloat(p.montant)||0),0));
+  document.getElementById('sortieNbEleves').textContent=`${parts.length} élève${parts.length>1?'s':''}`;
+  document.getElementById('sortieNbPayes').textContent=`${payes.length} réglé${payes.length>1?'s':''}`;
+
+  const tbody=document.getElementById('sortieBody'),empty=document.getElementById('sortieEmptyList'),table=document.getElementById('tbl-sortie');
+  if(!parts.length){tbody.innerHTML='';empty.classList.remove('hidden');table.style.display='none';return;}
+  empty.classList.add('hidden');table.style.display='';
+  tbody.innerHTML=parts.map((p,i)=>`<tr>
+    <td style="font-weight:700;text-align:center">${i+1}</td>
+    <td><strong>${x(p.nom)} ${x(p.prenom)}</strong></td>
+    <td>${classeBadge(p.classe)}</td>
+    <td>${x(p.telephone)||'<span class="muted">—</span>'}</td>
+    <td>${p.autorisation==='Oui'?'<span class="badge b-teal">&#9989; Oui</span>':'<span class="badge b-red">&#10060; Non</span>'}</td>
+    <td><div class="pay-cell">
+      <strong>${montantLabel(p.montant)}</strong>
+      <label class="check-item"><input type="checkbox" ${p.moyen==='cheque'?'checked':''} onchange="setMoyen('${p.id}','cheque',this.checked)"> Ch&egrave;que</label>
+      <label class="check-item"><input type="checkbox" ${p.moyen==='especes'?'checked':''} onchange="setMoyen('${p.id}','especes',this.checked)"> Esp&egrave;ces</label>
+    </div></td>
+    <td>${tclBadge(p.carteTCL)}</td>
+    <td><div class="flex gap2">
+      <button class="btn btn-warning btn-sm" onclick="openParticipantModal('${p.id}')" title="Modifier">&#9999;&#65039;</button>
+      <button class="btn btn-danger btn-sm" onclick="openDeleteParticipant('${p.id}')" title="Effacer">&#128465;&#65039;</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+// Validation rapide du paiement directement dans le tableau
+function setMoyen(pid,moyen,checked){
+  const s=getSortie(currentSortieId); if(!s) return;
+  const p=(s.participants||[]).find(q=>q.id===pid); if(!p) return;
+  p.moyen=checked?moyen:(p.moyen===moyen?'':p.moyen);
+  touchSortie(s);
+}
+
+// ── Création / modification d'une sortie
+function openSortieModal(id){
+  const s=id?getSortie(id):null;
+  document.getElementById('sortieModalTitle').innerHTML=s?'&#9999;&#65039; Modifier la sortie':'&#128652; Cr&eacute;er une sortie';
+  document.getElementById('so-id').value=s?s.id:'';
+  document.getElementById('so-date').value=s?(s.date||''):todayIso();
+  document.getElementById('so-libelle').value=s?(s.libelle||''):'';
+  document.getElementById('so-montant').value=s&&s.montant!==''&&s.montant!=null?s.montant:'';
+  document.getElementById('sortieModal').classList.remove('hidden');
+}
+function handleSortie(e){
+  e.preventDefault();
+  const id=document.getElementById('so-id').value;
+  const date=document.getElementById('so-date').value;
+  const libelle=document.getElementById('so-libelle').value.trim();
+  const mv=document.getElementById('so-montant').value;
+  const montant=mv===''?'':parseFloat(mv);
+  let s;
+  if(id){
+    s=getSortie(id); if(!s) return;
+    // Le nouveau montant est reporté sur les inscrits qui avaient l'ancien montant
+    if(s.montant!==montant) (s.participants||[]).forEach(p=>{if(p.montant===s.montant) p.montant=montant;});
+    Object.assign(s,{date,libelle,montant});
+  } else {
+    s={id:uid(),date,libelle,montant,participants:[]};
+    sorties.push(s);
+  }
+  currentSortieId=s.id;
+  closeModal('sortieModal');
+  touchSortie(s);
+  alert2(id?'✅ Sortie modifiée.':'✅ Sortie créée.','success');
+}
+function openDeleteSortie(){
+  const s=getSortie(currentSortieId); if(!s) return;
+  const n=(s.participants||[]).length;
+  openConfirm(`Effacer la sortie <strong>${x(sortieLabel(s))}</strong>${n?` et ses ${n} inscription${n>1?'s':''}`:''} ? Cette action est irréversible.`,()=>{
+    deletedLog[s.id]=Date.now(); saveDeletedLog();
+    sorties=sorties.filter(q=>q.id!==s.id); currentSortieId=null;
+    saveSorties(); renderSorties(); scheduleSortieSync();
+    alert2('🗑️ Sortie effacée.','info');
+  });
+}
+
+// ── Inscription d'un élève à la sortie
+function openParticipantModal(pid){
+  const s=getSortie(currentSortieId); if(!s) return;
+  const p=pid?(s.participants||[]).find(q=>q.id===pid):null;
+  document.getElementById('participantModalTitle').innerHTML=p?'&#9999;&#65039; Modifier l\'inscription':'&#10133; Inscrire un &eacute;l&egrave;ve &agrave; la sortie';
+  document.getElementById('p-pickerWrap').classList.toggle('hidden',!!p);
+  document.getElementById('p-search').value='';
+  document.getElementById('p-results').classList.add('hidden');
+  document.getElementById('p-id').value=p?p.id:'';
+  document.getElementById('p-student').value=p?(p.studentId||''):'';
+  document.getElementById('p-nom').value=p?p.nom:'';
+  document.getElementById('p-prenom').value=p?p.prenom:'';
+  document.getElementById('p-classe').value=p?(p.classe||''):'';
+  document.getElementById('p-telephone').value=p?formatPhoneNumber(p.telephone||''):'';
+  document.getElementById('p-autorisation').value=p?(p.autorisation||'Non'):'Non';
+  document.getElementById('p-montant').value=p?(p.montant??''):(s.montant??'');
+  document.getElementById('p-moyen-cheque').checked=!!p&&p.moyen==='cheque';
+  document.getElementById('p-moyen-especes').checked=!!p&&p.moyen==='especes';
+  const tcl=p?(p.carteTCL||'/'):'/';
+  document.getElementById('p-tcl-none').checked=tcl==='/';
+  document.getElementById('p-tcl-oui').checked=tcl==='Oui';
+  document.getElementById('p-tcl-non').checked=tcl==='Non';
+  document.getElementById('participantModal').classList.remove('hidden');
+}
+function filterSortieStudents(){
+  const q=(document.getElementById('p-search').value||'').toLowerCase().trim();
+  const res=document.getElementById('p-results');
+  const s=getSortie(currentSortieId);
+  const already=new Set((s?.participants||[]).map(p=>p.studentId));
+  const pool=liveStudents().filter(st=>!already.has(st.id));
+  const matches=pool.filter(st=>!q||(st.nom+' '+st.prenom).toLowerCase().includes(q)||(st.prenom+' '+st.nom).toLowerCase().includes(q))
+    .sort(sortByName).slice(0,50);
+  res.innerHTML=matches.length
+    ? matches.map(st=>`<div class="college-result-item" onclick="selectSortieStudent('${st.id}')">
+        <span class="cri-name">${x(st.nom)} ${x(st.prenom)}</span>
+        <span class="cri-detail">${x(st.classe||'—')}</span>
+      </div>`).join('')
+    : '<div class="college-result-item" style="color:var(--muted)">Aucun élève inscrit à l\'AS ne correspond</div>';
+  res.classList.remove('hidden');
+}
+function selectSortieStudent(id){
+  const st=students.find(q=>q.id===id); if(!st) return;
+  document.getElementById('p-student').value=st.id;
+  document.getElementById('p-nom').value=st.nom||'';
+  document.getElementById('p-prenom').value=st.prenom||'';
+  document.getElementById('p-classe').value=st.classe||'';
+  document.getElementById('p-telephone').value=formatPhoneNumber(st.telephone||'');
+  document.getElementById('p-search').value='';
+  document.getElementById('p-results').classList.add('hidden');
+}
+document.addEventListener('click',e=>{
+  const res=document.getElementById('p-results');
+  if(res&&!res.contains(e.target)&&e.target.id!=='p-search') res.classList.add('hidden');
+});
+function handleParticipant(e){
+  e.preventDefault();
+  const s=getSortie(currentSortieId); if(!s) return;
+  const pid=document.getElementById('p-id').value;
+  const studentId=document.getElementById('p-student').value;
+  if(!pid&&!studentId){alert2('Sélectionnez un élève dans la liste des inscrits à l\'AS.','error');return;}
+  s.participants=s.participants||[];
+  if(!pid&&s.participants.some(p=>p.studentId===studentId)){alert2('Cet élève est déjà inscrit à cette sortie.','error');return;}
+  const mv=document.getElementById('p-montant').value;
+  const data={
+    nom:document.getElementById('p-nom').value.trim(),
+    prenom:document.getElementById('p-prenom').value.trim(),
+    classe:document.getElementById('p-classe').value.trim(),
+    telephone:document.getElementById('p-telephone').value.trim(),
+    autorisation:document.getElementById('p-autorisation').value,
+    montant:mv===''?'':parseFloat(mv),
+    moyen:document.getElementById('p-moyen-cheque').checked?'cheque':(document.getElementById('p-moyen-especes').checked?'especes':''),
+    carteTCL:(document.querySelector('input[name="p-tcl"]:checked')||{}).value||'/'
+  };
+  if(pid){
+    const i=s.participants.findIndex(p=>p.id===pid); if(i===-1) return;
+    s.participants[i]={...s.participants[i],...data};
+  } else {
+    s.participants.push({id:uid(),studentId,...data});
+  }
+  closeModal('participantModal');
+  touchSortie(s);
+  alert2(pid?'✅ Inscription modifiée.':`✅ ${x(data.prenom)} ${x(data.nom)} inscrit(e) à la sortie.`,'success');
+}
+function openDeleteParticipant(pid){
+  const s=getSortie(currentSortieId); if(!s) return;
+  const p=(s.participants||[]).find(q=>q.id===pid); if(!p) return;
+  openConfirm(`Retirer <strong>${x(p.prenom)} ${x(p.nom)}</strong> de la sortie ?`,()=>{
+    s.participants=s.participants.filter(q=>q.id!==pid);
+    touchSortie(s);
+  });
+}
+
+// ── Confirmation générique
+function openConfirm(msg,fn){
+  document.getElementById('confirmMsg').innerHTML=msg;
+  confirmAction=fn;
+  document.getElementById('confirmModal').classList.remove('hidden');
+}
+function runConfirm(){
+  const fn=confirmAction; confirmAction=null;
+  closeModal('confirmModal');
+  if(fn) fn();
+}
+
+// ── Export PDF de la sortie affichée
+function printSortie(){
+  const s=getSortie(currentSortieId); if(!s) return;
+  const parts=[...(s.participants||[])].sort(sortByName);
+  const payes=parts.filter(p=>p.moyen);
+  const rows=parts.map((p,i)=>`<tr>
+    <td>${i+1}</td><td><strong>${x(p.nom)}</strong> ${x(p.prenom)}</td><td>${x(p.classe)||'—'}</td>
+    <td>${x(p.telephone)||'—'}</td><td>${p.autorisation==='Oui'?'Oui':'Non'}</td>
+    <td>${montantLabel(p.montant)} — ${p.moyen?REGL[p.moyen]:'non réglé'}</td><td>${x(p.carteTCL||'/')}</td>
+  </tr>`).join('');
+  document.getElementById('printSortieSection').innerHTML=`
+    <h1 class="sortie-print-title">AS Joliot Curie &mdash; Sortie AS${s.libelle?' &mdash; '+x(s.libelle):''} du ${isoToFr(s.date)}</h1>
+    <p class="sortie-print-sub"><strong>${parts.length} élève${parts.length>1?'s':''} inscrit${parts.length>1?'s':''}</strong>
+      &nbsp;&bull;&nbsp; Montant : ${montantLabel(s.montant)}
+      &nbsp;&bull;&nbsp; ${payes.length} réglé${payes.length>1?'s':''} (${montantLabel(payes.reduce((a,p)=>a+(parseFloat(p.montant)||0),0))})</p>
+    ${parts.length?`<table class="sortie-print-table"><thead><tr>
+      <th>#</th><th>Élève</th><th>Classe</th><th>Téléphone</th><th>Autorisation parentale</th><th>Paiement</th><th>Carte TCL</th>
+    </tr></thead><tbody>${rows}</tbody></table>`:'<p style="text-align:center;color:#94a3b8">Aucun élève inscrit</p>'}`;
+  document.body.classList.add('printing-sortie');
+  window.print();
+}
+window.addEventListener('afterprint',()=>{document.body.classList.remove('printing-sortie');});
 
 // ── GOOGLE SHEETS (JSONP import / formulaire export) ──────────────────────
 function jsonpFetch(url, timeout=12000){
@@ -1817,7 +2329,7 @@ function mergeStudents(local, remote) {
     const s = map.get(id);
     if (s && (s.lastModified||0) <= +deletedAt) map.delete(id);
   }
-  return [...map.values()].filter(s=>!s.deleted&&s.id!=='__deletedLog__'&&((s.nom||'').trim()||(s.prenom||'').trim())).sort((a,b)=>(a.ordre||0)-(b.ordre||0));
+  return [...map.values()].filter(s=>!s.deleted&&!isMetaId(s.id)&&((s.nom||'').trim()||(s.prenom||'').trim())).sort((a,b)=>(a.ordre||0)-(b.ordre||0));
 }
 
 async function syncWithSheets(silent=false){
@@ -1827,7 +2339,7 @@ async function syncWithSheets(silent=false){
     return false;
   }
   // ── LECTURE ──────────────────────────────────────────────────────────────
-  let sheetStudents=[];
+  let sheetStudents=[], sheetSorties=[];
   try{
     const d=await jsonpFetch(SCRIPT_URL,8000);
     if(d.success&&Array.isArray(d.data)){
@@ -1843,8 +2355,9 @@ async function syncWithSheets(silent=false){
           saveDeletedLog();
         }catch(e){}
       }
+      sheetSorties=sortiesFromRows(allRows);
       // Garder seulement les vrais élèves (ni méta, ni lignes vides)
-      sheetStudents=allRows.filter(s=>s.id!=='__deletedLog__'&&(s.nom||s.prenom));
+      sheetStudents=allRows.filter(s=>!isMetaId(s.id)&&(s.nom||s.prenom));
     }
   }catch(e){
     pendingSync=true; savePendingSync(); updateNetworkUI();
@@ -1855,19 +2368,14 @@ async function syncWithSheets(silent=false){
   const merged=mergeStudents(students,sheetStudents);
   // Renuméroter les élèves actifs de façon cohérente après fusion
   let ord=1; merged.filter(s=>!s.deleted).sort((a,b)=>(a.ordre||0)-(b.ordre||0)).forEach(s=>{s.ordre=ord++;});
-  students=merged; initNextOrdre(); save(); renderAll();
+  students=merged; initNextOrdre(); save();
+  sorties=mergeSorties(sorties,sheetSorties); saveSorties();
+  renderAll();
   // ── ÉCRITURE ─────────────────────────────────────────────────────────────
-  // On n'écrit que les élèves actifs + une ligne méta contenant le deletedLog
+  // On écrit les élèves actifs + des lignes méta (sorties AS et deletedLog)
   // → fonctionne avec l'Apps Script existant, sans modification côté serveur
   const liveOnly=liveStudents();
-  const metaEntry={
-    id:'__deletedLog__',ordre:9999999,
-    prenom:JSON.stringify(deletedLog),nom:'',classe:'',
-    sexe:'',dateNaissance:'',cotisation:'',reglement:'',
-    licence:'',telephone:'',teeShirt:'',section:'',handicap:'',droitImage:'',exclusion:'',exclusionFin:'',
-    activites:'',lastModified:0
-  };
-  const body='payload='+encodeURIComponent(JSON.stringify({students:[...liveOnly,metaEntry]}));
+  const body='payload='+encodeURIComponent(JSON.stringify({students:[...liveOnly,...metaRows()]}));
   let sent=false;
   // Méthode 1 : fetch no-cors (Chrome/Firefox/Edge/Safari desktop)
   try{
@@ -1923,7 +2431,8 @@ async function clearLocalAndPull(){
     const allRows=d.data.map((r,i)=>parseRow(r,i));
     const metaRow=allRows.find(s=>s.id==='__deletedLog__');
     if(metaRow&&metaRow.prenom){try{deletedLog=JSON.parse(metaRow.prenom);saveDeletedLog();}catch(e){}}
-    students=allRows.filter(s=>s.id!=='__deletedLog__'&&!s.deleted&&((s.nom||'').trim()||(s.prenom||'').trim()));
+    sorties=sortiesFromRows(allRows); saveSorties();
+    students=allRows.filter(s=>!isMetaId(s.id)&&!s.deleted&&((s.nom||'').trim()||(s.prenom||'').trim()));
     students.sort((a,b)=>(a.ordre||0)-(b.ordre||0)).forEach((s,i)=>{s.ordre=i+1;});
     initNextOrdre(); pendingSync=false; save(); savePendingSync(); updateNetworkUI(); renderAll();
     alert2(`✅ ${students.length} élève(s) rechargé(s) depuis Sheets.`,'success');
@@ -1937,14 +2446,7 @@ async function pushAsAuthority(){
   const live=liveStudents();
   if(!live.length&&!confirm('Aucun élève actif. Écraser Sheets quand même (effacera tout) ?')) return;
   if(!confirm(`⚠️ Remplacer les données Sheets par la liste locale (${live.length} élève(s)) ?\n\nLes autres appareils récupéreront cette liste à leur prochaine synchronisation.`)) return;
-  const metaEntry={
-    id:'__deletedLog__',ordre:9999999,
-    prenom:JSON.stringify(deletedLog),nom:'',classe:'',
-    sexe:'',dateNaissance:'',cotisation:'',reglement:'',
-    licence:'',telephone:'',teeShirt:'',section:'',handicap:'',droitImage:'',exclusion:'',exclusionFin:'',
-    activites:'',lastModified:0
-  };
-  const body='payload='+encodeURIComponent(JSON.stringify({students:[...live,metaEntry]}));
+  const body='payload='+encodeURIComponent(JSON.stringify({students:[...live,...metaRows()]}));
   let sent=false;
   try{
     await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',credentials:'omit',
@@ -2053,11 +2555,12 @@ function alert2(msg,type='info'){
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────
-['editModal','deleteModal','reinitModal'].forEach(id=>{
+const MODALS=['editModal','deleteModal','reinitModal','sortieModal','participantModal','confirmModal'];
+MODALS.forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)this.classList.add('hidden');});
 });
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape') ['editModal','deleteModal','reinitModal'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  if(e.key==='Escape') MODALS.forEach(id=>document.getElementById(id).classList.add('hidden'));
 });
 
 load();

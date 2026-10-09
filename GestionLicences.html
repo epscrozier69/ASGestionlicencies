@@ -60,10 +60,10 @@ header{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;
 .contents{display:contents}
 .hidden-field{display:none!important}
 label{font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-input,select{padding:.45rem .7rem;border:1.5px solid var(--border);border-radius:var(--radius);
+input,select,textarea{padding:.45rem .7rem;border:1.5px solid var(--border);border-radius:var(--radius);
   font-size:.9rem;color:var(--text);background:var(--surface);width:100%;
-  transition:border-color .15s,box-shadow .15s}
-input:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  transition:border-color .15s,box-shadow .15s;font-family:inherit;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
 input[readonly]{background:#f8fafc;cursor:default}
 .checkbox-group{display:flex;flex-wrap:wrap;gap:.75rem}
 .check-item{display:flex;align-items:center;gap:.375rem;cursor:pointer;font-size:.9rem}
@@ -389,24 +389,24 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 .apsa-print-list li span{display:block;color:#64748b;font-size:.9em}
 .apsa-print-empty{font-size:.58rem;color:#94a3b8;font-style:italic;padding:.3rem}
 
-/* ── SORTIES AS (onglet orange, distinct des activités) ── */
-.tab-btn.tab-sorties{color:#c2410c;background:#fff7ed}
-.tab-btn.tab-sorties:hover{background:#ffedd5;color:#9a3412}
-.tab-btn.tab-sorties.active{color:#ea580c;border-bottom-color:#ea580c;background:#ffedd5}
-.btn-orange{background:#ea580c;color:#fff}.btn-orange:hover{background:#c2410c}
+/* ── SORTIES AS (onglet indigo, distinct des activités) ── */
+.tab-btn.tab-sorties{color:#4338ca;background:#eef2ff}
+.tab-btn.tab-sorties:hover{background:#e0e7ff;color:#3730a3}
+.tab-btn.tab-sorties.active{color:#4338ca;border-bottom-color:#4338ca;background:#e0e7ff}
+.btn-sortie{background:#4338ca;color:#fff}.btn-sortie:hover{background:#3730a3}
 .sortie-subnav{display:flex;gap:.4rem;overflow-x:auto;padding:.75rem 1.25rem;
-  border-bottom:1px solid var(--border);background:#fff7ed}
-.sortie-chip{flex:none;padding:.4rem .85rem;border-radius:9999px;border:1.5px solid #fdba74;
-  background:#fff;color:#9a3412;font-weight:600;font-size:.82rem;cursor:pointer;white-space:nowrap}
-.sortie-chip:hover{background:#ffedd5}
-.sortie-chip.active{background:#ea580c;border-color:#ea580c;color:#fff}
+  border-bottom:1px solid var(--border);background:#eef2ff}
+.sortie-chip{flex:none;padding:.4rem .85rem;border-radius:9999px;border:1.5px solid #a5b4fc;
+  background:#fff;color:#3730a3;font-weight:600;font-size:.82rem;cursor:pointer;white-space:nowrap}
+.sortie-chip:hover{background:#e0e7ff}
+.sortie-chip.active{background:#4338ca;border-color:#4338ca;color:#fff}
 .sortie-info{display:flex;flex-wrap:wrap;gap:.35rem 1.25rem;font-size:.85rem;color:var(--muted);margin-top:.3rem}
 .sortie-table thead th:nth-child(1){background:#374151}
 .sortie-table thead th:nth-child(2){background:#1e40af}
 .sortie-table thead th:nth-child(3){background:#0f766e}
 .sortie-table thead th:nth-child(4){background:#be123c}
 .sortie-table thead th:nth-child(5){background:#7c3aed}
-.sortie-table thead th:nth-child(6){background:#ea580c}
+.sortie-table thead th:nth-child(6){background:#0891b2}
 .sortie-table thead th:nth-child(7){background:#0369a1}
 .sortie-table thead th:nth-child(8){background:#b91c1c}
 .sortie-table thead th:nth-child(9){background:#a21caf}
@@ -415,11 +415,29 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 .sortie-table tbody td:nth-child(3){background:#ccfbf1}
 .sortie-table tbody td:nth-child(4){background:#fee2e2}
 .sortie-table tbody td:nth-child(5){background:#ede9fe}
-.sortie-table tbody td:nth-child(6){background:#ffedd5}
+.sortie-table tbody td:nth-child(6){background:#cffafe}
 .sortie-table tbody td:nth-child(7){background:#e0f2fe}
 .sortie-table tbody td:nth-child(8){background:#fef2f2}
 .sortie-table tbody td:nth-child(9){background:#fae8ff}
 .sortie-table.free .col-paiement,.sortie-table.no-tcl .col-tcl{display:none}
+
+/* ── BLACK LISTE (onglet sombre, distinct des activités) ── */
+.tab-btn.tab-blackliste{color:#1f2937;background:#f1f5f9}
+.tab-btn.tab-blackliste:hover{background:#e2e8f0;color:#0f172a}
+.tab-btn.tab-blackliste.active{color:#1f2937;border-bottom-color:#1f2937;background:#e2e8f0}
+.btn-blackliste{background:#1f2937;color:#fff}.btn-blackliste:hover{background:#0f172a}
+.bl-table thead th:nth-child(1){background:#1f2937}
+.bl-table thead th:nth-child(2){background:#1e40af}
+.bl-table thead th:nth-child(3){background:#be123c}
+.bl-table thead th:nth-child(4){background:#7c3aed}
+.bl-table thead th:nth-child(5){background:#0369a1}
+.bl-table thead th:nth-child(6){background:#b91c1c}
+.bl-table tbody td:nth-child(1){background:#e2e8f0}
+.bl-table tbody td:nth-child(2){background:#dbeafe}
+.bl-table tbody td:nth-child(3){background:#fee2e2}
+.bl-table tbody td:nth-child(4){background:#ede9fe}
+.bl-table tbody td:nth-child(5){background:#e0f2fe}
+.bl-table tbody td:nth-child(6){background:#fef2f2}
 
 /* ── EXPORT PDF D'UNE SORTIE ── */
 #printSortieSection{display:none}
@@ -428,13 +446,13 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   body.printing-sortie #printSortieSection{display:block!important;width:100%}
   #printSortieSection table td:last-child,#printSortieSection table th:last-child{display:table-cell!important}
 }
-.sortie-print-title{font-size:1.15rem;font-weight:700;text-align:center;color:#9a3412;margin:0 0 .3rem}
+.sortie-print-title{font-size:1.15rem;font-weight:700;text-align:center;color:#3730a3;margin:0 0 .3rem}
 .sortie-print-sub{font-size:.8rem;text-align:center;color:#475569;margin:0 0 .9rem}
 .sortie-print-table{width:100%;border-collapse:collapse;font-size:.78rem;
   -webkit-print-color-adjust:exact;print-color-adjust:exact}
-.sortie-print-table th{background:#ea580c;color:#fff;padding:.35rem .5rem;text-align:left;font-size:.7rem}
+.sortie-print-table th{background:#4338ca;color:#fff;padding:.35rem .5rem;text-align:left;font-size:.7rem}
 .sortie-print-table td{padding:.3rem .5rem;border:1px solid #cbd5e1}
-.sortie-print-table tr:nth-child(even) td{background:#fff7ed}
+.sortie-print-table tr:nth-child(even) td{background:#eef2ff}
 </style>
 </head>
 <body>
@@ -474,6 +492,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   <button class="tab-btn" onclick="switchTab('futsal-min',this)">&#9917; Futsal Min</button>
   <button class="tab-btn" onclick="switchTab('stats',this)">&#128202; Statistiques</button>
   <button class="tab-btn tab-sorties" style="margin-left:1.5rem" onclick="switchTab('sorties',this)">&#128652; Sorties AS</button>
+  <button class="tab-btn tab-blackliste" onclick="switchTab('blackliste',this)">&#128683; Black liste</button>
   <button class="tab-btn" style="margin-left:auto" onclick="switchTab('tous-eleves',this)">&#127979; &Eacute;l&egrave;ves de Joliot</button>
 </nav>
 
@@ -796,9 +815,9 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 <!-- ===== TAB SORTIES AS ===== -->
 <div id="tab-sorties" class="tab-panel">
   <div class="card">
-    <div class="card-header" style="background:#fff7ed">
-      <h2>&#128652; Sorties AS &nbsp;<span id="sortiesCount" class="badge b-orange">0</span></h2>
-      <button class="btn btn-orange" onclick="openSortieModal()">&#10133; Cr&eacute;er une sortie</button>
+    <div class="card-header" style="background:#eef2ff">
+      <h2>&#128652; Sorties AS &nbsp;<span id="sortiesCount" class="badge b-indigo">0</span></h2>
+      <button class="btn btn-sortie" onclick="openSortieModal()">&#10133; Cr&eacute;er une sortie</button>
     </div>
     <div id="sortieSubnav" class="sortie-subnav hidden"></div>
     <div id="sortieEmpty" class="empty-state">
@@ -824,10 +843,10 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         </div>
       </div>
       <div class="card-header">
-        <h2>&Eacute;l&egrave;ves inscrits &agrave; la sortie &nbsp;<span id="sortieNbEleves" class="badge b-orange count-badge">0</span>
+        <h2>&Eacute;l&egrave;ves inscrits &agrave; la sortie &nbsp;<span id="sortieNbEleves" class="badge b-indigo count-badge">0</span>
           &nbsp;<span id="sortieNbPayes" class="badge b-teal"></span>
           &nbsp;<span id="sortieNbSeul" class="badge b-sky"></span>
-          &nbsp;<span id="sortieNbProf" class="badge b-indigo"></span></h2>
+          &nbsp;<span id="sortieNbProf" class="badge b-purple"></span></h2>
         <div class="flex gap2" style="flex-wrap:wrap">
           <button class="btn btn-primary btn-sm" onclick="openParticipantModal()">&#10133; Ajouter un &eacute;l&egrave;ve</button>
           <button class="btn btn-outline btn-sm" onclick="printSortie()">&#128196; Export PDF</button>
@@ -846,6 +865,31 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
           <h3>Aucun &eacute;l&egrave;ve inscrit &agrave; cette sortie</h3>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB BLACK LISTE ===== -->
+<div id="tab-blackliste" class="tab-panel">
+  <div class="card">
+    <div class="card-header" style="background:#f1f5f9">
+      <h2>&#128683; Black liste &nbsp;<span id="blacklisteCount" class="badge b-slate">0</span></h2>
+      <button class="btn btn-blackliste" onclick="openBlacklistModal()">&#10133; Signaler un &eacute;l&egrave;ve</button>
+    </div>
+    <div style="padding:.75rem 1.25rem;background:#f8fafc;border-bottom:1px solid var(--border);font-size:.82rem;color:#475569">
+      &#8505;&#65039; Les &eacute;l&egrave;ves exclus d&eacute;finitivement (onglet G&eacute;n&eacute;ral) apparaissent automatiquement ici. Vous pouvez aussi signaler manuellement un &eacute;l&egrave;ve qui s'est mal comport&eacute; lors d'une sortie.
+    </div>
+    <div id="blacklisteEmpty" class="empty-state">
+      <div class="icon">&#128683;</div>
+      <h3>Aucun &eacute;l&egrave;ve sur liste noire</h3>
+    </div>
+    <div class="table-wrap">
+      <table id="tbl-blackliste" class="bl-table hidden">
+        <thead><tr>
+          <th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Statut</th><th>Motif</th><th>Date</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="blacklisteBody"></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -1162,7 +1206,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('sortieModal')">Annuler</button>
-      <button class="btn btn-orange" form="sortieForm" type="submit">&#128190; Enregistrer</button>
+      <button class="btn btn-sortie" form="sortieForm" type="submit">&#128190; Enregistrer</button>
     </div>
   </div>
 </div>
@@ -1244,6 +1288,47 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('participantModal')">Annuler</button>
       <button class="btn btn-primary" form="participantForm" type="submit">&#128190; Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL SIGNALEMENT BLACK LISTE ===== -->
+<div id="blacklistModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>&#128683; Signaler un &eacute;l&egrave;ve</h3>
+      <button class="close-btn" onclick="closeModal('blacklistModal')">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div id="bl-pickerWrap" style="margin-bottom:1rem">
+        <label style="display:block;margin-bottom:.3rem">&#128269; Chercher un &eacute;l&egrave;ve inscrit &agrave; l'AS</label>
+        <div class="college-search-wrap">
+          <input type="text" id="bl-search" placeholder="Saisir nom ou prénom…" autocomplete="off"
+                 oninput="filterBlacklistStudents()" onfocus="filterBlacklistStudents()">
+          <div id="bl-results" class="college-results hidden"></div>
+        </div>
+      </div>
+      <form id="blacklistForm" onsubmit="handleBlacklist(event)">
+        <input type="hidden" id="bl-student">
+        <div class="form-grid" style="grid-template-columns:1fr">
+          <div class="form-group">
+            <label>&Eacute;l&egrave;ve</label>
+            <input type="text" id="bl-nom" readonly placeholder="Choisir un élève ci-dessus">
+          </div>
+          <div class="form-group">
+            <label>Motif *</label>
+            <textarea id="bl-motif" rows="3" required placeholder="Ex : comportement inadapté lors de la sortie Cani-cross du 04/11/2026"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Date du signalement</label>
+            <input type="date" id="bl-date">
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('blacklistModal')">Annuler</button>
+      <button class="btn btn-blackliste" form="blacklistForm" type="submit">&#128190; Enregistrer</button>
     </div>
   </div>
 </div>
@@ -1426,6 +1511,7 @@ function load() {
     const s=localStorage.getItem('as-students');    if(s) students=JSON.parse(s).filter(x=>!x.deleted&&!isMetaId(x.id)&&((x.nom||'').trim()||(x.prenom||'').trim()));
     const c=localStorage.getItem('as-college');     if(c) collegeStudents=JSON.parse(c);
     const so=localStorage.getItem('as-sorties');    if(so) sorties=JSON.parse(so);
+    const bl=localStorage.getItem('as-blacklist');  if(bl) blacklist=JSON.parse(bl);
     const d=localStorage.getItem('as-deleted-log'); if(d) deletedLog=JSON.parse(d);
     const p=localStorage.getItem('as-pending-sync'); pendingSync = p === '1';
     initNextOrdre();
@@ -1990,7 +2076,7 @@ function renderStats(){
   document.getElementById('stat-reglements').innerHTML=REGL_KEYS.filter(r=>rCounts[r]).length?REGL_KEYS.filter(r=>rCounts[r]).map(r=>renderBar(REGL[r],rCounts[r],total)).join(''):'<p class="muted">Aucun élève</p>';
 }
 
-function renderAll(){renderTable();['fitness','natation','sport_partage'].forEach(renderActivity);renderFutsalGroup('Benj');renderFutsalGroup('Min');renderSorties();renderCollegeTab();renderStats();}
+function renderAll(){renderTable();['fitness','natation','sport_partage'].forEach(renderActivity);renderFutsalGroup('Benj');renderFutsalGroup('Min');renderSorties();renderBlackliste();renderCollegeTab();renderStats();}
 
 // ── SORTIES AS ────────────────────────────────────────────────────────────
 // Les sorties sont synchronisées via des lignes "méta" de la feuille Eleves
@@ -2016,7 +2102,8 @@ function tclBadge(t){return t==='Oui'?'<span class="badge b-teal">Oui</span>':t=
 function paiementBadge(p){
   const montant=montantLabel(p.montant);
   if(!p.moyen) return `<strong>${montant}</strong> <span class="badge b-red">Non r&eacute;gl&eacute;</span>`;
-  return `<strong>${montant}</strong> <span class="badge b-teal">${REGL[p.moyen]||p.moyen}</span>`;
+  const cls=p.moyen==='cheque'?'b-teal':'b-amber';
+  return `<strong>${montant}</strong> <span class="badge ${cls}">${REGL[p.moyen]||p.moyen}</span>`;
 }
 
 // Plusieurs clics rapprochés (cases à cocher) → un seul envoi vers Sheets
@@ -2049,7 +2136,117 @@ function metaEntry(id,json,ordre){
 }
 function metaRows(){
   return [...sorties.map((s,i)=>metaEntry(SORTIE_PREFIX+s.id,JSON.stringify(s),9999000+i)),
+          ...blacklist.map((b,i)=>metaEntry(BLACKLIST_PREFIX+b.id,JSON.stringify(b),9998000+i)),
           metaEntry('__deletedLog__',JSON.stringify(deletedLog),9999999)];
+}
+
+// ── BLACK LISTE ───────────────────────────────────────────────────────────
+// Même mécanisme de synchronisation « méta » que les sorties AS.
+const BLACKLIST_PREFIX = '__blacklist__';
+let blacklist = [];
+
+function saveBlacklist(){try{localStorage.setItem('as-blacklist',JSON.stringify(blacklist));}catch(e){}}
+function mergeBlacklist(local,remote){
+  const map=new Map();
+  remote.forEach(b=>{if(b&&b.id) map.set(b.id,b);});
+  local.forEach(b=>{const e=map.get(b.id);if(!e||(b.lastModified||0)>=(e.lastModified||0)) map.set(b.id,b);});
+  for(const [id,ts] of Object.entries(deletedLog)){const b=map.get(id);if(b&&(b.lastModified||0)<=+ts) map.delete(id);}
+  return [...map.values()];
+}
+function blacklistFromRows(rows){
+  return rows.filter(r=>String(r.id).startsWith(BLACKLIST_PREFIX))
+    .map(r=>{try{return JSON.parse(r.prenom);}catch(e){return null;}})
+    .filter(b=>b&&b.id);
+}
+function touchBlacklist(){
+  saveBlacklist(); renderBlackliste(); scheduleSortieSync();
+}
+function autoBlacklisted(){return liveStudents().filter(s=>s.exclusion==='definitif');}
+function blacklistRow(b){
+  return `<tr>
+    <td><strong>${x(b.nom)} ${x(b.prenom)}</strong></td>
+    <td>${classeBadge(b.classe)}</td>
+    <td><span class="badge b-amber">&#9888;&#65039; Signal&eacute;</span></td>
+    <td>${x(b.motif)||'<span class="muted">—</span>'}</td>
+    <td>${isoToFr(b.date)}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="openDeleteBlacklist('${b.id}')" title="Retirer">&#128465;&#65039;</button></td>
+  </tr>`;
+}
+function renderBlackliste(){
+  const auto=autoBlacklisted(), manual=[...blacklist].sort((a,b)=>(b.lastModified||0)-(a.lastModified||0));
+  const total=auto.length+manual.length;
+  document.getElementById('blacklisteCount').textContent=total;
+  const empty=document.getElementById('blacklisteEmpty'),table=document.getElementById('tbl-blackliste');
+  if(!total){empty.classList.remove('hidden');table.classList.add('hidden');document.getElementById('blacklisteBody').innerHTML='';return;}
+  empty.classList.add('hidden');table.classList.remove('hidden');
+  const autoRows=[...auto].sort(sortByName).map(s=>`<tr>
+    <td><strong>${x(s.nom)} ${x(s.prenom)}</strong></td>
+    <td>${classeBadge(s.classe)}</td>
+    <td><span class="badge b-red">&#9940; Exclusion d&eacute;finitive</span></td>
+    <td><span class="muted">Voir l'onglet G&eacute;n&eacute;ral</span></td>
+    <td><span class="muted">—</span></td>
+    <td><span class="muted">—</span></td>
+  </tr>`).join('');
+  document.getElementById('blacklisteBody').innerHTML=autoRows+manual.map(blacklistRow).join('');
+}
+
+function openBlacklistModal(){
+  document.getElementById('bl-search').value='';
+  document.getElementById('bl-results').classList.add('hidden');
+  document.getElementById('bl-student').value='';
+  document.getElementById('bl-nom').value='';
+  document.getElementById('bl-motif').value='';
+  document.getElementById('bl-date').value=todayIso();
+  document.getElementById('blacklistModal').classList.remove('hidden');
+}
+function filterBlacklistStudents(){
+  const q=(document.getElementById('bl-search').value||'').toLowerCase().trim();
+  const res=document.getElementById('bl-results');
+  const pool=liveStudents();
+  const matches=pool.filter(st=>!q||(st.nom+' '+st.prenom).toLowerCase().includes(q)||(st.prenom+' '+st.nom).toLowerCase().includes(q))
+    .sort(sortByName).slice(0,50);
+  res.innerHTML=matches.length
+    ? matches.map(st=>`<div class="college-result-item" onclick="selectBlacklistStudent('${st.id}')">
+        <span class="cri-name">${x(st.nom)} ${x(st.prenom)}</span>
+        <span class="cri-detail">${x(st.classe||'—')}</span>
+      </div>`).join('')
+    : '<div class="college-result-item" style="color:var(--muted)">Aucun élève inscrit à l\'AS ne correspond</div>';
+  res.classList.remove('hidden');
+}
+function selectBlacklistStudent(id){
+  const st=students.find(q=>q.id===id); if(!st) return;
+  document.getElementById('bl-student').value=st.id;
+  document.getElementById('bl-nom').value=`${st.nom||''} ${st.prenom||''}`.trim();
+  document.getElementById('bl-nom').dataset.classe=st.classe||'';
+  document.getElementById('bl-search').value='';
+  document.getElementById('bl-results').classList.add('hidden');
+}
+document.addEventListener('click',e=>{
+  const res=document.getElementById('bl-results');
+  if(res&&!res.contains(e.target)&&e.target.id!=='bl-search') res.classList.add('hidden');
+});
+function handleBlacklist(e){
+  e.preventDefault();
+  const studentId=document.getElementById('bl-student').value;
+  if(!studentId){alert2('Sélectionnez un élève dans la liste des inscrits à l\'AS.','error');return;}
+  const st=students.find(q=>q.id===studentId); if(!st) return;
+  const b={id:uid(),studentId,nom:st.nom||'',prenom:st.prenom||'',classe:st.classe||'',
+    motif:document.getElementById('bl-motif').value.trim(),
+    date:document.getElementById('bl-date').value||todayIso(),
+    lastModified:Date.now()};
+  blacklist.push(b);
+  closeModal('blacklistModal');
+  touchBlacklist();
+  alert2(`🚫 ${x(st.prenom)} ${x(st.nom)} ajouté(e) à la black liste.`,'success');
+}
+function openDeleteBlacklist(id){
+  const b=blacklist.find(q=>q.id===id); if(!b) return;
+  openConfirm(`Retirer <strong>${x(b.prenom)} ${x(b.nom)}</strong> de la black liste ?`,()=>{
+    deletedLog[b.id]=Date.now(); saveDeletedLog();
+    blacklist=blacklist.filter(q=>q.id!==id);
+    touchBlacklist();
+    alert2('🗑️ Élève retiré de la black liste.','info');
+  });
 }
 
 function selectSortie(id){currentSortieId=(currentSortieId===id)?null:id;renderSorties();}
@@ -2374,7 +2571,7 @@ async function syncWithSheets(silent=false){
     return false;
   }
   // ── LECTURE ──────────────────────────────────────────────────────────────
-  let sheetStudents=[], sheetSorties=[];
+  let sheetStudents=[], sheetSorties=[], sheetBlacklist=[];
   try{
     const d=await jsonpFetch(SCRIPT_URL,8000);
     if(d.success&&Array.isArray(d.data)){
@@ -2391,6 +2588,7 @@ async function syncWithSheets(silent=false){
         }catch(e){}
       }
       sheetSorties=sortiesFromRows(allRows);
+      sheetBlacklist=blacklistFromRows(allRows);
       // Garder seulement les vrais élèves (ni méta, ni lignes vides)
       sheetStudents=allRows.filter(s=>!isMetaId(s.id)&&(s.nom||s.prenom));
     }
@@ -2405,6 +2603,7 @@ async function syncWithSheets(silent=false){
   let ord=1; merged.filter(s=>!s.deleted).sort((a,b)=>(a.ordre||0)-(b.ordre||0)).forEach(s=>{s.ordre=ord++;});
   students=merged; initNextOrdre(); save();
   sorties=mergeSorties(sorties,sheetSorties); saveSorties();
+  blacklist=mergeBlacklist(blacklist,sheetBlacklist); saveBlacklist();
   renderAll();
   // ── ÉCRITURE ─────────────────────────────────────────────────────────────
   // On écrit les élèves actifs + des lignes méta (sorties AS et deletedLog)
@@ -2467,6 +2666,7 @@ async function clearLocalAndPull(){
     const metaRow=allRows.find(s=>s.id==='__deletedLog__');
     if(metaRow&&metaRow.prenom){try{deletedLog=JSON.parse(metaRow.prenom);saveDeletedLog();}catch(e){}}
     sorties=sortiesFromRows(allRows); saveSorties();
+    blacklist=blacklistFromRows(allRows); saveBlacklist();
     students=allRows.filter(s=>!isMetaId(s.id)&&!s.deleted&&((s.nom||'').trim()||(s.prenom||'').trim()));
     students.sort((a,b)=>(a.ordre||0)-(b.ordre||0)).forEach((s,i)=>{s.ordre=i+1;});
     initNextOrdre(); pendingSync=false; save(); savePendingSync(); updateNetworkUI(); renderAll();
@@ -2590,7 +2790,7 @@ function alert2(msg,type='info'){
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────
-const MODALS=['editModal','deleteModal','reinitModal','sortieModal','participantModal','confirmModal'];
+const MODALS=['editModal','deleteModal','reinitModal','sortieModal','participantModal','blacklistModal','confirmModal'];
 MODALS.forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)this.classList.add('hidden');});
 });

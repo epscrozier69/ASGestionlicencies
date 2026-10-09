@@ -401,8 +401,6 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 .sortie-chip:hover{background:#ffedd5}
 .sortie-chip.active{background:#ea580c;border-color:#ea580c;color:#fff}
 .sortie-info{display:flex;flex-wrap:wrap;gap:.35rem 1.25rem;font-size:.85rem;color:var(--muted);margin-top:.3rem}
-.pay-cell{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
-.pay-cell .check-item{font-size:.8rem;text-transform:none;letter-spacing:0;color:var(--text);font-weight:600}
 .sortie-table thead th:nth-child(1){background:#374151}
 .sortie-table thead th:nth-child(2){background:#1e40af}
 .sortie-table thead th:nth-child(3){background:#0f766e}
@@ -827,7 +825,9 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
       </div>
       <div class="card-header">
         <h2>&Eacute;l&egrave;ves inscrits &agrave; la sortie &nbsp;<span id="sortieNbEleves" class="badge b-orange count-badge">0</span>
-          &nbsp;<span id="sortieNbPayes" class="badge b-teal"></span></h2>
+          &nbsp;<span id="sortieNbPayes" class="badge b-teal"></span>
+          &nbsp;<span id="sortieNbSeul" class="badge b-sky"></span>
+          &nbsp;<span id="sortieNbProf" class="badge b-indigo"></span></h2>
         <div class="flex gap2" style="flex-wrap:wrap">
           <button class="btn btn-primary btn-sm" onclick="openParticipantModal()">&#10133; Ajouter un &eacute;l&egrave;ve</button>
           <button class="btn btn-outline btn-sm" onclick="printSortie()">&#128196; Export PDF</button>
@@ -2013,6 +2013,11 @@ function isFreeSortie(s){return s.montant===''||s.montant==null||isNaN(parseFloa
 function sortieLabel(s){return isoToFr(s.date)+(s.libelle?' — '+s.libelle:'');}
 function exclusiveCheck(el,otherId){if(el.checked) document.getElementById(otherId).checked=false;}
 function tclBadge(t){return t==='Oui'?'<span class="badge b-teal">Oui</span>':t==='Non'?'<span class="badge b-red">Non</span>':'<span class="muted">/</span>';}
+function paiementBadge(p){
+  const montant=montantLabel(p.montant);
+  if(!p.moyen) return `<strong>${montant}</strong> <span class="badge b-red">Non r&eacute;gl&eacute;</span>`;
+  return `<strong>${montant}</strong> <span class="badge b-teal">${REGL[p.moyen]||p.moyen}</span>`;
+}
 
 // Plusieurs clics rapprochés (cases à cocher) → un seul envoi vers Sheets
 function scheduleSortieSync(){
@@ -2047,17 +2052,17 @@ function metaRows(){
           metaEntry('__deletedLog__',JSON.stringify(deletedLog),9999999)];
 }
 
-function selectSortie(id){currentSortieId=id;renderSorties();}
+function selectSortie(id){currentSortieId=(currentSortieId===id)?null:id;renderSorties();}
 
 function renderSorties(){
   const list=sortedSorties();
   document.getElementById('sortiesCount').textContent=list.length;
-  if(!getSortie(currentSortieId)) currentSortieId=list.length?list[list.length-1].id:null;
+  if(currentSortieId&&!getSortie(currentSortieId)) currentSortieId=null;
   const nav=document.getElementById('sortieSubnav');
   nav.classList.toggle('hidden',!list.length);
   nav.innerHTML=list.map(s=>`<button class="sortie-chip${s.id===currentSortieId?' active':''}" onclick="selectSortie('${s.id}')">&#128652; ${x(sortieLabel(s))} (${(s.participants||[]).length})</button>`).join('');
   const s=getSortie(currentSortieId);
-  document.getElementById('sortieEmpty').classList.toggle('hidden',!!s);
+  document.getElementById('sortieEmpty').classList.toggle('hidden',!!list.length);
   document.getElementById('sortieContent').classList.toggle('hidden',!s);
   if(!s) return;
   document.getElementById('tbl-sortie').classList.toggle('free',isFreeSortie(s));
@@ -2069,8 +2074,11 @@ function renderSorties(){
   document.getElementById('sortieDate').textContent=isoToFr(s.date);
   document.getElementById('sortieMontant').textContent=montantLabel(s.montant);
   document.getElementById('sortieEncaisse').textContent=montantLabel(payes.reduce((acc,p)=>acc+(parseFloat(p.montant)||0),0));
+  const seuls=parts.filter(p=>p.departDirect==='Oui'),avecProf=parts.filter(p=>p.departDirect!=='Oui');
   document.getElementById('sortieNbEleves').textContent=`${parts.length} élève${parts.length>1?'s':''}`;
   document.getElementById('sortieNbPayes').textContent=`${payes.length} réglé${payes.length>1?'s':''}`;
+  document.getElementById('sortieNbSeul').textContent=`${seuls.length} seul${seuls.length>1?'s':''}`;
+  document.getElementById('sortieNbProf').textContent=`${avecProf.length} avec le professeur`;
 
   const tbody=document.getElementById('sortieBody'),empty=document.getElementById('sortieEmptyList'),table=document.getElementById('tbl-sortie');
   if(!parts.length){tbody.innerHTML='';empty.classList.remove('hidden');table.style.display='none';return;}
@@ -2082,25 +2090,13 @@ function renderSorties(){
     <td>${x(p.telephone)||'<span class="muted">—</span>'}</td>
     <td>${p.autorisation==='Oui'?'<span class="badge b-teal">&#9989; Oui</span>':'<span class="badge b-red">&#10060; Non</span>'}</td>
     <td>${p.departDirect==='Oui'?'<span class="badge b-teal">&#9989; Oui</span>':'<span class="badge b-red">&#10060; Non</span>'}</td>
-    <td class="col-paiement"><div class="pay-cell">
-      <strong>${montantLabel(p.montant)}</strong>
-      <label class="check-item"><input type="checkbox" ${p.moyen==='cheque'?'checked':''} onchange="setMoyen('${p.id}','cheque',this.checked)"> Ch&egrave;que</label>
-      <label class="check-item"><input type="checkbox" ${p.moyen==='especes'?'checked':''} onchange="setMoyen('${p.id}','especes',this.checked)"> Esp&egrave;ces</label>
-    </div></td>
+    <td class="col-paiement">${paiementBadge(p)}</td>
     <td class="col-tcl">${tclBadge(p.carteTCL)}</td>
     <td><div class="flex gap2">
       <button class="btn btn-warning btn-sm" onclick="openParticipantModal('${p.id}')" title="Modifier">&#9999;&#65039;</button>
       <button class="btn btn-danger btn-sm" onclick="openDeleteParticipant('${p.id}')" title="Effacer">&#128465;&#65039;</button>
     </div></td>
   </tr>`).join('');
-}
-
-// Validation rapide du paiement directement dans le tableau
-function setMoyen(pid,moyen,checked){
-  const s=getSortie(currentSortieId); if(!s) return;
-  const p=(s.participants||[]).find(q=>q.id===pid); if(!p) return;
-  p.moyen=checked?moyen:(p.moyen===moyen?'':p.moyen);
-  touchSortie(s);
 }
 
 // ── Création / modification d'une sortie

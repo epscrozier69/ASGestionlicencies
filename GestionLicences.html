@@ -411,6 +411,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 .sortie-table thead th:nth-child(6){background:#ea580c}
 .sortie-table thead th:nth-child(7){background:#0369a1}
 .sortie-table thead th:nth-child(8){background:#b91c1c}
+.sortie-table thead th:nth-child(9){background:#a21caf}
 .sortie-table tbody td:nth-child(1){background:#e2e8f0}
 .sortie-table tbody td:nth-child(2){background:#dbeafe}
 .sortie-table tbody td:nth-child(3){background:#ccfbf1}
@@ -419,6 +420,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 .sortie-table tbody td:nth-child(6){background:#ffedd5}
 .sortie-table tbody td:nth-child(7){background:#e0f2fe}
 .sortie-table tbody td:nth-child(8){background:#fef2f2}
+.sortie-table tbody td:nth-child(9){background:#fae8ff}
 .sortie-table.free .col-paiement,.sortie-table.no-tcl .col-tcl{display:none}
 
 /* ── EXPORT PDF D'UNE SORTIE ── */
@@ -835,7 +837,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <table id="tbl-sortie" class="sortie-table">
           <thead><tr>
             <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>T&eacute;l&eacute;phone</th>
-            <th>Autorisation parentale</th><th class="col-paiement">Paiement</th><th class="col-tcl">Carte TCL</th><th>Actions</th>
+            <th>Autorisation parentale</th><th>D&eacute;part direct</th><th class="col-paiement">Paiement</th><th class="col-tcl">Carte TCL</th><th>Actions</th>
           </tr></thead>
           <tbody id="sortieBody"></tbody>
         </table>
@@ -1204,6 +1206,13 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
           <div class="form-group">
             <label>Autorisation parentale</label>
             <select id="p-autorisation">
+              <option value="Non">Non</option>
+              <option value="Oui">Oui</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Autoris&eacute; &agrave; partir directement du lieu</label>
+            <select id="p-depart-direct">
               <option value="Non">Non</option>
               <option value="Oui">Oui</option>
             </select>
@@ -2072,6 +2081,7 @@ function renderSorties(){
     <td>${classeBadge(p.classe)}</td>
     <td>${x(p.telephone)||'<span class="muted">—</span>'}</td>
     <td>${p.autorisation==='Oui'?'<span class="badge b-teal">&#9989; Oui</span>':'<span class="badge b-red">&#10060; Non</span>'}</td>
+    <td>${p.departDirect==='Oui'?'<span class="badge b-teal">&#9989; Oui</span>':'<span class="badge b-red">&#10060; Non</span>'}</td>
     <td class="col-paiement"><div class="pay-cell">
       <strong>${montantLabel(p.montant)}</strong>
       <label class="check-item"><input type="checkbox" ${p.moyen==='cheque'?'checked':''} onchange="setMoyen('${p.id}','cheque',this.checked)"> Ch&egrave;que</label>
@@ -2153,6 +2163,7 @@ function openParticipantModal(pid){
   document.getElementById('p-classe').value=p?(p.classe||''):'';
   document.getElementById('p-telephone').value=p?formatPhoneNumber(p.telephone||''):'';
   document.getElementById('p-autorisation').value=p?(p.autorisation||'Non'):'Non';
+  document.getElementById('p-depart-direct').value=p?(p.departDirect||'Non'):'Non';
   document.getElementById('p-montant').value=p?(p.montant??''):(s.montant??'');
   document.getElementById('p-moyen-cheque').checked=!!p&&p.moyen==='cheque';
   document.getElementById('p-moyen-especes').checked=!!p&&p.moyen==='especes';
@@ -2209,6 +2220,7 @@ function handleParticipant(e){
     classe:document.getElementById('p-classe').value.trim(),
     telephone:document.getElementById('p-telephone').value.trim(),
     autorisation:document.getElementById('p-autorisation').value,
+    departDirect:document.getElementById('p-depart-direct').value,
     montant:mv===''?'':parseFloat(mv),
     moyen:document.getElementById('p-moyen-cheque').checked?'cheque':(document.getElementById('p-moyen-especes').checked?'especes':''),
     carteTCL:(document.querySelector('input[name="p-tcl"]:checked')||{}).value||'/'
@@ -2252,7 +2264,7 @@ function printSortie(){
   const payes=parts.filter(p=>p.moyen);
   const rows=parts.map((p,i)=>`<tr>
     <td>${i+1}</td><td><strong>${x(p.nom)}</strong> ${x(p.prenom)}</td><td>${x(p.classe)||'—'}</td>
-    <td>${x(p.telephone)||'—'}</td><td>${p.autorisation==='Oui'?'Oui':'Non'}</td>
+    <td>${x(p.telephone)||'—'}</td><td>${p.autorisation==='Oui'?'Oui':'Non'}</td><td>${p.departDirect==='Oui'?'Oui':'Non'}</td>
     ${free?'':`<td>${montantLabel(p.montant)} — ${p.moyen?REGL[p.moyen]:'non réglé'}</td>`}${tcl?`<td>${x(p.carteTCL||'/')}</td>`:''}
   </tr>`).join('');
   document.getElementById('printSortieSection').innerHTML=`
@@ -2261,7 +2273,7 @@ function printSortie(){
       ${free?'':`&nbsp;&bull;&nbsp; Montant : ${montantLabel(s.montant)}
       &nbsp;&bull;&nbsp; ${payes.length} réglé${payes.length>1?'s':''} (${montantLabel(payes.reduce((a,p)=>a+(parseFloat(p.montant)||0),0))})`}</p>
     ${parts.length?`<table class="sortie-print-table"><thead><tr>
-      <th>#</th><th>Élève</th><th>Classe</th><th>Téléphone</th><th>Autorisation parentale</th>${free?'':'<th>Paiement</th>'}${tcl?'<th>Carte TCL</th>':''}
+      <th>#</th><th>Élève</th><th>Classe</th><th>Téléphone</th><th>Autorisation parentale</th><th>Départ direct</th>${free?'':'<th>Paiement</th>'}${tcl?'<th>Carte TCL</th>':''}
     </tr></thead><tbody>${rows}</tbody></table>`:'<p style="text-align:center;color:#94a3b8">Aucun élève inscrit</p>'}`;
   document.body.classList.add('printing-sortie');
   window.print();

@@ -419,7 +419,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 .sortie-table tbody td:nth-child(7){background:#e0f2fe}
 .sortie-table tbody td:nth-child(8){background:#fef2f2}
 .sortie-table tbody td:nth-child(9){background:#fae8ff}
-.sortie-table.free .col-paiement,.sortie-table.no-tcl .col-tcl{display:none}
+.sortie-table.free .col-paiement,.sortie-table.no-tcl .col-tcl,.sortie-table.no-depart .col-depart{display:none}
 
 /* ── BLACK LISTE (onglet sombre, distinct des activités) ── */
 .tab-btn.tab-blackliste{color:#1f2937;background:#f1f5f9}
@@ -856,7 +856,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <table id="tbl-sortie" class="sortie-table">
           <thead><tr>
             <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>T&eacute;l&eacute;phone</th>
-            <th>Autorisation parentale</th><th>D&eacute;part direct</th><th class="col-paiement">Paiement</th><th class="col-tcl">Carte TCL</th><th>Actions</th>
+            <th>Autorisation parentale</th><th class="col-depart">D&eacute;part direct</th><th class="col-paiement">Paiement</th><th class="col-tcl">Carte TCL</th><th>Actions</th>
           </tr></thead>
           <tbody id="sortieBody"></tbody>
         </table>
@@ -1201,6 +1201,12 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
               <label class="check-item"><input type="checkbox" id="so-tcl"> Besoin d'une carte TCL</label>
             </div>
           </div>
+          <div class="form-group">
+            <label>Retour</label>
+            <div class="checkbox-group">
+              <label class="check-item"><input type="checkbox" id="so-depart-direct"> Autorisation &agrave; rentrer seul(e) possible</label>
+            </div>
+          </div>
         </div>
       </form>
     </div>
@@ -1254,7 +1260,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
               <option value="Oui">Oui</option>
             </select>
           </div>
-          <div class="form-group">
+          <div id="p-depart-wrap" class="form-group">
             <label>Autoris&eacute; &agrave; partir directement du lieu</label>
             <select id="p-depart-direct">
               <option value="Non">Non</option>
@@ -2264,6 +2270,7 @@ function renderSorties(){
   if(!s) return;
   document.getElementById('tbl-sortie').classList.toggle('free',isFreeSortie(s));
   document.getElementById('tbl-sortie').classList.toggle('no-tcl',!s.needTCL);
+  document.getElementById('tbl-sortie').classList.toggle('no-depart',!s.allowDepartDirect);
 
   const parts=[...(s.participants||[])].sort(sortByName);
   const payes=parts.filter(p=>p.moyen);
@@ -2274,8 +2281,11 @@ function renderSorties(){
   const seuls=parts.filter(p=>p.departDirect==='Oui'),avecProf=parts.filter(p=>p.departDirect!=='Oui');
   document.getElementById('sortieNbEleves').textContent=`${parts.length} élève${parts.length>1?'s':''}`;
   document.getElementById('sortieNbPayes').textContent=`${payes.length} réglé${payes.length>1?'s':''}`;
+  document.getElementById('sortieNbPayes').classList.toggle('hidden-field',isFreeSortie(s));
   document.getElementById('sortieNbSeul').textContent=`${seuls.length} seul${seuls.length>1?'s':''}`;
   document.getElementById('sortieNbProf').textContent=`${avecProf.length} avec le professeur`;
+  document.getElementById('sortieNbSeul').classList.toggle('hidden-field',!s.allowDepartDirect);
+  document.getElementById('sortieNbProf').classList.toggle('hidden-field',!s.allowDepartDirect);
 
   const tbody=document.getElementById('sortieBody'),empty=document.getElementById('sortieEmptyList'),table=document.getElementById('tbl-sortie');
   if(!parts.length){tbody.innerHTML='';empty.classList.remove('hidden');table.style.display='none';return;}
@@ -2286,7 +2296,7 @@ function renderSorties(){
     <td>${classeBadge(p.classe)}</td>
     <td>${x(p.telephone)||'<span class="muted">—</span>'}</td>
     <td>${p.autorisation==='Oui'?'<span class="badge b-teal">&#9989; Oui</span>':'<span class="badge b-red">&#10060; Non</span>'}</td>
-    <td>${p.departDirect==='Oui'?'<span class="badge b-teal">&#9989; Oui</span>':'<span class="badge b-red">&#10060; Non</span>'}</td>
+    <td class="col-depart">${p.departDirect==='Oui'?'<span class="badge b-teal">&#9989; Oui</span>':'<span class="badge b-red">&#10060; Non</span>'}</td>
     <td class="col-paiement">${paiementBadge(p)}</td>
     <td class="col-tcl">${tclBadge(p.carteTCL)}</td>
     <td><div class="flex gap2">
@@ -2305,6 +2315,7 @@ function openSortieModal(id){
   document.getElementById('so-libelle').value=s?(s.libelle||''):'';
   document.getElementById('so-montant').value=s&&s.montant!==''&&s.montant!=null?s.montant:'';
   document.getElementById('so-tcl').checked=s?!!s.needTCL:false;
+  document.getElementById('so-depart-direct').checked=s?!!s.allowDepartDirect:false;
   document.getElementById('sortieModal').classList.remove('hidden');
 }
 function handleSortie(e){
@@ -2315,14 +2326,15 @@ function handleSortie(e){
   const mv=document.getElementById('so-montant').value;
   const montant=mv===''?'':parseFloat(mv);
   const needTCL=document.getElementById('so-tcl').checked;
+  const allowDepartDirect=document.getElementById('so-depart-direct').checked;
   let s;
   if(id){
     s=getSortie(id); if(!s) return;
     // Le nouveau montant est reporté sur les inscrits qui avaient l'ancien montant
     if(s.montant!==montant) (s.participants||[]).forEach(p=>{if(p.montant===s.montant) p.montant=montant;});
-    Object.assign(s,{date,libelle,montant,needTCL});
+    Object.assign(s,{date,libelle,montant,needTCL,allowDepartDirect});
   } else {
-    s={id:uid(),date,libelle,montant,needTCL,participants:[]};
+    s={id:uid(),date,libelle,montant,needTCL,allowDepartDirect,participants:[]};
     sorties.push(s);
   }
   currentSortieId=s.id;
@@ -2366,6 +2378,7 @@ function openParticipantModal(pid){
   document.getElementById('p-tcl-non').checked=tcl==='Non';
   document.getElementById('p-paiement-wrap').classList.toggle('hidden-field',isFreeSortie(s));
   document.getElementById('p-tcl-wrap').classList.toggle('hidden-field',!s.needTCL);
+  document.getElementById('p-depart-wrap').classList.toggle('hidden-field',!s.allowDepartDirect);
   document.getElementById('participantModal').classList.remove('hidden');
 }
 function filterSortieStudents(){
@@ -2452,21 +2465,23 @@ function runConfirm(){
 // ── Export PDF de la sortie affichée
 function printSortie(){
   const s=getSortie(currentSortieId); if(!s) return;
-  const free=isFreeSortie(s), tcl=!!s.needTCL;
+  const free=isFreeSortie(s), tcl=!!s.needTCL, depart=!!s.allowDepartDirect;
   const parts=[...(s.participants||[])].sort(sortByName);
   const payes=parts.filter(p=>p.moyen);
+  const seuls=parts.filter(p=>p.departDirect==='Oui');
   const rows=parts.map((p,i)=>`<tr>
     <td>${i+1}</td><td><strong>${x(p.nom)}</strong> ${x(p.prenom)}</td><td>${x(p.classe)||'—'}</td>
-    <td>${x(p.telephone)||'—'}</td><td>${p.autorisation==='Oui'?'Oui':'Non'}</td><td>${p.departDirect==='Oui'?'Oui':'Non'}</td>
+    <td>${x(p.telephone)||'—'}</td><td>${p.autorisation==='Oui'?'Oui':'Non'}</td>${depart?`<td>${p.departDirect==='Oui'?'Oui':'Non'}</td>`:''}
     ${free?'':`<td>${montantLabel(p.montant)} — ${p.moyen?REGL[p.moyen]:'non réglé'}</td>`}${tcl?`<td>${x(p.carteTCL||'/')}</td>`:''}
   </tr>`).join('');
   document.getElementById('printSortieSection').innerHTML=`
     <h1 class="sortie-print-title">AS Joliot Curie &mdash; Sortie AS${s.libelle?' &mdash; '+x(s.libelle):''} du ${isoToFr(s.date)}</h1>
     <p class="sortie-print-sub"><strong>${parts.length} élève${parts.length>1?'s':''} inscrit${parts.length>1?'s':''}</strong>
       ${free?'':`&nbsp;&bull;&nbsp; Montant : ${montantLabel(s.montant)}
-      &nbsp;&bull;&nbsp; ${payes.length} réglé${payes.length>1?'s':''} (${montantLabel(payes.reduce((a,p)=>a+(parseFloat(p.montant)||0),0))})`}</p>
+      &nbsp;&bull;&nbsp; ${payes.length} réglé${payes.length>1?'s':''} (${montantLabel(payes.reduce((a,p)=>a+(parseFloat(p.montant)||0),0))})`}
+      ${depart?`&nbsp;&bull;&nbsp; ${seuls.length} seul${seuls.length>1?'s':''} &nbsp;&bull;&nbsp; ${parts.length-seuls.length} avec le professeur`:''}</p>
     ${parts.length?`<table class="sortie-print-table"><thead><tr>
-      <th>#</th><th>Élève</th><th>Classe</th><th>Téléphone</th><th>Autorisation parentale</th><th>Départ direct</th>${free?'':'<th>Paiement</th>'}${tcl?'<th>Carte TCL</th>':''}
+      <th>#</th><th>Élève</th><th>Classe</th><th>Téléphone</th><th>Autorisation parentale</th>${depart?'<th>Départ direct</th>':''}${free?'':'<th>Paiement</th>'}${tcl?'<th>Carte TCL</th>':''}
     </tr></thead><tbody>${rows}</tbody></table>`:'<p style="text-align:center;color:#94a3b8">Aucun élève inscrit</p>'}`;
   document.body.classList.add('printing-sortie');
   window.print();

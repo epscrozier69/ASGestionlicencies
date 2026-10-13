@@ -856,7 +856,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <table id="tbl-sortie" class="sortie-table">
           <thead><tr>
             <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>T&eacute;l&eacute;phone</th>
-            <th>Autorisation parentale</th><th class="col-depart">D&eacute;part direct</th><th class="col-paiement">Paiement</th><th class="col-tcl">Carte TCL</th><th>Actions</th>
+            <th>Autorisation parentale</th><th class="col-depart">Rentre seul</th><th class="col-paiement">Paiement</th><th class="col-tcl">Carte TCL</th><th>Actions</th>
           </tr></thead>
           <tbody id="sortieBody"></tbody>
         </table>
@@ -1261,7 +1261,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
             </select>
           </div>
           <div id="p-depart-wrap" class="form-group">
-            <label>Autoris&eacute; &agrave; partir directement du lieu</label>
+            <label>Rentre seul</label>
             <select id="p-depart-direct">
               <option value="Non">Non</option>
               <option value="Oui">Oui</option>
@@ -2481,7 +2481,7 @@ function printSortie(){
       &nbsp;&bull;&nbsp; ${payes.length} réglé${payes.length>1?'s':''} (${montantLabel(payes.reduce((a,p)=>a+(parseFloat(p.montant)||0),0))})`}
       ${depart?`&nbsp;&bull;&nbsp; ${seuls.length} seul${seuls.length>1?'s':''} &nbsp;&bull;&nbsp; ${parts.length-seuls.length} avec le professeur`:''}</p>
     ${parts.length?`<table class="sortie-print-table"><thead><tr>
-      <th>#</th><th>Élève</th><th>Classe</th><th>Téléphone</th><th>Autorisation parentale</th>${depart?'<th>Départ direct</th>':''}${free?'':'<th>Paiement</th>'}${tcl?'<th>Carte TCL</th>':''}
+      <th>#</th><th>Élève</th><th>Classe</th><th>Téléphone</th><th>Autorisation parentale</th>${depart?'<th>Rentre seul</th>':''}${free?'':'<th>Paiement</th>'}${tcl?'<th>Carte TCL</th>':''}
     </tr></thead><tbody>${rows}</tbody></table>`:'<p style="text-align:center;color:#94a3b8">Aucun élève inscrit</p>'}`;
   document.body.classList.add('printing-sortie');
   window.print();

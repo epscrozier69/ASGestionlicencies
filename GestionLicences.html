@@ -400,6 +400,10 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   background:#fff;color:#3730a3;font-weight:600;font-size:.82rem;cursor:pointer;white-space:nowrap}
 .sortie-chip:hover{background:#e0e7ff}
 .sortie-chip.active{background:#4338ca;border-color:#4338ca;color:#fff}
+.sortie-chip.archived{opacity:.6;border-style:dashed;background:#f1f5f9}
+.sortie-chip.archived.active{opacity:1;background:#64748b;border-color:#64748b}
+.sortie-archived-banner{background:#e2e8f0;color:#334155;font-weight:700;font-size:.78rem;
+  padding:.3rem .7rem;border-radius:6px;display:inline-block;margin-bottom:.4rem}
 .sortie-info{display:flex;flex-wrap:wrap;gap:.35rem 1.25rem;font-size:.85rem;color:var(--muted);margin-top:.3rem}
 .sortie-table thead th:nth-child(1){background:#374151}
 .sortie-table thead th:nth-child(2){background:#1e40af}
@@ -817,7 +821,10 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   <div class="card">
     <div class="card-header" style="background:#eef2ff">
       <h2>&#128652; Sorties AS &nbsp;<span id="sortiesCount" class="badge b-indigo">0</span></h2>
-      <button class="btn btn-sortie" onclick="openSortieModal()">&#10133; Cr&eacute;er une sortie</button>
+      <div class="flex gap2" style="flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm hidden" id="toggleArchivedBtn" onclick="toggleShowArchivedSorties()"></button>
+        <button class="btn btn-sortie" onclick="openSortieModal()">&#10133; Cr&eacute;er une sortie</button>
+      </div>
     </div>
     <div id="sortieSubnav" class="sortie-subnav hidden"></div>
     <div id="sortieEmpty" class="empty-state">
@@ -829,6 +836,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
       <div class="card-body" style="border-bottom:1px solid var(--border)">
         <div class="flex" style="justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.75rem">
           <div>
+            <div id="sortieArchivedBanner" class="sortie-archived-banner hidden">&#128230; Sortie archiv&eacute;e</div>
             <h2 id="sortieTitle" style="font-size:1.05rem;font-weight:700"></h2>
             <div class="sortie-info">
               <span>&#128197; Date : <strong id="sortieDate"></strong></span>
@@ -837,6 +845,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
             </div>
           </div>
           <div class="flex gap2" style="flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" id="archiveSortieBtn" onclick="toggleArchiveSortie()"></button>
             <button class="btn btn-warning btn-sm" onclick="openSortieModal(currentSortieId)">&#9999;&#65039; Modifier la sortie</button>
             <button class="btn btn-danger btn-sm" onclick="openDeleteSortie()">&#128465;&#65039; Effacer la sortie</button>
           </div>
@@ -2093,6 +2102,7 @@ let sorties         = [];
 let currentSortieId = null;
 let confirmAction   = null;
 let sortieSyncTimer = null;
+let showArchivedSorties = false;
 
 function isMetaId(id){return String(id||'').startsWith('__');}
 function saveSorties(){try{localStorage.setItem('as-sorties',JSON.stringify(sorties));}catch(e){}}
@@ -2256,18 +2266,36 @@ function openDeleteBlacklist(id){
 }
 
 function selectSortie(id){currentSortieId=(currentSortieId===id)?null:id;renderSorties();}
+function toggleShowArchivedSorties(){showArchivedSorties=!showArchivedSorties;renderSorties();}
+function toggleArchiveSortie(){
+  const s=getSortie(currentSortieId); if(!s) return;
+  s.archived=!s.archived;
+  if(!s.archived) showArchivedSorties=true;
+  touchSortie(s);
+  alert2(s.archived?'📦 Sortie archivée.':'📤 Sortie désarchivée.','info');
+}
 
 function renderSorties(){
-  const list=sortedSorties();
-  document.getElementById('sortiesCount').textContent=list.length;
+  const all=sortedSorties();
+  const archivedCount=all.filter(s=>s.archived).length;
+  document.getElementById('sortiesCount').textContent=all.length-archivedCount;
+  const archBtn=document.getElementById('toggleArchivedBtn');
+  archBtn.classList.toggle('hidden',!archivedCount);
+  archBtn.textContent=showArchivedSorties?`🙈 Masquer les archivées`:`📦 Afficher les archivées (${archivedCount})`;
   if(currentSortieId&&!getSortie(currentSortieId)) currentSortieId=null;
+  const list=showArchivedSorties?all:all.filter(q=>!q.archived);
   const nav=document.getElementById('sortieSubnav');
   nav.classList.toggle('hidden',!list.length);
-  nav.innerHTML=list.map(s=>`<button class="sortie-chip${s.id===currentSortieId?' active':''}" onclick="selectSortie('${s.id}')">&#128652; ${x(sortieLabel(s))} (${(s.participants||[]).length})</button>`).join('');
+  nav.innerHTML=list.map(q=>{
+    const past=!q.archived&&q.date&&q.date<todayIso();
+    return `<button class="sortie-chip${q.id===currentSortieId?' active':''}${q.archived?' archived':''}" onclick="selectSortie('${q.id}')" title="${q.archived?'Sortie archivée':(past?'Sortie passée — vous pouvez l\'archiver':'')}">${q.archived?'&#128230;':'&#128652;'} ${x(sortieLabel(q))} (${(q.participants||[]).length})${past?' &#9203;':''}</button>`;
+  }).join('');
   const s=getSortie(currentSortieId);
-  document.getElementById('sortieEmpty').classList.toggle('hidden',!!list.length);
+  document.getElementById('sortieEmpty').classList.toggle('hidden',!!all.length);
   document.getElementById('sortieContent').classList.toggle('hidden',!s);
   if(!s) return;
+  document.getElementById('sortieArchivedBanner').classList.toggle('hidden',!s.archived);
+  document.getElementById('archiveSortieBtn').innerHTML=s.archived?'&#128228; D&eacute;sarchiver':'&#128230; Archiver';
   document.getElementById('tbl-sortie').classList.toggle('free',isFreeSortie(s));
   document.getElementById('tbl-sortie').classList.toggle('no-tcl',!s.needTCL);
   document.getElementById('tbl-sortie').classList.toggle('no-depart',!s.allowDepartDirect);

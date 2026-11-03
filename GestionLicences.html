@@ -119,6 +119,8 @@ th[data-sort]:hover{filter:brightness(1.15)}
 thead th::before,thead th::after{content:''!important}
 
 /* Ajustement largeur : Classe/Règlement/Tee shirt resserrés, Téléphone élargi */
+#mainTable th:nth-child(1),  .act-table th:nth-child(1),
+#mainTable td:nth-child(1),  .act-table td:nth-child(1)  {width:3rem}
 #mainTable th:nth-child(3),  .act-table th:nth-child(3),
 #mainTable td:nth-child(3),  .act-table td:nth-child(3)  {width:4rem}
 #mainTable th:nth-child(8),  .act-table th:nth-child(8),
@@ -199,12 +201,17 @@ thead th::before,thead th::after{content:''!important}
 /* Élève exclu définitivement : toute la ligne est barrée */
 tr.excluded-row td,tr.excluded-row td *{text-decoration:line-through}
 
-/* Colonne "Élève" figée pour le défilement horizontal */
+/* Colonnes "#" et "Élève" figées pour le défilement horizontal */
+#mainTable thead th:nth-child(1), .act-table thead th:nth-child(1),
+#mainTable tbody td:nth-child(1), .act-table tbody td:nth-child(1) {
+  position:sticky; left:0;
+}
 #mainTable thead th:nth-child(2), .act-table thead th:nth-child(2),
 #mainTable tbody td:nth-child(2), .act-table tbody td:nth-child(2) {
-  position:sticky; left:0;
+  position:sticky; left:3rem;
   box-shadow:2px 0 4px -2px rgba(0,0,0,.25);
 }
+#mainTable tbody td:nth-child(1), .act-table tbody td:nth-child(1),
 #mainTable tbody td:nth-child(2), .act-table tbody td:nth-child(2) { z-index:2; }
 
 /* Ligne d'en-tête figée pour le défilement vertical : le tableau défile
@@ -212,6 +219,7 @@ tr.excluded-row td,tr.excluded-row td *{text-decoration:line-through}
 #mainTable thead th, .act-table thead th {
   position:sticky; top:0; z-index:4;
 }
+#mainTable thead th:nth-child(1), .act-table thead th:nth-child(1),
 #mainTable thead th:nth-child(2), .act-table thead th:nth-child(2) { z-index:5; }
 
 /* Tableau liste collège – 4 colonnes */
@@ -225,6 +233,14 @@ tr.excluded-row td,tr.excluded-row td *{text-decoration:line-through}
 .college-table tbody td:nth-child(3) {background:#ccfbf1}
 .college-table tbody td:nth-child(4) {background:#fae8ff}
 .college-table tbody td:nth-child(5) {background:#cffafe}
+
+/* Colonne "Nom" figée pour le défilement horizontal (pas de colonne numéro ici) */
+.college-table thead th:nth-child(1), .college-table tbody td:nth-child(1) {
+  position:sticky; left:0;
+  box-shadow:2px 0 4px -2px rgba(0,0,0,.25);
+}
+.college-table tbody td:nth-child(1) { z-index:2; }
+.college-table thead th:nth-child(1) { z-index:5; }
 
 .cat-group-row td{
   background:linear-gradient(90deg,#1e3a8a,#3b82f6) !important;
@@ -364,6 +380,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   .card{box-shadow:none;border:1px solid #cbd5e1}
   table td:last-child,table th:last-child{display:none!important}
   #mainTable thead th,.act-table thead th,
+  #mainTable tbody td:nth-child(1),.act-table tbody td:nth-child(1),
   #mainTable tbody td:nth-child(2),.act-table tbody td:nth-child(2){position:static;box-shadow:none}
   body{background:#fff}
 }
@@ -425,6 +442,16 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 .sortie-table tbody td:nth-child(9){background:#fae8ff}
 .sortie-table.free .col-paiement,.sortie-table.no-tcl .col-tcl,.sortie-table.no-depart .col-depart{display:none}
 
+/* Colonnes "#" et "Élève" figées pour le défilement horizontal */
+.sortie-table th:nth-child(1), .sortie-table td:nth-child(1) {width:3rem}
+.sortie-table thead th:nth-child(1), .sortie-table tbody td:nth-child(1) {position:sticky; left:0}
+.sortie-table thead th:nth-child(2), .sortie-table tbody td:nth-child(2) {
+  position:sticky; left:3rem;
+  box-shadow:2px 0 4px -2px rgba(0,0,0,.25);
+}
+.sortie-table tbody td:nth-child(1), .sortie-table tbody td:nth-child(2) { z-index:2; }
+.sortie-table thead th:nth-child(1), .sortie-table thead th:nth-child(2) { z-index:5; }
+
 /* ── BLACK LISTE (onglet sombre, distinct des activités) ── */
 .tab-btn.tab-blackliste{color:#1f2937;background:#f1f5f9}
 .tab-btn.tab-blackliste:hover{background:#e2e8f0;color:#0f172a}
@@ -442,6 +469,14 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 .bl-table tbody td:nth-child(4){background:#ede9fe}
 .bl-table tbody td:nth-child(5){background:#e0f2fe}
 .bl-table tbody td:nth-child(6){background:#fef2f2}
+
+/* Colonne "Élève" figée pour le défilement horizontal (pas de colonne numéro ici) */
+.bl-table thead th:nth-child(1), .bl-table tbody td:nth-child(1) {
+  position:sticky; left:0;
+  box-shadow:2px 0 4px -2px rgba(0,0,0,.25);
+}
+.bl-table tbody td:nth-child(1) { z-index:2; }
+.bl-table thead th:nth-child(1) { z-index:5; }
 
 /* ── EXPORT PDF D'UNE SORTIE ── */
 #printSortieSection{display:none}

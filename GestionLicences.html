@@ -517,6 +517,9 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
       <button id="syncBtn" class="btn btn-ghost btn-sm" onclick="manualSync()" title="Synchroniser maintenant avec Google Sheets">🔄 Synchroniser</button>
       <span id="lastSyncInfo" style="font-size:.65rem;color:rgba(255,255,255,.75)"></span>
     </div>
+    <button class="btn btn-ghost btn-sm" onclick="exportBackupJSON()" style="margin-left:1.25rem" title="Télécharger une sauvegarde complète des données (fichier .json)">💾 Sauvegarde</button>
+    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('restoreFileInput').click()" title="Restaurer les données depuis un fichier de sauvegarde (.json)">📂 Restaurer</button>
+    <input type="file" id="restoreFileInput" accept=".json,application/json" style="display:none" onchange="handleRestoreFile(event)">
     <button class="btn btn-ghost btn-sm" onclick="openReinitModal()" style="color:#fca5a5;margin-left:1.25rem" title="Effacer les données locales et recharger depuis Sheets">↩ Réinit.</button>
   </div>
 </header>
@@ -1571,6 +1574,46 @@ function save(){try{localStorage.setItem('as-students',JSON.stringify(students))
 function saveCollege(){try{localStorage.setItem('as-college',JSON.stringify(collegeStudents));}catch(e){}}
 function saveDeletedLog(){try{localStorage.setItem('as-deleted-log',JSON.stringify(deletedLog));}catch(e){}}
 function savePendingSync(){try{localStorage.setItem('as-pending-sync',pendingSync?'1':'0');}catch(e){}}
+
+// ── SAUVEGARDE / RESTAURATION .JSON ──────────────────────────────────────
+function exportBackupJSON(){
+  const backup={type:'as-gestion-licences-backup',version:1,exportedAt:new Date().toISOString(),
+    students,collegeStudents,sorties,blacklist,deletedLog};
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const d=new Date(),pad=n=>String(n).padStart(2,'0');
+  a.href=url;
+  a.download=`AS-JoliotCurie-sauvegarde-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert2('💾 Sauvegarde téléchargée.','success');
+}
+function handleRestoreFile(ev){
+  const file=ev.target.files&&ev.target.files[0];
+  ev.target.value='';
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    let data;
+    try{ data=JSON.parse(reader.result); }catch(e){ alert2('❌ Fichier invalide (JSON illisible).','error'); return; }
+    if(!data||!Array.isArray(data.students)){ alert2('❌ Ce fichier ne semble pas être une sauvegarde valide.','error'); return; }
+    if(!confirm(`⚠️ Remplacer toutes les données locales par cette sauvegarde (${data.students.length} élève(s)) ?\n\nCette action écrasera la liste actuelle sur cet appareil et sera synchronisée vers Google Sheets.`)) return;
+    students=data.students;
+    collegeStudents=Array.isArray(data.collegeStudents)?data.collegeStudents:[];
+    sorties=Array.isArray(data.sorties)?data.sorties:[];
+    blacklist=Array.isArray(data.blacklist)?data.blacklist:[];
+    deletedLog=(data.deletedLog&&typeof data.deletedLog==='object')?data.deletedLog:{};
+    initNextOrdre();
+    save(); saveCollege(); saveSorties(); saveBlacklist(); saveDeletedLog();
+    pendingSync=true; savePendingSync(); updateNetworkUI();
+    renderAll();
+    alert2(`✅ Sauvegarde restaurée (${students.length} élève(s)). Synchronisation en attente.`,'success');
+  };
+  reader.onerror=()=>alert2('❌ Erreur de lecture du fichier.','error');
+  reader.readAsText(file);
+}
+
 function updateNetworkUI(){
   const txt=!navigator.onLine?'⚡ Hors ligne':pendingSync?'🔄 Sync en attente':'🟢 En ligne';
   const cls=!navigator.onLine?'offline':pendingSync?'pending':'online';

@@ -31,9 +31,11 @@ header{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;
 .header-actions{margin-left:auto;display:flex;gap:.5rem;flex-wrap:wrap}
 
 /* TABS */
-.tabs-nav{background:var(--surface);border-bottom:2px solid var(--border);display:flex;
-  overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:20;box-shadow:var(--shadow)}
-.tabs-nav::-webkit-scrollbar{display:none}
+.tabs-nav{background:var(--surface);border-bottom:2px solid var(--border);display:flex;flex-direction:column;
+  position:sticky;top:0;z-index:20;box-shadow:var(--shadow)}
+.tabs-row{display:flex;overflow-x:auto;scrollbar-width:none}
+.tabs-row::-webkit-scrollbar{display:none}
+.tabs-row+.tabs-row{border-top:1px solid var(--border)}
 .tab-btn{padding:.75rem 1.125rem;border:none;background:none;font-size:.85rem;font-weight:600;
   color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;
   margin-bottom:-2px;transition:all .15s}
@@ -526,16 +528,20 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 
 <!-- TABS -->
 <nav class="tabs-nav">
-  <button class="tab-btn active" onclick="switchTab('general',this)">&#128203; G&eacute;n&eacute;ral</button>
-  <button class="tab-btn" onclick="switchTab('fitness',this)">&#128170; Fitness</button>
-  <button class="tab-btn" onclick="switchTab('natation',this)">🏊‍♂️ Natation</button>
-  <button class="tab-btn" onclick="switchTab('sport-partage',this)">&#129309; Sport Partag&eacute;</button>
-  <button class="tab-btn" onclick="switchTab('futsal-benj',this)">&#9917; Futsal Benj</button>
-  <button class="tab-btn" onclick="switchTab('futsal-min',this)">&#9917; Futsal Min</button>
-  <button class="tab-btn" onclick="switchTab('stats',this)">&#128202; Statistiques</button>
-  <button class="tab-btn tab-sorties" style="margin-left:1.5rem" onclick="switchTab('sorties',this)">&#128652; Sorties AS</button>
-  <button class="tab-btn tab-blackliste" onclick="switchTab('blackliste',this)">&#128683; Black liste</button>
-  <button class="tab-btn" style="margin-left:auto" onclick="switchTab('tous-eleves',this)">&#127979; &Eacute;l&egrave;ves de Joliot</button>
+  <div class="tabs-row">
+    <button class="tab-btn active" onclick="switchTab('general',this)">&#128203; G&eacute;n&eacute;ral</button>
+    <button class="tab-btn" onclick="switchTab('fitness',this)">&#128170; Fitness</button>
+    <button class="tab-btn" onclick="switchTab('natation',this)">🏊‍♂️ Natation</button>
+    <button class="tab-btn" onclick="switchTab('sport-partage',this)">&#129309; Sport Partag&eacute;</button>
+    <button class="tab-btn" onclick="switchTab('futsal-benj',this)">&#9917; Futsal Benj</button>
+    <button class="tab-btn" onclick="switchTab('futsal-min',this)">&#9917; Futsal Min</button>
+  </div>
+  <div class="tabs-row">
+    <button class="tab-btn" onclick="switchTab('stats',this)">&#128202; Statistiques</button>
+    <button class="tab-btn tab-sorties" onclick="switchTab('sorties',this)">&#128652; Sorties AS</button>
+    <button class="tab-btn tab-blackliste" onclick="switchTab('blackliste',this)">&#128683; Black liste</button>
+    <button class="tab-btn" style="margin-left:auto" onclick="switchTab('tous-eleves',this)">&#127979; &Eacute;l&egrave;ves de Joliot</button>
+  </div>
 </nav>
 
 <div id="main-content">

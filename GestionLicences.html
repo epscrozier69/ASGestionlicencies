@@ -743,6 +743,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <h2>&#128170; Fitness &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-fitness" class="badge b-purple count-badge">0</span></h2>
         <p class="apsa-schedule">&#128197; Mercredi 12h45 &ndash; 14h &mdash; Mme JOUD</p>
       </div>
+      <button class="btn btn-outline btn-sm" id="sortBtn-fitness" onclick="toggleActSort('fitness')">&#128100; Trier par ordre alphab&eacute;tique</button>
       <button class="btn btn-success btn-sm" onclick="exportActivityCSV('fitness')">&#128190; Export Excel</button>
       <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
@@ -767,6 +768,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <h2>🏊‍♂️ Natation AS &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-natation" class="badge b-blue count-badge">0</span></h2>
         <p class="apsa-schedule">&#128197; Mercredi 13h &ndash; 14h &mdash; Mme MEKRALDI</p>
       </div>
+      <button class="btn btn-outline btn-sm" id="sortBtn-natation" onclick="toggleActSort('natation')">&#128100; Trier par ordre alphab&eacute;tique</button>
       <button class="btn btn-success btn-sm" onclick="exportActivityCSV('natation')">&#128190; Export Excel</button>
       <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
@@ -791,6 +793,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <h2>&#129309; Sport Partag&eacute; &mdash; &eacute;l&egrave;ves inscrits &nbsp;<span id="cnt-sport_partage" class="badge b-orange count-badge">0</span></h2>
         <p class="apsa-schedule">&#128197; Lundi 12h30 &ndash; 13h45 &mdash; Mme JOUD et Mme CROZIER</p>
       </div>
+      <button class="btn btn-outline btn-sm" id="sortBtn-sport_partage" onclick="toggleActSort('sport_partage')">&#128100; Trier par ordre alphab&eacute;tique</button>
       <button class="btn btn-success btn-sm" onclick="exportActivityCSV('sport_partage')">&#128190; Export Excel</button>
       <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
@@ -817,6 +820,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
           <span id="cnt-futsal-benj-g" class="badge b-blue">0 Gar&ccedil;on</span></h2>
         <p class="apsa-schedule">&#128197; Mercredi 12h45 &ndash; 14h &mdash; Mme CROZIER</p>
       </div>
+      <button class="btn btn-outline btn-sm" id="sortBtn-futsal-benj" onclick="toggleActSort('futsal-benj')">&#128100; Trier par ordre alphab&eacute;tique</button>
       <button class="btn btn-success btn-sm" onclick="exportFutsalGroupCSV('Benj')">&#128190; Export Excel</button>
       <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
@@ -843,6 +847,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
           <span id="cnt-futsal-min-g" class="badge b-blue">0 Gar&ccedil;on</span></h2>
         <p class="apsa-schedule">&#128197; Mardi 12h30 &ndash; 13h45 &mdash; Mme MEKRALDI</p>
       </div>
+      <button class="btn btn-outline btn-sm" id="sortBtn-futsal-min" onclick="toggleActSort('futsal-min')">&#128100; Trier par ordre alphab&eacute;tique</button>
       <button class="btn btn-success btn-sm" onclick="exportFutsalGroupCSV('Min')">&#128190; Export Excel</button>
       <button class="btn btn-outline btn-sm" onclick="printTab()">&#128196; Export PDF</button>
     </div>
@@ -1936,12 +1941,33 @@ function renderTable(){
 }
 
 // ── RENDU ACTIVITÉS ───────────────────────────────────────────────────────
+// Tri par catégorie (regroupé, par défaut) ou par ordre alphabétique (liste
+// plate), au choix, indépendamment par onglet. Non persisté (revient au tri
+// par catégorie à chaque rechargement).
+let actSortMode={};
+function toggleActSort(id){
+  actSortMode[id]=(actSortMode[id]==='alpha')?'cat':'alpha';
+  updateActSortBtn(id);
+  if(id==='futsal-benj') renderFutsalGroup('Benj');
+  else if(id==='futsal-min') renderFutsalGroup('Min');
+  else renderActivity(id);
+}
+function updateActSortBtn(id){
+  const btn=document.getElementById('sortBtn-'+id); if(!btn) return;
+  btn.innerHTML=(actSortMode[id]==='alpha')
+    ?'&#128202; Trier par cat&eacute;gorie'
+    :'&#128100; Trier par ordre alphab&eacute;tique';
+}
 function renderActivity(act){
   const filtered=liveStudents().filter(s=>(s.activites||[]).includes(act));
   document.getElementById('cnt-'+act).textContent=filtered.length;
   const tbody=document.getElementById('body-'+act),empty=document.getElementById('empty-'+act),table=document.getElementById('tbl-'+act);
   if(filtered.length===0){tbody.innerHTML='';empty.classList.remove('hidden');table.style.display='none';return;}
   empty.classList.add('hidden');table.style.display='';
+  if(actSortMode[act]==='alpha'){
+    tbody.innerHTML=[...filtered].sort(sortByName).map(studentRow).join('');
+    return;
+  }
   const groups={};GROUP_ORDER.forEach(cat=>{groups[cat]=[];});
   filtered.forEach(s=>{const c=groupCategorie(getCategorie(s.sexe,s.dateNaissance));(groups[c]=groups[c]||[]).push(s);});
   let html='';
@@ -1971,6 +1997,10 @@ function renderFutsalGroup(group){
   const tbody=document.getElementById('body-'+id),empty=document.getElementById('empty-'+id),table=document.getElementById('tbl-'+id);
   if(filtered.length===0){tbody.innerHTML='';empty.classList.remove('hidden');table.style.display='none';return;}
   empty.classList.add('hidden');table.style.display='';
+  if(actSortMode[id]==='alpha'){
+    tbody.innerHTML=[...filtered].sort(sortByName).map(studentRow).join('');
+    return;
+  }
   let html='';
   FUTSAL_CATS[group].forEach(cat=>{
     const list=filtered.filter(s=>groupCategorie(getCategorie(s.sexe,s.dateNaissance))===cat).sort(sortByName);

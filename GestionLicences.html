@@ -540,7 +540,6 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
     <button class="tab-btn" onclick="switchTab('stats',this)">&#128202; Statistiques</button>
     <button class="tab-btn tab-sorties" onclick="switchTab('sorties',this)">&#128652; Sorties AS</button>
     <button class="tab-btn tab-blackliste" onclick="switchTab('blackliste',this)">&#128683; Black liste</button>
-    <button class="tab-btn" style="margin-left:auto" onclick="switchTab('tous-eleves',this)">&#127979; &Eacute;l&egrave;ves de Joliot</button>
   </div>
 </nav>
 
@@ -948,39 +947,6 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         </tr></thead>
         <tbody id="blacklisteBody"></tbody>
       </table>
-    </div>
-  </div>
-</div>
-
-<!-- ===== TAB TOUS LES ÉLÈVES ===== -->
-<div id="tab-tous-eleves" class="tab-panel">
-  <div class="card">
-    <div class="card-header">
-      <h2>
-        &#127979; Liste du coll&egrave;ge &nbsp;
-        <span id="collegeBadge" style="background:#ccfbf1;color:#0f766e;padding:.1rem .5rem;border-radius:9999px;font-size:.8rem">0 &eacute;l&egrave;ves</span>
-      </h2>
-      <div class="flex gap2 items-center" style="flex-wrap:wrap">
-        <input type="text" id="searchCollege" placeholder="&#128269; Rechercher…" style="width:180px;font-size:.85rem" oninput="renderCollegeTab()">
-        <button class="btn btn-teal" onclick="importCollegeStudents()">&#128229; Importer depuis Google Sheets</button>
-      </div>
-    </div>
-    <div style="padding:.75rem 1.25rem;background:#f0fdfa;border-bottom:1px solid #99f6e4;font-size:.82rem;color:#0f766e">
-      &#8505;&#65039; Cette liste est importée depuis l'onglet &laquo;&nbsp;liste des élèves du collège&nbsp;&raquo; du Google Sheet.
-      Elle sert de référentiel pour le formulaire d'ajout d'un élève à l'AS (auto-complétion Nom / Prénom / Classe / Sexe).
-    </div>
-    <div class="table-wrap">
-      <table id="tbl-college" class="college-table">
-        <thead><tr>
-          <th>Nom</th><th>Prénom</th><th>Classe</th><th>Sexe</th><th>Date de naiss.</th>
-        </tr></thead>
-        <tbody id="body-college"></tbody>
-      </table>
-      <div id="empty-college" class="empty-state hidden">
-        <div class="icon">&#127979;</div>
-        <h3>Aucune liste importée</h3>
-        <p style="margin-top:.35rem;font-size:.85rem">Cliquez sur &laquo;&nbsp;&#128229; Importer depuis Google Sheets&nbsp;&raquo; pour charger la liste du coll&egrave;ge.</p>
-      </div>
     </div>
   </div>
 </div>
@@ -2011,25 +1977,6 @@ function renderFutsalGroup(group){
   tbody.innerHTML=html;
 }
 
-// ── RENDU ONGLET TOUS LES ÉLÈVES ──────────────────────────────────────────
-function renderCollegeTab(){
-  const q=(document.getElementById('searchCollege').value||'').toLowerCase();
-  const filtered=collegeStudents.filter(c=>(c.nom+' '+c.prenom+' '+(c.classe||'')).toLowerCase().includes(q));
-  document.getElementById('collegeBadge').textContent=collegeStudents.length+' élève'+(collegeStudents.length>1?'s':'');
-  const tbody=document.getElementById('body-college'),empty=document.getElementById('empty-college'),table=document.getElementById('tbl-college');
-  if(filtered.length===0){tbody.innerHTML='';empty.classList.remove('hidden');table.style.display='none';return;}
-  empty.classList.add('hidden');table.style.display='';
-  tbody.innerHTML=[...filtered].sort((a,b)=>{
-    const k=((a.nom||'')+(a.prenom||'')).localeCompare((b.nom||'')+(b.prenom||''));return k;
-  }).map(c=>`<tr>
-    <td><strong>${x(c.nom)}</strong></td>
-    <td>${x(c.prenom)}</td>
-    <td>${classeBadge(c.classe)}</td>
-    <td>${sexeBadge(c.sexe)}</td>
-    <td>${x(c.dateNaissance)||'<span class="muted">—</span>'}</td>
-  </tr>`).join('');
-}
-
 // ── EXPORT EXCEL / CSV ────────────────────────────────────────────────────
 // ── EXPORT PDF (impression du navigateur) ──────────────────────────────────
 function printTab(){
@@ -2205,7 +2152,7 @@ function renderStats(){
   document.getElementById('stat-reglements').innerHTML=REGL_KEYS.filter(r=>rCounts[r]).length?REGL_KEYS.filter(r=>rCounts[r]).map(r=>renderBar(REGL[r],rCounts[r],total)).join(''):'<p class="muted">Aucun élève</p>';
 }
 
-function renderAll(){renderTable();['fitness','natation','sport_partage'].forEach(renderActivity);renderFutsalGroup('Benj');renderFutsalGroup('Min');renderSorties();renderBlackliste();renderCollegeTab();renderStats();}
+function renderAll(){renderTable();['fitness','natation','sport_partage'].forEach(renderActivity);renderFutsalGroup('Benj');renderFutsalGroup('Min');renderSorties();renderBlackliste();renderStats();}
 
 // ── SORTIES AS ────────────────────────────────────────────────────────────
 // Les sorties sont synchronisées via des lignes "méta" de la feuille Eleves
@@ -2652,8 +2599,9 @@ async function importFromSheets(){
   await syncWithSheets(true);
 }
 
-async function importCollegeStudents(){
-  alert2('Importation de la liste du collège…','info');
+async function importCollegeStudents(silent=false){
+  if(!navigator.onLine) return;
+  if(!silent) alert2('Importation de la liste du collège…','info');
   try{
     const d=await jsonpFetch(SCRIPT_URL+'?type=college');
     if(d.success&&Array.isArray(d.data)){
@@ -2697,12 +2645,12 @@ async function importCollegeStudents(){
       let msg=`${collegeStudents.length} élève(s) du collège importé(s).`;
       if(nbDoublons>0) msg+=` ${nbDoublons} doublon(s) fusionné(s).`;
       if(sansDdn>0) msg+=` ⚠️ ${sansDdn} sans date de naissance — à corriger dans le Google Sheet.`;
-      alert2(msg, (nbDoublons>0||sansDdn>0) ? 'info' : 'success');
-    } else {
+      if(!silent) alert2(msg, (nbDoublons>0||sansDdn>0) ? 'info' : 'success');
+    } else if(!silent){
       alert2('Erreur : '+(d.error||'réponse inattendue'),'error');
     }
   }catch(e){
-    alert2('Impossible de contacter Google Sheets. Vérifiez le déploiement Web App ("Tout le monde").','error');
+    if(!silent) alert2('Impossible de contacter Google Sheets. Vérifiez le déploiement Web App ("Tout le monde").','error');
   }
 }
 
@@ -2960,6 +2908,7 @@ updateNetworkUI();
 updateLastSyncUI();
 renderAll();
 importFromSheets();
+importCollegeStudents(true);
 
 // ── SYNCHRONISATION AUTOMATIQUE ────────────────────────────────────────────
 window.addEventListener('online', async () => {

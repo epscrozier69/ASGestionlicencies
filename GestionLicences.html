@@ -454,6 +454,57 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
 .sortie-table tbody td:nth-child(1), .sortie-table tbody td:nth-child(2) { z-index:2; }
 .sortie-table thead th:nth-child(1), .sortie-table thead th:nth-child(2) { z-index:5; }
 
+/* ── VENTE (onglet ambre, distinct des activités) ── */
+.tab-btn.tab-vente{color:#b45309;background:#fffbeb}
+.tab-btn.tab-vente:hover{background:#fef3c7;color:#92400e}
+.tab-btn.tab-vente.active{color:#b45309;border-bottom-color:#b45309;background:#fef3c7}
+.btn-vente{background:#b45309;color:#fff}.btn-vente:hover{background:#92400e}
+.vente-subnav{display:flex;gap:.4rem;overflow-x:auto;padding:.75rem 1.25rem;
+  border-bottom:1px solid var(--border);background:#fffbeb}
+.vente-chip{flex:none;padding:.4rem .85rem;border-radius:9999px;border:1.5px solid #fcd34d;
+  background:#fff;color:#92400e;font-weight:600;font-size:.82rem;cursor:pointer;white-space:nowrap}
+.vente-chip:hover{background:#fef3c7}
+.vente-chip.active{background:#b45309;border-color:#b45309;color:#fff}
+.vente-tarifs-recap{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.3rem}
+.vente-tarifs-recap span{background:#fef3c7;color:#92400e;border-radius:6px;padding:.15rem .55rem;font-size:.8rem;font-weight:600}
+.vente-table thead th:nth-child(1){background:#374151}
+.vente-table thead th:nth-child(2){background:#1e40af}
+.vente-table thead th:nth-child(3){background:#0f766e}
+.vente-table thead th:nth-child(4){background:#b45309}
+.vente-table thead th:nth-child(5){background:#7c3aed}
+.vente-table thead th:nth-child(6){background:#0891b2}
+.vente-table thead th:nth-child(7){background:#0369a1}
+.vente-table thead th:nth-child(8){background:#b91c1c}
+.vente-table thead th:nth-child(9){background:#a21caf}
+.vente-table thead th:nth-child(10){background:#4338ca}
+.vente-table thead th:nth-child(11){background:#9d174d}
+.vente-table tbody td:nth-child(1){background:#e2e8f0}
+.vente-table tbody td:nth-child(2){background:#dbeafe}
+.vente-table tbody td:nth-child(3){background:#ccfbf1}
+.vente-table tbody td:nth-child(4){background:#fef3c7}
+.vente-table tbody td:nth-child(5){background:#ede9fe}
+.vente-table tbody td:nth-child(6){background:#cffafe}
+.vente-table tbody td:nth-child(7){background:#e0f2fe}
+.vente-table tbody td:nth-child(8){background:#fef2f2}
+.vente-table tbody td:nth-child(9){background:#fae8ff}
+.vente-table tbody td:nth-child(10){background:#e0e7ff}
+.vente-table tbody td:nth-child(11){background:#fce7f3}
+.vente-table th:nth-child(1), .vente-table td:nth-child(1) {width:3rem}
+.vente-table thead th:nth-child(1), .vente-table tbody td:nth-child(1) {position:sticky; left:0}
+.vente-table thead th:nth-child(2), .vente-table tbody td:nth-child(2) {
+  position:sticky; left:3rem;
+  box-shadow:2px 0 4px -2px rgba(0,0,0,.25);
+}
+.vente-table tbody td:nth-child(1), .vente-table tbody td:nth-child(2) { z-index:2; }
+.vente-table thead th:nth-child(1), .vente-table thead th:nth-child(2) { z-index:5; }
+
+/* Boutons de choix rapide (palier de quantité, moyen de paiement) */
+.choice-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.choice-btn{flex:none;padding:.55rem .9rem;border-radius:10px;border:1.5px solid var(--border);
+  background:#fff;color:#334155;font-weight:600;font-size:.85rem;cursor:pointer;text-align:center;line-height:1.3}
+.choice-btn:hover{background:#f8fafc;border-color:#94a3b8}
+.choice-btn.selected{background:#b45309;border-color:#b45309;color:#fff}
+
 /* ── BLACK LISTE (onglet sombre, distinct des activités) ── */
 .tab-btn.tab-blackliste{color:#1f2937;background:#f1f5f9}
 .tab-btn.tab-blackliste:hover{background:#e2e8f0;color:#0f172a}
@@ -540,6 +591,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
     <button class="tab-btn" onclick="switchTab('stats',this)">&#128202; Statistiques</button>
     <button class="tab-btn tab-sorties" onclick="switchTab('sorties',this)">&#128652; Sorties AS</button>
     <button class="tab-btn tab-blackliste" onclick="switchTab('blackliste',this)">&#128683; Black liste</button>
+    <button class="tab-btn tab-vente" onclick="switchTab('vente',this)">&#128176; Vente</button>
   </div>
 </nav>
 
@@ -951,6 +1003,58 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   </div>
 </div>
 
+<!-- ===== TAB VENTE ===== -->
+<div id="tab-vente" class="tab-panel">
+  <div class="card">
+    <div class="card-header" style="background:#fffbeb">
+      <h2>&#128176; Vente &nbsp;<span id="venteCount" class="badge b-orange">0</span></h2>
+      <button class="btn btn-vente" onclick="openVenteModal()">&#10133; Cr&eacute;er une vente</button>
+    </div>
+    <div id="venteSubnav" class="vente-subnav hidden"></div>
+    <div id="venteEmpty" class="empty-state">
+      <div class="icon">&#128176;</div>
+      <h3>Aucune vente cr&eacute;&eacute;e</h3>
+      <p style="margin-top:.35rem;font-size:.85rem">Cliquez sur &laquo;&nbsp;&#10133; Cr&eacute;er une vente&nbsp;&raquo; pour commencer (ex. Vente de bougies).</p>
+    </div>
+    <div id="venteContent" class="hidden">
+      <div class="card-body" style="border-bottom:1px solid var(--border)">
+        <div class="flex" style="justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.75rem">
+          <div>
+            <h2 id="venteTitle" style="font-size:1.05rem;font-weight:700"></h2>
+            <div id="venteTarifsRecap" class="vente-tarifs-recap"></div>
+            <div class="sortie-info" style="margin-top:.5rem">
+              <span>&#128176; Total d&ucirc; : <strong id="venteTotalDu"></strong></span>
+              <span>&#128181; Total re&ccedil;u : <strong id="venteTotalRecu"></strong></span>
+              <span>&#9878;&#65039; &Eacute;cart : <strong id="venteTotalEcart"></strong></span>
+            </div>
+          </div>
+          <div class="flex gap2" style="flex-wrap:wrap">
+            <button class="btn btn-warning btn-sm" onclick="openVenteModal(currentVenteId)">&#9999;&#65039; Modifier</button>
+            <button class="btn btn-danger btn-sm" onclick="openDeleteVente()">&#128465;&#65039; Effacer</button>
+          </div>
+        </div>
+      </div>
+      <div class="card-header">
+        <h2>Ventes enregistr&eacute;es &nbsp;<span id="venteNbVentes" class="badge b-orange count-badge">0</span></h2>
+        <button class="btn btn-vente btn-sm" onclick="openVenteSaleModal()">&#10133; Enregistrer une vente</button>
+      </div>
+      <div class="table-wrap">
+        <table id="tbl-vente" class="vente-table">
+          <thead><tr>
+            <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Quantit&eacute;</th><th>Prix d&ucirc;</th>
+            <th>Somme donn&eacute;e</th><th>&Eacute;cart</th><th>Paiement</th><th>Donn&eacute; par</th><th>R&eacute;cup&eacute;r&eacute; par</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="venteBody"></tbody>
+        </table>
+        <div id="venteEmptyList" class="empty-state hidden">
+          <div class="icon">&#128101;</div>
+          <h3>Aucune vente enregistr&eacute;e pour cette op&eacute;ration</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== TAB STATS ===== -->
 <div id="tab-stats" class="tab-panel">
   <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:1rem">&#128202; Statistiques</h2>
@@ -1322,6 +1426,125 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   </div>
 </div>
 
+<!-- ===== MODAL VENTE (création / modification d'une opération de vente) ===== -->
+<div id="venteModal" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 id="venteModalTitle">&#128176; Cr&eacute;er une vente</h3>
+      <button class="close-btn" onclick="closeModal('venteModal')">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <form id="venteForm" onsubmit="handleVente(event)">
+        <input type="hidden" id="vm-id">
+        <div class="form-grid" style="grid-template-columns:1fr">
+          <div class="form-group">
+            <label>Nom de l'op&eacute;ration *</label>
+            <input type="text" id="vm-nom" required placeholder="Ex : Vente de bougies">
+          </div>
+          <div class="form-group">
+            <label>Unit&eacute; vendue <small style="text-transform:none;font-weight:400">(ex : bougie)</small></label>
+            <input type="text" id="vm-unite" placeholder="Ex : bougie">
+          </div>
+          <div class="form-group">
+            <label>Paliers de prix *</label>
+            <div class="flex gap2" style="align-items:flex-end;flex-wrap:wrap">
+              <div style="flex:1;min-width:5rem">
+                <small class="muted">Quantit&eacute;</small>
+                <input type="number" id="vm-tarif-qte" min="1" step="1" style="width:100%">
+              </div>
+              <div style="flex:1;min-width:5rem">
+                <small class="muted">Prix (&euro;)</small>
+                <input type="number" id="vm-tarif-prix" min="0" step="0.5" style="width:100%">
+              </div>
+              <button type="button" class="btn btn-outline btn-sm" onclick="addVenteTarif()">&#10133; Ajouter</button>
+            </div>
+            <div id="vm-tarifs-list" class="vente-tarifs-recap" style="margin-top:.6rem"></div>
+            <small class="muted">Au moins un palier est n&eacute;cessaire (ex : 1 bougie = 3&nbsp;&euro;, 2 bougies = 4&nbsp;&euro;, 5 bougies = 8&nbsp;&euro;).</small>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('venteModal')">Annuler</button>
+      <button class="btn btn-vente" form="venteForm" type="submit">&#128190; Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL VENTE — ENREGISTRER UNE VENTE ===== -->
+<div id="venteSaleModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="venteSaleModalTitle">&#10133; Enregistrer une vente</h3>
+      <button class="close-btn" onclick="closeModal('venteSaleModal')">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div id="vs-pickerWrap" style="margin-bottom:1rem">
+        <label style="display:block;margin-bottom:.3rem">&#128269; Chercher un &eacute;l&egrave;ve inscrit &agrave; l'AS</label>
+        <div class="college-search-wrap">
+          <input type="text" id="vs-search" placeholder="Saisir nom ou prénom…" autocomplete="off"
+                 oninput="filterVenteStudents()" onfocus="filterVenteStudents()">
+          <div id="vs-results" class="college-results hidden"></div>
+        </div>
+      </div>
+      <form id="venteSaleForm" onsubmit="handleVenteSale(event)">
+        <input type="hidden" id="vs-id">
+        <input type="hidden" id="vs-student">
+        <input type="hidden" id="vs-qte">
+        <input type="hidden" id="vs-prixdu">
+        <input type="hidden" id="vs-moyen">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nom</label>
+            <input type="text" id="vs-nom" readonly placeholder="Choisir un élève ci-dessus">
+          </div>
+          <div class="form-group">
+            <label>Pr&eacute;nom</label>
+            <input type="text" id="vs-prenom" readonly>
+          </div>
+          <div class="form-group">
+            <label>Classe</label>
+            <input type="text" id="vs-classe" readonly>
+          </div>
+          <div class="form-group full">
+            <label id="vs-qte-label">Quantit&eacute;</label>
+            <div id="vs-tarifs" class="choice-btns"></div>
+          </div>
+          <div class="form-group">
+            <label>Somme donn&eacute;e (&euro;)</label>
+            <input type="number" id="vs-somme" min="0" step="0.5" oninput="updateVenteEcart()">
+          </div>
+          <div class="form-group">
+            <label>&Eacute;cart</label>
+            <input type="text" id="vs-ecart" readonly>
+          </div>
+          <div class="form-group full">
+            <label>Moyen de paiement</label>
+            <div class="choice-btns">
+              <button type="button" class="choice-btn" id="vs-moyen-especes-btn" onclick="selectVenteMoyen('especes')">&#128181; Esp&egrave;ces</button>
+              <button type="button" class="choice-btn" id="vs-moyen-cheque-btn" onclick="selectVenteMoyen('cheque')">&#128197; Ch&egrave;que</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Prof ayant donn&eacute; les bougies</label>
+            <select id="vs-prof-donneur" onchange="toggleProfAutre('vs-prof-donneur')"></select>
+            <input type="text" id="vs-prof-donneur-autre" class="hidden" placeholder="Nom du professeur" style="margin-top:.4rem">
+          </div>
+          <div class="form-group">
+            <label>Prof ayant r&eacute;cup&eacute;r&eacute; l'argent</label>
+            <select id="vs-prof-recup" onchange="toggleProfAutre('vs-prof-recup')"></select>
+            <input type="text" id="vs-prof-recup-autre" class="hidden" placeholder="Nom du professeur" style="margin-top:.4rem">
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('venteSaleModal')">Annuler</button>
+      <button class="btn btn-vente" form="venteSaleForm" type="submit">&#128190; Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== MODAL SIGNALEMENT BLACK LISTE ===== -->
 <div id="blacklistModal" class="modal-overlay hidden">
   <div class="modal">
@@ -1427,6 +1650,7 @@ const CAT_BADGE   = {
   'Min Fille':'b-rose',   'Min Garçon':'b-sky',
   'Cadette':'b-purple',   'Cadet':'b-indigo', '—':'b-gray'
 };
+const PROFS = ['Mme JOUD','Mme CROZIER','Mme MEKRALDI','M. TINELLI','M. JEAN-BAPTISTE','M. GOUTTE-TOQUET'];
 
 // ── DONNÉES ───────────────────────────────────────────────────────────────
 let students        = [];
@@ -1542,6 +1766,7 @@ function load() {
     const c=localStorage.getItem('as-college');     if(c) collegeStudents=JSON.parse(c);
     const so=localStorage.getItem('as-sorties');    if(so) sorties=JSON.parse(so);
     const bl=localStorage.getItem('as-blacklist');  if(bl) blacklist=JSON.parse(bl);
+    const ve=localStorage.getItem('as-ventes');     if(ve) ventes=JSON.parse(ve);
     const d=localStorage.getItem('as-deleted-log'); if(d) deletedLog=JSON.parse(d);
     const p=localStorage.getItem('as-pending-sync'); pendingSync = p === '1';
     initNextOrdre();
@@ -1555,7 +1780,7 @@ function savePendingSync(){try{localStorage.setItem('as-pending-sync',pendingSyn
 // ── SAUVEGARDE / RESTAURATION .JSON ──────────────────────────────────────
 function exportBackupJSON(){
   const backup={type:'as-gestion-licences-backup',version:1,exportedAt:new Date().toISOString(),
-    students,collegeStudents,sorties,blacklist,deletedLog};
+    students,collegeStudents,sorties,blacklist,ventes,deletedLog};
   const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
@@ -1580,9 +1805,10 @@ function handleRestoreFile(ev){
     collegeStudents=Array.isArray(data.collegeStudents)?data.collegeStudents:[];
     sorties=Array.isArray(data.sorties)?data.sorties:[];
     blacklist=Array.isArray(data.blacklist)?data.blacklist:[];
+    ventes=Array.isArray(data.ventes)?data.ventes:[];
     deletedLog=(data.deletedLog&&typeof data.deletedLog==='object')?data.deletedLog:{};
     initNextOrdre();
-    save(); saveCollege(); saveSorties(); saveBlacklist(); saveDeletedLog();
+    save(); saveCollege(); saveSorties(); saveBlacklist(); saveVentes(); saveDeletedLog();
     pendingSync=true; savePendingSync(); updateNetworkUI();
     renderAll();
     alert2(`✅ Sauvegarde restaurée (${students.length} élève(s)). Synchronisation en attente.`,'success');
@@ -2152,7 +2378,7 @@ function renderStats(){
   document.getElementById('stat-reglements').innerHTML=REGL_KEYS.filter(r=>rCounts[r]).length?REGL_KEYS.filter(r=>rCounts[r]).map(r=>renderBar(REGL[r],rCounts[r],total)).join(''):'<p class="muted">Aucun élève</p>';
 }
 
-function renderAll(){renderTable();['fitness','natation','sport_partage'].forEach(renderActivity);renderFutsalGroup('Benj');renderFutsalGroup('Min');renderSorties();renderBlackliste();renderStats();}
+function renderAll(){renderTable();['fitness','natation','sport_partage'].forEach(renderActivity);renderFutsalGroup('Benj');renderFutsalGroup('Min');renderSorties();renderBlackliste();renderVentes();renderStats();}
 
 // ── SORTIES AS ────────────────────────────────────────────────────────────
 // Les sorties sont synchronisées via des lignes "méta" de la feuille Eleves
@@ -2214,6 +2440,7 @@ function metaEntry(id,json,ordre){
 function metaRows(){
   return [...sorties.map((s,i)=>metaEntry(SORTIE_PREFIX+s.id,JSON.stringify(s),9999000+i)),
           ...blacklist.map((b,i)=>metaEntry(BLACKLIST_PREFIX+b.id,JSON.stringify(b),9998000+i)),
+          ...ventes.map((v,i)=>metaEntry(VENTE_PREFIX+v.id,JSON.stringify(v),9997000+i)),
           metaEntry('__deletedLog__',JSON.stringify(deletedLog),9999999)];
 }
 
@@ -2577,6 +2804,289 @@ function printSortie(){
 }
 window.addEventListener('afterprint',()=>{document.body.classList.remove('printing-sortie');});
 
+// ── VENTE (ex. Vente de bougies) ─────────────────────────────────────────
+// Même mécanisme de synchronisation « méta » que les sorties AS et la Black
+// liste : chaque vente (avec ses enregistrements individuels imbriqués) est
+// sérialisée en JSON dans une ligne méta (id "__vente__<id>") → aucune
+// modification de l'Apps Script n'est requise.
+const VENTE_PREFIX  = '__vente__';
+let ventes          = [];
+let currentVenteId  = null;
+let venteModalTarifs = [];
+let venteSaleTarif   = null; // {qte,prix} choisi par bouton dans le modal d'enregistrement
+let venteSaleMoyen   = '';
+
+function saveVentes(){try{localStorage.setItem('as-ventes',JSON.stringify(ventes));}catch(e){}}
+function getVente(id){return ventes.find(v=>v.id===id);}
+function sortedVentes(){return [...ventes].sort((a,b)=>(a.lastModified||0)-(b.lastModified||0));}
+function touchVente(v){
+  v.lastModified=Date.now();
+  saveVentes(); renderVentes(); scheduleSortieSync();
+}
+function mergeVentes(local,remote){
+  const map=new Map();
+  remote.forEach(v=>{if(v&&v.id) map.set(v.id,v);});
+  local.forEach(v=>{const e=map.get(v.id);if(!e||(v.lastModified||0)>=(e.lastModified||0)) map.set(v.id,v);});
+  for(const [id,ts] of Object.entries(deletedLog)){const v=map.get(id);if(v&&(v.lastModified||0)<=+ts) map.delete(id);}
+  return [...map.values()];
+}
+function ventesFromRows(rows){
+  return rows.filter(r=>String(r.id).startsWith(VENTE_PREFIX))
+    .map(r=>{try{return JSON.parse(r.prenom);}catch(e){return null;}})
+    .filter(v=>v&&v.id);
+}
+function venteUnite(v,qte){return (v.unite||'article')+(qte>1?'s':'');}
+function venteTarifLabel(v,t){return `${t.qte} ${venteUnite(v,t.qte)} = ${montantLabel(t.prix)}`;}
+function venteEcartLabel(ecart){
+  const n=parseFloat(ecart)||0;
+  if(n===0) return '<span class="badge b-teal">&#10003; Compte juste</span>';
+  if(n>0) return `<span class="badge b-red">Manque ${montantLabel(n)}</span>`;
+  return `<span class="badge b-amber">+${montantLabel(-n)} donn&eacute;s</span>`;
+}
+function selectVente(id){currentVenteId=(currentVenteId===id)?null:id;renderVentes();}
+
+function renderVentes(){
+  const all=sortedVentes();
+  document.getElementById('venteCount').textContent=all.length;
+  const nav=document.getElementById('venteSubnav');
+  nav.classList.toggle('hidden',!all.length);
+  nav.innerHTML=all.map(v=>`<button class="vente-chip${v.id===currentVenteId?' active':''}" onclick="selectVente('${v.id}')">&#128176; ${x(v.nom)} (${(v.participants||[]).length})</button>`).join('');
+  if(currentVenteId&&!getVente(currentVenteId)) currentVenteId=null;
+  document.getElementById('venteEmpty').classList.toggle('hidden',!!all.length);
+  const v=getVente(currentVenteId);
+  document.getElementById('venteContent').classList.toggle('hidden',!v);
+  if(!v) return;
+  document.getElementById('venteTitle').textContent=v.nom;
+  document.getElementById('venteTarifsRecap').innerHTML=(v.tarifs||[]).map(t=>`<span>${venteTarifLabel(v,t)}</span>`).join('');
+  const parts=[...(v.participants||[])].sort(sortByName);
+  const totalDu=parts.reduce((a,p)=>a+(parseFloat(p.prixDu)||0),0);
+  const totalRecu=parts.reduce((a,p)=>a+(parseFloat(p.somme)||0),0);
+  document.getElementById('venteTotalDu').textContent=montantLabel(totalDu);
+  document.getElementById('venteTotalRecu').textContent=montantLabel(totalRecu);
+  document.getElementById('venteTotalEcart').innerHTML=venteEcartLabel(totalDu-totalRecu);
+  document.getElementById('venteNbVentes').textContent=parts.length;
+  const tbody=document.getElementById('venteBody'),empty=document.getElementById('venteEmptyList'),table=document.getElementById('tbl-vente');
+  if(!parts.length){tbody.innerHTML='';empty.classList.remove('hidden');table.style.display='none';return;}
+  empty.classList.add('hidden');table.style.display='';
+  tbody.innerHTML=parts.map((p,i)=>`<tr>
+    <td style="font-weight:700;text-align:center">${i+1}</td>
+    <td><strong>${x(p.nom)} ${x(p.prenom)}</strong></td>
+    <td>${classeBadge(p.classe)}</td>
+    <td>${p.qte} ${venteUnite(v,p.qte)}</td>
+    <td>${montantLabel(p.prixDu)}</td>
+    <td>${montantLabel(p.somme)}</td>
+    <td>${venteEcartLabel((parseFloat(p.prixDu)||0)-(parseFloat(p.somme)||0))}</td>
+    <td>${p.moyen?`<span class="badge ${p.moyen==='cheque'?'b-teal':'b-amber'}">${REGL[p.moyen]}</span>`:'<span class="muted">—</span>'}</td>
+    <td>${x(p.profDonneur)||'<span class="muted">—</span>'}</td>
+    <td>${x(p.profRecup)||'<span class="muted">—</span>'}</td>
+    <td><div class="flex gap2">
+      <button class="btn btn-warning btn-sm" onclick="openVenteSaleModal('${p.id}')" title="Modifier">&#9999;&#65039;</button>
+      <button class="btn btn-danger btn-sm" onclick="openDeleteVenteSale('${p.id}')" title="Effacer">&#128465;&#65039;</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+// ── Création / modification d'une opération de vente
+function openVenteModal(id){
+  const v=id?getVente(id):null;
+  document.getElementById('venteModalTitle').innerHTML=v?'&#9999;&#65039; Modifier la vente':'&#128176; Cr&eacute;er une vente';
+  document.getElementById('vm-id').value=v?v.id:'';
+  document.getElementById('vm-nom').value=v?v.nom:'';
+  document.getElementById('vm-unite').value=v?(v.unite||''):'';
+  document.getElementById('vm-tarif-qte').value='';
+  document.getElementById('vm-tarif-prix').value='';
+  venteModalTarifs=v?[...(v.tarifs||[])]:[];
+  renderVenteModalTarifs();
+  document.getElementById('venteModal').classList.remove('hidden');
+}
+function renderVenteModalTarifs(){
+  const unite=document.getElementById('vm-unite').value.trim()||'article';
+  const wrap=document.getElementById('vm-tarifs-list');
+  wrap.innerHTML=venteModalTarifs.length
+    ? venteModalTarifs.map((t,i)=>`<span>${t.qte} ${unite}${t.qte>1?'s':''} = ${montantLabel(t.prix)} <a onclick="removeVenteTarif(${i})" style="cursor:pointer;margin-left:.3rem;font-weight:700">&times;</a></span>`).join('')
+    : '<span class="muted" style="background:none;font-weight:400">Aucun palier ajout&eacute;</span>';
+}
+function addVenteTarif(){
+  const qte=parseInt(document.getElementById('vm-tarif-qte').value);
+  const prix=parseFloat(document.getElementById('vm-tarif-prix').value);
+  if(!qte||qte<1||isNaN(prix)||prix<0){alert2('Indiquez une quantité (≥ 1) et un prix valides.','error');return;}
+  if(venteModalTarifs.some(t=>t.qte===qte)){alert2('Un palier existe déjà pour cette quantité.','error');return;}
+  venteModalTarifs.push({qte,prix});
+  venteModalTarifs.sort((a,b)=>a.qte-b.qte);
+  document.getElementById('vm-tarif-qte').value='';
+  document.getElementById('vm-tarif-prix').value='';
+  renderVenteModalTarifs();
+}
+function removeVenteTarif(i){venteModalTarifs.splice(i,1);renderVenteModalTarifs();}
+function handleVente(e){
+  e.preventDefault();
+  const id=document.getElementById('vm-id').value;
+  const nom=document.getElementById('vm-nom').value.trim();
+  const unite=document.getElementById('vm-unite').value.trim();
+  if(!venteModalTarifs.length){alert2('Ajoutez au moins un palier de prix.','error');return;}
+  let v;
+  if(id){
+    v=getVente(id); if(!v) return;
+    Object.assign(v,{nom,unite,tarifs:[...venteModalTarifs]});
+  } else {
+    v={id:uid(),nom,unite,tarifs:[...venteModalTarifs],participants:[]};
+    ventes.push(v);
+  }
+  currentVenteId=v.id;
+  closeModal('venteModal');
+  touchVente(v);
+  alert2(id?'✅ Vente modifiée.':'✅ Vente créée.','success');
+}
+function openDeleteVente(){
+  const v=getVente(currentVenteId); if(!v) return;
+  const n=(v.participants||[]).length;
+  openConfirm(`Effacer la vente <strong>${x(v.nom)}</strong>${n?` et ses ${n} enregistrement${n>1?'s':''}`:''} ? Cette action est irréversible.`,()=>{
+    deletedLog[v.id]=Date.now(); saveDeletedLog();
+    ventes=ventes.filter(q=>q.id!==v.id); currentVenteId=null;
+    saveVentes(); renderVentes(); scheduleSortieSync();
+    alert2('🗑️ Vente effacée.','info');
+  });
+}
+
+// ── Enregistrement d'une vente pour un élève
+function profsOptionsHtml(){
+  return '<option value="">—</option>'+PROFS.map(p=>`<option value="${x(p)}">${x(p)}</option>`).join('')+'<option value="__autre__">Autre…</option>';
+}
+function toggleProfAutre(selectId){
+  const sel=document.getElementById(selectId);
+  const autre=document.getElementById(selectId+'-autre');
+  autre.classList.toggle('hidden',sel.value!=='__autre__');
+  if(sel.value!=='__autre__') autre.value='';
+}
+function profValue(selectId){
+  const sel=document.getElementById(selectId);
+  return sel.value==='__autre__'?document.getElementById(selectId+'-autre').value.trim():sel.value;
+}
+function renderVenteSaleTarifButtons(v){
+  const wrap=document.getElementById('vs-tarifs');
+  const tarifs=[...(v.tarifs||[])].sort((a,b)=>a.qte-b.qte);
+  wrap.innerHTML=tarifs.map(t=>{
+    const sel=!!venteSaleTarif&&venteSaleTarif.qte===t.qte&&venteSaleTarif.prix===t.prix;
+    return `<button type="button" class="choice-btn${sel?' selected':''}" onclick="selectVenteTarif(${t.qte},${t.prix})">${t.qte} ${venteUnite(v,t.qte)}<br>${montantLabel(t.prix)}</button>`;
+  }).join('');
+}
+function selectVenteTarif(qte,prix){
+  venteSaleTarif={qte,prix};
+  renderVenteSaleTarifButtons(getVente(currentVenteId));
+  document.getElementById('vs-somme').value=prix;
+  updateVenteEcart();
+}
+function updateVenteMoyenButtons(){
+  document.getElementById('vs-moyen-especes-btn').classList.toggle('selected',venteSaleMoyen==='especes');
+  document.getElementById('vs-moyen-cheque-btn').classList.toggle('selected',venteSaleMoyen==='cheque');
+}
+function selectVenteMoyen(m){
+  venteSaleMoyen=(venteSaleMoyen===m)?'':m;
+  updateVenteMoyenButtons();
+}
+function updateVenteEcart(){
+  const el=document.getElementById('vs-ecart');
+  const somme=parseFloat(document.getElementById('vs-somme').value);
+  if(!venteSaleTarif||isNaN(somme)){el.value='';return;}
+  const ecart=venteSaleTarif.prix-somme;
+  el.value=ecart===0?'Compte juste':(ecart>0?`Manque ${montantLabel(ecart)}`:`+${montantLabel(-ecart)} donnés`);
+}
+function openVenteSaleModal(pid){
+  const v=getVente(currentVenteId); if(!v) return;
+  const p=pid?(v.participants||[]).find(q=>q.id===pid):null;
+  document.getElementById('venteSaleModalTitle').innerHTML=p?'&#9999;&#65039; Modifier la vente':'&#10133; Enregistrer une vente';
+  document.getElementById('vs-pickerWrap').classList.toggle('hidden',!!p);
+  document.getElementById('vs-search').value='';
+  document.getElementById('vs-results').classList.add('hidden');
+  document.getElementById('vs-id').value=p?p.id:'';
+  document.getElementById('vs-student').value=p?(p.studentId||''):'';
+  document.getElementById('vs-nom').value=p?p.nom:'';
+  document.getElementById('vs-prenom').value=p?p.prenom:'';
+  document.getElementById('vs-classe').value=p?(p.classe||''):'';
+  document.getElementById('vs-somme').value=p?(p.somme??''):'';
+  venteSaleTarif=p?{qte:p.qte,prix:p.prixDu}:null;
+  venteSaleMoyen=p?(p.moyen||''):'';
+  renderVenteSaleTarifButtons(v);
+  updateVenteMoyenButtons();
+  updateVenteEcart();
+  const donneurSel=document.getElementById('vs-prof-donneur');
+  const recupSel=document.getElementById('vs-prof-recup');
+  donneurSel.innerHTML=profsOptionsHtml();
+  recupSel.innerHTML=profsOptionsHtml();
+  donneurSel.value=(p&&p.profDonneur&&!PROFS.includes(p.profDonneur))?'__autre__':(p?(p.profDonneur||''):'');
+  recupSel.value=(p&&p.profRecup&&!PROFS.includes(p.profRecup))?'__autre__':(p?(p.profRecup||''):'');
+  document.getElementById('vs-prof-donneur-autre').value=(p&&donneurSel.value==='__autre__')?p.profDonneur:'';
+  document.getElementById('vs-prof-recup-autre').value=(p&&recupSel.value==='__autre__')?p.profRecup:'';
+  toggleProfAutre('vs-prof-donneur');
+  toggleProfAutre('vs-prof-recup');
+  document.getElementById('venteSaleModal').classList.remove('hidden');
+}
+function filterVenteStudents(){
+  const q=(document.getElementById('vs-search').value||'').toLowerCase().trim();
+  const res=document.getElementById('vs-results');
+  const pool=liveStudents();
+  const matches=pool.filter(st=>!q||(st.nom+' '+st.prenom).toLowerCase().includes(q)||(st.prenom+' '+st.nom).toLowerCase().includes(q))
+    .sort(sortByName).slice(0,50);
+  res.innerHTML=matches.length
+    ? matches.map(st=>`<div class="college-result-item" onclick="selectVenteStudent('${st.id}')">
+        <span class="cri-name">${x(st.nom)} ${x(st.prenom)}</span>
+        <span class="cri-detail">${x(st.classe||'—')}</span>
+      </div>`).join('')
+    : '<div class="college-result-item" style="color:var(--muted)">Aucun élève inscrit à l\'AS ne correspond</div>';
+  res.classList.remove('hidden');
+}
+function selectVenteStudent(id){
+  const st=students.find(q=>q.id===id); if(!st) return;
+  document.getElementById('vs-student').value=st.id;
+  document.getElementById('vs-nom').value=st.nom||'';
+  document.getElementById('vs-prenom').value=st.prenom||'';
+  document.getElementById('vs-classe').value=st.classe||'';
+  document.getElementById('vs-search').value='';
+  document.getElementById('vs-results').classList.add('hidden');
+}
+document.addEventListener('click',e=>{
+  const res=document.getElementById('vs-results');
+  if(res&&!res.contains(e.target)&&e.target.id!=='vs-search') res.classList.add('hidden');
+});
+function handleVenteSale(e){
+  e.preventDefault();
+  const v=getVente(currentVenteId); if(!v) return;
+  const pid=document.getElementById('vs-id').value;
+  const studentId=document.getElementById('vs-student').value;
+  if(!pid&&!studentId){alert2('Sélectionnez un élève dans la liste des inscrits à l\'AS.','error');return;}
+  if(!venteSaleTarif){alert2('Choisissez une quantité.','error');return;}
+  const mv=document.getElementById('vs-somme').value;
+  v.participants=v.participants||[];
+  const data={
+    nom:document.getElementById('vs-nom').value.trim(),
+    prenom:document.getElementById('vs-prenom').value.trim(),
+    classe:document.getElementById('vs-classe').value.trim(),
+    qte:venteSaleTarif.qte,
+    prixDu:venteSaleTarif.prix,
+    somme:mv===''?0:parseFloat(mv),
+    moyen:venteSaleMoyen,
+    profDonneur:profValue('vs-prof-donneur'),
+    profRecup:profValue('vs-prof-recup')
+  };
+  if(pid){
+    const i=v.participants.findIndex(p=>p.id===pid); if(i===-1) return;
+    v.participants[i]={...v.participants[i],...data};
+  } else {
+    v.participants.push({id:uid(),studentId,...data});
+  }
+  closeModal('venteSaleModal');
+  touchVente(v);
+  alert2(pid?'✅ Vente modifiée.':`✅ Vente enregistrée pour ${x(data.prenom)} ${x(data.nom)}.`,'success');
+}
+function openDeleteVenteSale(pid){
+  const v=getVente(currentVenteId); if(!v) return;
+  const p=(v.participants||[]).find(q=>q.id===pid); if(!p) return;
+  openConfirm(`Supprimer la vente de <strong>${x(p.prenom)} ${x(p.nom)}</strong> ?`,()=>{
+    v.participants=v.participants.filter(q=>q.id!==pid);
+    touchVente(v);
+  });
+}
+
 // ── GOOGLE SHEETS (JSONP import / formulaire export) ──────────────────────
 function jsonpFetch(url, timeout=12000){
   return new Promise((resolve,reject)=>{
@@ -2656,6 +3166,7 @@ async function importCollegeStudents(silent=false){
 
 function mergeStudents(local, remote) {
   const map = new Map();
+  const remoteIds = new Set(remote.map(s=>s.id));
   for (const s of remote) map.set(s.id, s);
   for (const s of local) {
     if (!((s.nom||'').trim()||(s.prenom||'').trim())) continue; // ignorer entrées locales sans nom
@@ -2666,7 +3177,17 @@ function mergeStudents(local, remote) {
     const s = map.get(id);
     if (s && (s.lastModified||0) <= +deletedAt) map.delete(id);
   }
-  return [...map.values()].filter(s=>!s.deleted&&!isMetaId(s.id)&&((s.nom||'').trim()||(s.prenom||'').trim())).sort((a,b)=>(a.ordre||0)-(b.ordre||0));
+  const list=[...map.values()].filter(s=>!s.deleted&&!isMetaId(s.id)&&((s.nom||'').trim()||(s.prenom||'').trim()));
+  // Les élèves pas encore connus du serveur (ajoutés localement depuis la
+  // dernière synchro) sont toujours placés en dernier : leur numéro d'ordre
+  // provisoire peut avoir été calculé sur un état local pas encore à jour
+  // (ex. ajout juste après l'ouverture de l'appli, avant la fin de la synchro
+  // automatique) et ne doit pas les faire atterrir au milieu de la liste.
+  return list.sort((a,b)=>{
+    const aNew=!remoteIds.has(a.id), bNew=!remoteIds.has(b.id);
+    if(aNew!==bNew) return aNew?1:-1;
+    return (a.ordre||0)-(b.ordre||0) || (a.lastModified||0)-(b.lastModified||0);
+  });
 }
 
 async function syncWithSheets(silent=false){
@@ -2676,7 +3197,7 @@ async function syncWithSheets(silent=false){
     return false;
   }
   // ── LECTURE ──────────────────────────────────────────────────────────────
-  let sheetStudents=[], sheetSorties=[], sheetBlacklist=[];
+  let sheetStudents=[], sheetSorties=[], sheetBlacklist=[], sheetVentes=[];
   try{
     const d=await jsonpFetch(SCRIPT_URL,8000);
     if(d.success&&Array.isArray(d.data)){
@@ -2694,6 +3215,7 @@ async function syncWithSheets(silent=false){
       }
       sheetSorties=sortiesFromRows(allRows);
       sheetBlacklist=blacklistFromRows(allRows);
+      sheetVentes=ventesFromRows(allRows);
       // Garder seulement les vrais élèves (ni méta, ni lignes vides)
       sheetStudents=allRows.filter(s=>!isMetaId(s.id)&&(s.nom||s.prenom));
     }
@@ -2704,15 +3226,20 @@ async function syncWithSheets(silent=false){
   }
   // ── FUSION LWW + suppressions ─────────────────────────────────────────────
   const merged=mergeStudents(students,sheetStudents);
-  // Renuméroter les élèves actifs de façon cohérente après fusion
-  let ord=1; merged.filter(s=>!s.deleted).sort((a,b)=>(a.ordre||0)-(b.ordre||0)).forEach(s=>{s.ordre=ord++;});
+  // Renuméroter les élèves actifs de façon cohérente après fusion, en conservant
+  // l'ordre déjà établi par mergeStudents (élèves connus du serveur d'abord,
+  // puis nouveautés locales en dernier) plutôt que de re-trier par l'ancien
+  // numéro d'ordre, qui annulerait ce placement.
+  let ord=1; merged.forEach(s=>{s.ordre=ord++;});
   students=merged; initNextOrdre(); save();
   sorties=mergeSorties(sorties,sheetSorties); saveSorties();
   blacklist=mergeBlacklist(blacklist,sheetBlacklist); saveBlacklist();
+  ventes=mergeVentes(ventes,sheetVentes); saveVentes();
   renderAll();
   // ── ÉCRITURE ─────────────────────────────────────────────────────────────
-  // On écrit les élèves actifs + des lignes méta (sorties AS et deletedLog)
-  // → fonctionne avec l'Apps Script existant, sans modification côté serveur
+  // On écrit les élèves actifs + des lignes méta (sorties AS, ventes, Black
+  // liste et deletedLog) → fonctionne avec l'Apps Script existant, sans
+  // modification côté serveur
   const liveOnly=liveStudents();
   const body='payload='+encodeURIComponent(JSON.stringify({students:[...liveOnly,...metaRows()]}));
   let sent=false;
@@ -2772,6 +3299,7 @@ async function clearLocalAndPull(){
     if(metaRow&&metaRow.prenom){try{deletedLog=JSON.parse(metaRow.prenom);saveDeletedLog();}catch(e){}}
     sorties=sortiesFromRows(allRows); saveSorties();
     blacklist=blacklistFromRows(allRows); saveBlacklist();
+    ventes=ventesFromRows(allRows); saveVentes();
     students=allRows.filter(s=>!isMetaId(s.id)&&!s.deleted&&((s.nom||'').trim()||(s.prenom||'').trim()));
     students.sort((a,b)=>(a.ordre||0)-(b.ordre||0)).forEach((s,i)=>{s.ordre=i+1;});
     initNextOrdre(); pendingSync=false; save(); savePendingSync(); updateNetworkUI(); renderAll();
@@ -2895,7 +3423,7 @@ function alert2(msg,type='info'){
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────
-const MODALS=['editModal','deleteModal','reinitModal','sortieModal','participantModal','blacklistModal','confirmModal'];
+const MODALS=['editModal','deleteModal','reinitModal','sortieModal','participantModal','blacklistModal','confirmModal','venteModal','venteSaleModal'];
 MODALS.forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)this.classList.add('hidden');});
 });

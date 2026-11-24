@@ -1042,7 +1042,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <table id="tbl-vente" class="vente-table">
           <thead><tr>
             <th>#</th><th>&Eacute;l&egrave;ve</th><th>Classe</th><th>Quantit&eacute;</th><th>Prix d&ucirc;</th>
-            <th>Somme donn&eacute;e</th><th>&Eacute;cart</th><th>Paiement</th><th>Donn&eacute; par</th><th>R&eacute;cup&eacute;r&eacute; par</th><th>Actions</th>
+            <th>Somme rendue</th><th>&Eacute;cart</th><th>Paiement</th><th>Donn&eacute; par</th><th>R&eacute;cup&eacute;r&eacute; par</th><th>Actions</th>
           </tr></thead>
           <tbody id="venteBody"></tbody>
         </table>
@@ -1511,7 +1511,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
             <div id="vs-tarifs" class="choice-btns"></div>
           </div>
           <div class="form-group">
-            <label>Somme donn&eacute;e (&euro;)</label>
+            <label>Somme rendue (&euro;) <small style="text-transform:none;font-weight:400">(&agrave; remplir plus tard, quand l'argent est r&eacute;cup&eacute;r&eacute;)</small></label>
             <input type="number" id="vs-somme" min="0" step="0.5" oninput="updateVenteEcart()">
           </div>
           <div class="form-group">
@@ -2843,6 +2843,10 @@ function venteEcartLabel(ecart){
   if(n>0) return `<span class="badge b-red">Manque ${montantLabel(n)}</span>`;
   return `<span class="badge b-amber">+${montantLabel(-n)} donn&eacute;s</span>`;
 }
+function venteEcartRowLabel(p){
+  if(p.somme===null||p.somme===undefined||p.somme==='') return '<span class="badge b-sky">En attente</span>';
+  return venteEcartLabel((parseFloat(p.prixDu)||0)-(parseFloat(p.somme)||0));
+}
 function selectVente(id){currentVenteId=(currentVenteId===id)?null:id;renderVentes();}
 
 function renderVentes(){
@@ -2875,7 +2879,7 @@ function renderVentes(){
     <td>${p.qte} ${venteUnite(v,p.qte)}</td>
     <td>${montantLabel(p.prixDu)}</td>
     <td>${montantLabel(p.somme)}</td>
-    <td>${venteEcartLabel((parseFloat(p.prixDu)||0)-(parseFloat(p.somme)||0))}</td>
+    <td>${venteEcartRowLabel(p)}</td>
     <td>${p.moyen?`<span class="badge ${p.moyen==='cheque'?'b-teal':'b-amber'}">${REGL[p.moyen]}</span>`:'<span class="muted">—</span>'}</td>
     <td>${x(p.profDonneur)||'<span class="muted">—</span>'}</td>
     <td>${x(p.profRecup)||'<span class="muted">—</span>'}</td>
@@ -2973,7 +2977,6 @@ function renderVenteSaleTarifButtons(v){
 function selectVenteTarif(qte,prix){
   venteSaleTarif={qte,prix};
   renderVenteSaleTarifButtons(getVente(currentVenteId));
-  document.getElementById('vs-somme').value=prix;
   updateVenteEcart();
 }
 function updateVenteMoyenButtons(){
@@ -2986,9 +2989,10 @@ function selectVenteMoyen(m){
 }
 function updateVenteEcart(){
   const el=document.getElementById('vs-ecart');
-  const somme=parseFloat(document.getElementById('vs-somme').value);
-  if(!venteSaleTarif||isNaN(somme)){el.value='';return;}
-  const ecart=venteSaleTarif.prix-somme;
+  if(!venteSaleTarif){el.value='';return;}
+  const sommeStr=document.getElementById('vs-somme').value;
+  if(sommeStr===''){el.value='En attente — '+montantLabel(venteSaleTarif.prix)+' à récupérer';return;}
+  const ecart=venteSaleTarif.prix-parseFloat(sommeStr);
   el.value=ecart===0?'Compte juste':(ecart>0?`Manque ${montantLabel(ecart)}`:`+${montantLabel(-ecart)} donnés`);
 }
 function openVenteSaleModal(pid){
@@ -3063,7 +3067,7 @@ function handleVenteSale(e){
     classe:document.getElementById('vs-classe').value.trim(),
     qte:venteSaleTarif.qte,
     prixDu:venteSaleTarif.prix,
-    somme:mv===''?0:parseFloat(mv),
+    somme:mv===''?null:parseFloat(mv),
     moyen:venteSaleMoyen,
     profDonneur:profValue('vs-prof-donneur'),
     profRecup:profValue('vs-prof-recup')

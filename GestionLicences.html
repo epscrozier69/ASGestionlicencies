@@ -2927,6 +2927,13 @@ window.addEventListener('offline', () => {
 // Sync périodique toutes les 2 minutes (récupère les modifs des autres utilisateurs)
 setInterval(async () => { if(navigator.onLine) await syncWithSheets(true); }, 120000);
 
+// ── MODE HORS LIGNE (mise en cache de l'appli via service worker) ─────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  });
+}
+
 /*
 ═══════════════════════════════════════════════════════════════════════════════
   TEMPLATE GOOGLE APPS SCRIPT — à copier dans votre projet Apps Script

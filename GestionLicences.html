@@ -1008,7 +1008,10 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
   <div class="card">
     <div class="card-header" style="background:#fffbeb">
       <h2>&#128176; Vente &nbsp;<span id="venteCount" class="badge b-orange">0</span></h2>
-      <button class="btn btn-vente" onclick="openVenteModal()">&#10133; Cr&eacute;er une vente</button>
+      <div class="flex gap2">
+        <button class="btn btn-outline btn-sm hidden" id="toggleArchivedVenteOpsBtn" onclick="toggleShowArchivedVenteOps()"></button>
+        <button class="btn btn-vente" onclick="openVenteModal()">&#10133; Cr&eacute;er une vente</button>
+      </div>
     </div>
     <div id="venteSubnav" class="vente-subnav hidden"></div>
     <div id="venteEmpty" class="empty-state">
@@ -1021,6 +1024,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
         <div class="flex" style="justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.75rem">
           <div>
             <h2 id="venteTitle" style="font-size:1.05rem;font-weight:700"></h2>
+            <div id="venteArchivedBanner" class="sortie-archived-banner hidden">&#128230; Vente archiv&eacute;e</div>
             <div id="venteTarifsRecap" class="vente-tarifs-recap"></div>
             <div class="sortie-info" style="margin-top:.5rem">
               <span>&#128176; Total d&ucirc; : <strong id="venteTotalDu"></strong></span>
@@ -1029,6 +1033,7 @@ tbody td{padding:.55rem .875rem;border-bottom:1px solid var(--border);vertical-a
             </div>
           </div>
           <div class="flex gap2" style="flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" id="archiveVenteBtn" onclick="toggleArchiveVente()"></button>
             <button class="btn btn-warning btn-sm" onclick="openVenteModal(currentVenteId)">&#9999;&#65039; Modifier</button>
             <button class="btn btn-danger btn-sm" onclick="openDeleteVente()">&#128465;&#65039; Effacer</button>
           </div>
@@ -2819,6 +2824,7 @@ let venteModalTarifs = [];
 let venteSaleTarif   = null; // {qte,prix} choisi par bouton dans le modal d'enregistrement
 let venteSaleMoyen   = '';
 let showArchivedVentes = false;
+let showArchivedVenteOps = false;
 
 function saveVentes(){try{localStorage.setItem('as-ventes',JSON.stringify(ventes));}catch(e){}}
 function getVente(id){return ventes.find(v=>v.id===id);}
@@ -2855,15 +2861,22 @@ function selectVente(id){currentVenteId=(currentVenteId===id)?null:id;renderVent
 
 function renderVentes(){
   const all=sortedVentes();
-  document.getElementById('venteCount').textContent=all.length;
+  const archivedOpsCount=all.filter(v=>v.archived).length;
+  document.getElementById('venteCount').textContent=all.length-archivedOpsCount;
+  const opsBtn=document.getElementById('toggleArchivedVenteOpsBtn');
+  opsBtn.classList.toggle('hidden',!archivedOpsCount);
+  opsBtn.textContent=showArchivedVenteOps?'🙈 Masquer les ventes archivées':`📦 Afficher les ventes archivées (${archivedOpsCount})`;
+  const list=showArchivedVenteOps?all:all.filter(v=>!v.archived);
   const nav=document.getElementById('venteSubnav');
-  nav.classList.toggle('hidden',!all.length);
-  nav.innerHTML=all.map(v=>`<button class="vente-chip${v.id===currentVenteId?' active':''}" onclick="selectVente('${v.id}')">&#128176; ${x(v.nom)} (${(v.participants||[]).length})</button>`).join('');
+  nav.classList.toggle('hidden',!list.length);
+  nav.innerHTML=list.map(v=>`<button class="vente-chip${v.id===currentVenteId?' active':''}"${v.archived?' style="opacity:.6;border-style:dashed"':''} onclick="selectVente('${v.id}')" title="${v.archived?'Vente archivée':''}">${v.archived?'&#128230;':'&#128176;'} ${x(v.nom)} (${(v.participants||[]).length})</button>`).join('');
   if(currentVenteId&&!getVente(currentVenteId)) currentVenteId=null;
   document.getElementById('venteEmpty').classList.toggle('hidden',!!all.length);
   const v=getVente(currentVenteId);
   document.getElementById('venteContent').classList.toggle('hidden',!v);
   if(!v) return;
+  document.getElementById('venteArchivedBanner').classList.toggle('hidden',!v.archived);
+  document.getElementById('archiveVenteBtn').innerHTML=v.archived?'&#128228; D&eacute;sarchiver':'&#128230; Archiver';
   document.getElementById('venteTitle').textContent=v.nom;
   document.getElementById('venteTarifsRecap').innerHTML=(v.tarifs||[]).map(t=>`<span>${venteTarifLabel(v,t)}</span>`).join('');
   const allParts=[...(v.participants||[])].sort(sortByName);
@@ -2906,6 +2919,14 @@ function toggleArchiveVenteSale(pid){
   p.archived=!p.archived;
   touchVente(v);
   alert2(p.archived?'📦 Vente archivée.':'📤 Vente désarchivée.','info');
+}
+function toggleShowArchivedVenteOps(){showArchivedVenteOps=!showArchivedVenteOps;renderVentes();}
+function toggleArchiveVente(){
+  const v=getVente(currentVenteId); if(!v) return;
+  v.archived=!v.archived;
+  if(!v.archived) showArchivedVenteOps=true;
+  touchVente(v);
+  alert2(v.archived?'📦 Vente archivée.':'📤 Vente désarchivée.','info');
 }
 
 // ── Création / modification d'une opération de vente
@@ -3090,6 +3111,7 @@ function handleVenteSale(e){
     profDonneur:profValue('vs-prof-donneur'),
     profRecup:profValue('vs-prof-recup')
   };
+  data.archived=data.somme!==null; // somme rendue renseignée → vente considérée terminée, archivée directement
   if(pid){
     const i=v.participants.findIndex(p=>p.id===pid); if(i===-1) return;
     v.participants[i]={...v.participants[i],...data};
@@ -3098,7 +3120,8 @@ function handleVenteSale(e){
   }
   closeModal('venteSaleModal');
   touchVente(v);
-  alert2(pid?'✅ Vente modifiée.':`✅ Vente enregistrée pour ${x(data.prenom)} ${x(data.nom)}.`,'success');
+  const archivedSuffix=data.archived?' (archivée, somme rendue)':'';
+  alert2(pid?`✅ Vente modifiée.${archivedSuffix}`:`✅ Vente enregistrée pour ${x(data.prenom)} ${x(data.nom)}.${archivedSuffix}`,'success');
 }
 function openDeleteVenteSale(pid){
   const v=getVente(currentVenteId); if(!v) return;

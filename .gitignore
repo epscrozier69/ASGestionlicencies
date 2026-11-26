@@ -1,0 +1,9 @@
+# Seuls les fichiers de l'application déployée sont suivis par git.
+# Tout le reste (sauvegardes JSON, export CSV élèves, docs internes, config
+# locale) reste exclu par défaut pour éviter de publier des données d'élèves
+# sur le dépôt public.
+*
+!.gitignore
+!GestionLicences.html
+!service-worker.js
+!index.html
